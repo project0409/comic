@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+/* FYP — Dark-only design tokens */
+:root {
+  --sf-bg: #080808;
+  --sf-surface: #111111;
+  --sf-card: #1a1a1a;
+  --sf-elevated: #222222;
+
+  --sf-primary: #7c3aed; /* Electric violet */
+  --sf-gold: #f59e0b; /* Amber gold */
+  --sf-danger: #ef4444; /* Crimson */
+
+  --sf-text: #f9fafb;
+  --sf-muted: #6b7280;
+
+  --sf-ambient: #7c3aed;
+
+  color-scheme: dark;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--sf-bg);
+  color: var(--sf-text);
+  font-family: var(--sf-font-ui), system-ui, sans-serif;
+}
+
+/* Make sure fixed background stays behind everything */
+body {
+  position: relative;
+}
+
+/* Ambient gradient sync (set via uiStore.ambientColor) */
+.sf-ambient {
+  background: radial-gradient(
+      900px 500px at 30% 10%,
+      color-mix(in srgb, var(--sf-ambient) 22%, transparent),
+      transparent 55%
+    ),
+    radial-gradient(
+      900px 500px at 70% 30%,
+      color-mix(in srgb, var(--sf-ambient) 12%, transparent),
+      transparent 55%
+    ),
+    var(--sf-bg);
+  transition: background 450ms ease;
+}
+
+/* Haptic simulation (CSS vibrate) for high-action panels */
+@keyframes sf-vibrate {
+  0% {
+    transform: translate(0);
+  }
+  20% {
+    transform: translate(-1px, 1px);
+  }
+  40% {
+    transform: translate(-1px, -1px);
+  }
+  60% {
+    transform: translate(1px, 1px);
+  }
+  80% {
+    transform: translate(1px, -1px);
+  }
+  100% {
+    transform: translate(0);
+  }
+}
+
+.sf-vibrate {
+  animation: sf-vibrate 160ms linear 1;
+}
+
+/* Reader anti-piracy helpers */
+.sf-no-select {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}

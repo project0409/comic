@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="768" height="1024" viewBox="0 0 768 1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#EF4444"/>
+      <stop offset="1" stop-color="#080808"/>
+    </linearGradient>
+  </defs>
+  <rect width="768" height="1024" fill="url(#bg)"/>
+  <rect x="52" y="64" width="664" height="896" rx="40" fill="rgba(0,0,0,0.35)" stroke="rgba(255,255,255,0.18)"/>
+  <text x="96" y="220" font-size="64" font-family="system-ui, sans-serif" font-weight="800" fill="#F9FAFB">The Hollow</text>
+  <text x="96" y="295" font-size="64" font-family="system-ui, sans-serif" font-weight="800" fill="#F9FAFB">Map</text>
+  <text x="96" y="410" font-size="26" font-family="system-ui, sans-serif" fill="rgba(249,250,251,0.75)">Horror · Fantasy</text>
+  <text x="96" y="900" font-size="20" font-family="system-ui, sans-serif" fill="rgba(249,250,251,0.6)">FYP</text>
+</svg>
