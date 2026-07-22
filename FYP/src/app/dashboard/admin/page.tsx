@@ -4,8 +4,8 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
+import { RequireAuth } from "@/components/RequireAuth";
 import { useToastStore } from "@/store/toastStore";
-import { useAuthStore } from "@/store/authStore";
 
 type Row = {
   id: string;
@@ -18,31 +18,21 @@ type Row = {
   isPublished: boolean;
 };
 
+type UserRow = {
+  id: string;
+  username: string;
+  email: string;
+  role: "reader" | "writer" | "admin";
+  subscription: "Free" | "Premium" | "Creator Pro";
+  status: "Active" | "Suspended";
+  joinedAt: string;
+  lastLogin: string;
+  coins: number;
+};
+
 export default function AdminPublishingGatePage() {
   const toast = useToastStore((s) => s.push);
-  const role = useAuthStore((s) => s.role);
-
-  if (role !== "admin") {
-    return (
-      <div className="mx-auto max-w-3xl space-y-4 px-4 py-12">
-        <div className="rounded-3xl border border-white/10 bg-card p-6">
-          <div className="font-display text-3xl tracking-widest">Admin Gate</div>
-          <div className="mt-2 text-sm text-muted">
-            Admin login normal login lo undadu. Separate admin login use cheyyandi.
-          </div>
-          <div className="mt-5 flex flex-wrap gap-2">
-            <Link href="/admin/login">
-              <Button variant="primary">Go to Admin Login</Button>
-            </Link>
-            <Link href="/">
-              <Button variant="outline">Back to Home</Button>
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
+  const [query, setQuery] = useState("");
   const [rows, setRows] = useState<Row[]>([
     {
       id: "r1",
@@ -65,8 +55,76 @@ export default function AdminPublishingGatePage() {
       isPublished: false
     }
   ]);
+  const [users, setUsers] = useState<UserRow[]>([
+    {
+      id: "u1",
+      username: "sravan_reader",
+      email: "sravan.reader@fyp.local",
+      role: "reader",
+      subscription: "Premium",
+      status: "Active",
+      joinedAt: "2026-05-02",
+      lastLogin: "2026-06-24",
+      coins: 240
+    },
+    {
+      id: "u2",
+      username: "neon_writer",
+      email: "writer@fyp.local",
+      role: "writer",
+      subscription: "Creator Pro",
+      status: "Active",
+      joinedAt: "2026-04-18",
+      lastLogin: "2026-06-23",
+      coins: 1824
+    },
+    {
+      id: "u3",
+      username: "manga_fan_09",
+      email: "fan09@fyp.local",
+      role: "reader",
+      subscription: "Free",
+      status: "Active",
+      joinedAt: "2026-06-01",
+      lastLogin: "2026-06-20",
+      coins: 35
+    },
+    {
+      id: "u4",
+      username: "admin_master",
+      email: "admin@fyp.local",
+      role: "admin",
+      subscription: "Creator Pro",
+      status: "Active",
+      joinedAt: "2026-03-11",
+      lastLogin: "2026-06-25",
+      coins: 9999
+    }
+  ]);
 
   const pendingCount = useMemo(() => rows.filter((r) => r.status === "Pending").length, [rows]);
+  const filteredUsers = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    if (!needle) return users;
+    return users.filter((user) =>
+      [user.username, user.email, user.role, user.subscription, user.status].some((value) =>
+        value.toLowerCase().includes(needle)
+      )
+    );
+  }, [query, users]);
+  const adminStats = useMemo(
+    () => [
+      { label: "Total Users", value: String(users.length), tone: "primary" as const },
+      { label: "Readers", value: String(users.filter((user) => user.role === "reader").length), tone: "muted" as const },
+      { label: "Writers", value: String(users.filter((user) => user.role === "writer").length), tone: "gold" as const },
+      {
+        label: "Subscription Members",
+        value: String(users.filter((user) => user.subscription !== "Free").length),
+        tone: "primary" as const
+      }
+    ],
+    [users]
+  );
 
   function setStatus(id: string, status: Row["status"]) {
     setRows((s) =>
@@ -91,22 +149,265 @@ export default function AdminPublishingGatePage() {
     toast({ tone: "success", title: "Bulk approved", message: "All pending chapters approved (demo)." });
   }
 
+  function updateUser<K extends keyof UserRow>(id: string, key: K, value: UserRow[K]) {
+    setUsers((current) => current.map((user) => (user.id === id ? { ...user, [key]: value } : user)));
+  }
+
+  function addUser() {
+    const nextIndex = users.length + 1;
+    setUsers((current) => [
+      {
+        id: crypto.randomUUID(),
+        username: `new_user_${nextIndex}`,
+        email: `new.user${nextIndex}@fyp.local`,
+        role: "reader",
+        subscription: "Free",
+        status: "Active",
+        joinedAt: new Date().toISOString().slice(0, 10),
+        lastLogin: "Not yet",
+        coins: 0
+      },
+      ...current
+    ]);
+    toast({ tone: "success", title: "User added", message: "New editable user row created." });
+  }
+
+  function saveAdminChanges() {
+    toast({
+      tone: "success",
+      title: "Admin changes saved",
+      message: "User credentials, roles, subscriptions, and status changes saved locally."
+    });
+  }
+
+  function toggleUserStatus(id: string) {
+    setUsers((current) =>
+      current.map((user) =>
+        user.id === id ? { ...user, status: user.status === "Active" ? "Suspended" : "Active" } : user
+      )
+    );
+    toast({ tone: "default", title: "User status changed", message: "Access status updated locally." });
+  }
+
+  function resetUserPassword(user: UserRow) {
+    toast({
+      tone: "default",
+      title: "Password reset",
+      message: `Reset link generated for ${user.username} (demo).`
+    });
+  }
+
+  function removeUser(id: string) {
+    setUsers((current) => current.filter((user) => user.id !== id));
+    toast({ tone: "danger", title: "User removed", message: "User removed from the admin list locally." });
+  }
+
   return (
+    <RequireAuth roles={["admin"]} redirectTo="/admin/login">
     <div className="mx-auto max-w-6xl space-y-6 px-4 py-10">
       <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
         <div>
-          <div className="font-display text-4xl tracking-widest">Admin Gate</div>
-          <div className="text-sm text-muted">Approve / Reject writer uploads</div>
+          <div className="font-display text-4xl tracking-widest">Admin Home</div>
+          <div className="text-sm text-muted">All credentials, approvals, subscriptions, and website users</div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Badge tone="muted">{pendingCount} pending</Badge>
+          <Link href="/">
+            <Button variant="ghost">Home Page</Button>
+          </Link>
+          <a href="#credentials">
+            <Button variant="outline">Credentials</Button>
+          </a>
+          <a href="#approvals">
+            <Button variant="outline">Approvals</Button>
+          </a>
+          <Button variant="outline" onClick={addUser}>
+            Add User
+          </Button>
+          <Button variant="gold" onClick={saveAdminChanges}>
+            Save Changes
+          </Button>
           <Button variant="primary" onClick={bulkApprove}>
             Bulk approve
           </Button>
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-3xl border border-white/10 bg-card">
+      <div className="grid gap-3 md:grid-cols-4">
+        {adminStats.map((stat) => (
+          <div key={stat.label} className="sf-comic-card rounded-3xl border border-white/10 bg-card p-5">
+            <div className="flex items-center justify-between gap-3">
+              <div className="text-xs text-muted">{stat.label}</div>
+              <Badge tone={stat.tone}>Live</Badge>
+            </div>
+            <div className="mt-3 text-3xl font-semibold tabular-nums">{stat.value}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        <div className="sf-comic-card rounded-3xl border border-white/10 bg-card p-5">
+          <div className="font-display text-2xl tracking-widest">Admin Home Panel</div>
+          <div className="mt-2 text-sm text-muted">
+            Access the public home page, all user credentials, subscriptions, and writer approvals from one place.
+          </div>
+          <div className="mt-4 grid gap-2 text-sm">
+            <Link href="/" className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 hover:border-primary/40">
+              Open public home page
+            </Link>
+            <a href="#credentials" className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 hover:border-primary/40">
+              Manage all credentials
+            </a>
+            <a href="#approvals" className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 hover:border-primary/40">
+              Review all approvals
+            </a>
+          </div>
+        </div>
+
+        <div className="sf-comic-card rounded-3xl border border-white/10 bg-card p-5">
+          <div className="font-display text-2xl tracking-widest">Approval Summary</div>
+          <div className="mt-4 space-y-3 text-sm">
+            <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
+              <span className="text-muted">Pending uploads</span>
+              <Badge tone="gold">{pendingCount}</Badge>
+            </div>
+            <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
+              <span className="text-muted">Approved uploads</span>
+              <Badge tone="primary">{rows.filter((row) => row.status === "Approved").length}</Badge>
+            </div>
+            <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
+              <span className="text-muted">Published chapters</span>
+              <Badge tone="primary">{rows.filter((row) => row.isPublished).length}</Badge>
+            </div>
+          </div>
+        </div>
+
+        <div className="sf-comic-card rounded-3xl border border-white/10 bg-card p-5">
+          <div className="font-display text-2xl tracking-widest">Credential Summary</div>
+          <div className="mt-4 space-y-3 text-sm">
+            <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
+              <span className="text-muted">Active users</span>
+              <Badge tone="primary">{users.filter((user) => user.status === "Active").length}</Badge>
+            </div>
+            <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
+              <span className="text-muted">Suspended users</span>
+              <Badge tone="danger">{users.filter((user) => user.status === "Suspended").length}</Badge>
+            </div>
+            <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
+              <span className="text-muted">Paid members</span>
+              <Badge tone="gold">{users.filter((user) => user.subscription !== "Free").length}</Badge>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="credentials" className="scroll-mt-24 rounded-3xl border border-white/10 bg-card p-5">
+        <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+          <div>
+            <div className="font-display text-2xl tracking-widest">Website Users & Credentials</div>
+            <div className="text-sm text-muted">View usernames, roles, subscription members, and access status.</div>
+          </div>
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="h-11 w-full rounded-2xl border border-white/10 bg-black/25 px-4 text-sm outline-none focus:border-primary/45 md:w-72"
+            placeholder="Search users, roles, subscriptions..."
+          />
+        </div>
+
+        <div className="mt-5 overflow-x-auto rounded-2xl border border-white/10">
+          <div className="grid min-w-[980px] grid-cols-[1.2fr_1.6fr_1fr_1.1fr_0.9fr_0.8fr_1.6fr] bg-white/5 px-4 py-3 text-xs text-muted">
+            <div>Username</div>
+            <div>Email</div>
+            <div>Role</div>
+            <div>Subscription</div>
+            <div>Status</div>
+            <div>Coins</div>
+            <div className="text-right">Admin Actions</div>
+          </div>
+
+          {filteredUsers.map((user) => (
+            <div
+              key={user.id}
+              className="grid min-w-[980px] grid-cols-[1.2fr_1.6fr_1fr_1.1fr_0.9fr_0.8fr_1.6fr] items-center border-t border-white/8 px-4 py-4 text-sm"
+            >
+              <div>
+                <input
+                  value={user.username}
+                  onChange={(e) => updateUser(user.id, "username", e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 font-semibold outline-none focus:border-primary/45"
+                />
+                <div className="mt-1 text-[11px] text-muted">Joined {user.joinedAt} · Last {user.lastLogin}</div>
+              </div>
+              <input
+                value={user.email}
+                onChange={(e) => updateUser(user.id, "email", e.target.value)}
+                className="mr-3 rounded-xl border border-white/10 bg-black/20 px-3 py-2 outline-none focus:border-primary/45"
+              />
+              <select
+                value={user.role}
+                onChange={(e) => updateUser(user.id, "role", e.target.value as UserRow["role"])}
+                className="mr-3 rounded-xl border border-white/10 bg-black/20 px-3 py-2 capitalize outline-none focus:border-primary/45"
+              >
+                <option className="bg-black" value="reader">Reader</option>
+                <option className="bg-black" value="writer">Writer</option>
+                <option className="bg-black" value="admin">Admin</option>
+              </select>
+              <select
+                value={user.subscription}
+                onChange={(e) => updateUser(user.id, "subscription", e.target.value as UserRow["subscription"])}
+                className="mr-3 rounded-xl border border-white/10 bg-black/20 px-3 py-2 outline-none focus:border-primary/45"
+              >
+                <option className="bg-black" value="Free">Free</option>
+                <option className="bg-black" value="Premium">Premium</option>
+                <option className="bg-black" value="Creator Pro">Creator Pro</option>
+              </select>
+              <Badge tone={user.status === "Active" ? "primary" : "danger"}>{user.status}</Badge>
+              <input
+                type="number"
+                value={user.coins}
+                onChange={(e) => updateUser(user.id, "coins", Number(e.target.value))}
+                className="mr-3 w-20 rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-right outline-none focus:border-primary/45"
+              />
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" size="sm" onClick={() => resetUserPassword(user)}>
+                  Reset
+                </Button>
+                <Button
+                  variant={user.status === "Active" ? "ghost" : "primary"}
+                  size="sm"
+                  onClick={() => toggleUserStatus(user.id)}
+                >
+                  {user.status === "Active" ? "Suspend" : "Activate"}
+                </Button>
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={() => removeUser(user.id)}
+                  disabled={user.role === "admin" && users.filter((item) => item.role === "admin").length <= 1}
+                  title="At least one admin must remain"
+                >
+                  Delete
+                </Button>
+              </div>
+            </div>
+          ))}
+
+          {filteredUsers.length === 0 ? (
+            <div className="px-4 py-8 text-sm text-muted">No users match this search.</div>
+          ) : null}
+        </div>
+
+        <div className="mt-3 text-xs text-muted">
+          Demo admin controls: edits are stored locally in the current browser session. Connect these fields to your backend when your database is ready.
+        </div>
+      </div>
+
+      <div id="approvals" className="scroll-mt-24 overflow-hidden rounded-3xl border border-white/10 bg-card">
+        <div className="border-b border-white/10 px-4 py-4">
+          <div className="font-display text-2xl tracking-widest">Writer Upload Publishing</div>
+          <div className="text-sm text-muted">Approve, reject, preview, publish, and unpublish writer chapters.</div>
+        </div>
         <div className="grid grid-cols-5 bg-white/5 px-4 py-3 text-xs text-muted">
           <div>Chapter</div>
           <div>Pages</div>
@@ -157,5 +458,6 @@ export default function AdminPublishingGatePage() {
         ))}
       </div>
     </div>
+    </RequireAuth>
   );
 }

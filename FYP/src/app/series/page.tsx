@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { Navbar } from "@/features/discovery/Navbar";
 import { SeriesCard } from "@/features/discovery/SeriesCard";
 import type { Series } from "@/lib/types";
@@ -39,10 +40,17 @@ export default function AllSeriesPage() {
         }}
       />
 
-      <main className="mx-auto max-w-6xl space-y-6 px-4 py-8">
+      <motion.main
+        className="mx-auto max-w-6xl space-y-6 px-4 py-8"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.38, ease: "easeOut" }}
+      >
         <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <div>
-            <div className="font-display text-4xl tracking-widest">All Series</div>
+            <div className="font-display text-4xl tracking-widest drop-shadow-[0_0_16px_rgba(255,51,102,0.16)]">
+              All Series
+            </div>
             <div className="text-sm text-muted">Explore everything in FYP</div>
           </div>
           <div className="flex gap-2">
@@ -53,18 +61,17 @@ export default function AllSeriesPage() {
         </div>
 
         {filtered.length === 0 ? (
-          <div className="rounded-3xl border border-white/10 bg-card p-6 text-sm text-muted">
+          <div className="sf-comic-panel sf-comic-surface rounded-3xl border border-white/10 bg-card p-6 text-sm text-muted">
             No series found for this filter.
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-6">
             {filtered.map((s) => (
               <SeriesCard key={s.id} series={s} />
             ))}
           </div>
         )}
-      </main>
+      </motion.main>
     </div>
   );
 }
-

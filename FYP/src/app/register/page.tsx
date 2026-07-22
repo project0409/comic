@@ -2,25 +2,19 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { useState } from "react";
 import { Button } from "@/components/Button";
-import { EmailVerificationStep } from "@/features/auth/EmailVerificationStep";
 import { setAuthFlash } from "@/lib/authFlash";
 import { createGoogleAuthUrl, getActiveGoogleClientId } from "@/lib/googleIdentity";
 import { useToastStore } from "@/store/toastStore";
 import { useAuthStore } from "@/store/authStore";
 
-type Step = "form" | "verify";
-
 export default function RegisterPage() {
   const router = useRouter();
   const toast = useToastStore((s) => s.push);
   const loginWithGoogle = useAuthStore((s) => s.loginWithGoogle);
-  const requestEmailVerification = useAuthStore((s) => s.requestEmailVerification);
-  const cancelPendingEmailAuth = useAuthStore((s) => s.cancelPendingEmailAuth);
 
-  const [step, setStep] = useState<Step>("form");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [dob, setDob] = useState("");
@@ -31,7 +25,7 @@ export default function RegisterPage() {
   const [role, setRole] = useState<"reader" | "writer">("reader");
   const [submitting, setSubmitting] = useState(false);
 
-  async function handleRegisterSubmit(e?: React.FormEvent) {
+  function handleRegisterSubmit(e?: React.FormEvent) {
     e?.preventDefault();
 
     if (!firstName.trim() || !lastName.trim() || !dob || !username.trim() || !email.trim() || !password.trim() || !retypePassword.trim()) {
@@ -52,27 +46,14 @@ export default function RegisterPage() {
     }
 
     setSubmitting(true);
-    const result = await requestEmailVerification(role, email, {
-      mode: "register",
-      displayName: `${firstName.trim()} ${lastName.trim()}`.trim()
-    });
+    setAuthFlash({ type: "register_success", email: email.trim().toLowerCase() });
     setSubmitting(false);
 
-    if (!result.ok) {
-      toast({ tone: "danger", title: "Invalid email", message: result.error });
-      return;
-    }
-
     toast({
-      tone: "default",
-      title: "Verify your email",
-      message: `Code sent to ${email.trim()}. Demo code: ${result.demoCode}. Verification request detected from IP: ${result.ipAddress}`
+      tone: "success",
+      title: "Account created",
+      message: `${role === "reader" ? "Reader" : "Writer"} account created. Please log in.`
     });
-    setStep("verify");
-  }
-
-  function handleRegisterVerified(result: { email: string }) {
-    setAuthFlash({ type: "register_success", email: result.email });
     router.replace("/login");
   }
 
@@ -102,20 +83,16 @@ export default function RegisterPage() {
         className="pointer-events-none absolute inset-0 opacity-35 blur-[2px]"
         style={{
           background:
-            "radial-gradient(900px 500px at 25% 20%, rgba(124,58,237,0.35), transparent 60%), radial-gradient(900px 500px at 70% 70%, rgba(245,158,11,0.14), transparent 60%), repeating-linear-gradient(135deg, rgba(255,255,255,0.06) 0px, rgba(255,255,255,0.06) 1px, transparent 1px, transparent 16px)"
+            "radial-gradient(900px 500px at 25% 20%, rgba(255,51,102,0.24), transparent 60%), radial-gradient(900px 500px at 70% 70%, rgba(0,229,255,0.1), transparent 60%), radial-gradient(700px 420px at 78% 18%, rgba(255,193,7,0.08), transparent 62%), repeating-linear-gradient(135deg, rgba(255,255,255,0.055) 0px, rgba(255,255,255,0.055) 1px, transparent 1px, transparent 16px)"
         }}
       />
 
       <div className="relative w-[min(480px,92vw)] rounded-3xl border border-white/10 bg-card/80 p-6 shadow-2xl backdrop-blur-xl">
         <div className="mb-5">
           <div className="font-display text-4xl tracking-widest">Register</div>
-          <div className="mt-1 text-sm text-muted">
-            {step === "verify" ? "Verify your email to finish registration" : "Create your FYP profile"}
-          </div>
+          <div className="mt-1 text-sm text-muted">Create your FYP profile</div>
         </div>
 
-        <AnimatePresence mode="wait">
-          {step === "form" ? (
             <motion.form
               key="form"
               initial={{ opacity: 0, x: -16 }}
@@ -251,19 +228,6 @@ export default function RegisterPage() {
                 </Link>
               </div>
             </motion.form>
-          ) : (
-            <EmailVerificationStep
-              key="verify"
-              title="Verify to complete registration"
-              verifyLabel="Verify & Finish"
-              onVerified={handleRegisterVerified}
-              onBack={() => {
-                cancelPendingEmailAuth();
-                setStep("form");
-              }}
-            />
-          )}
-        </AnimatePresence>
       </div>
     </div>
   );

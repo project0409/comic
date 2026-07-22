@@ -138,7 +138,7 @@ function ChatBubble({ msg, loading }: { msg: Msg; loading: boolean }) {
       <div
         className={cn(
           "max-w-[86%] rounded-2xl px-4 py-3 text-sm",
-          isUser ? "bg-primary text-black" : "border border-white/10 bg-black/25 text-white shadow-[0_0_0_1px_rgba(124,58,237,0.15)]"
+          isUser ? "bg-primary text-white" : "border border-white/10 bg-black/25 text-white shadow-[0_0_0_1px_rgba(255,51,102,0.15)]"
         )}
       >
         {"typing" in msg && msg.typing ? (

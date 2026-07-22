@@ -1,6 +1,5 @@
 "use client";
 
-import { ShieldCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/Button";
@@ -9,7 +8,6 @@ import { useAuthStore } from "@/store/authStore";
 
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
 const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD;
-const ADMIN_2FA_CODE = process.env.NEXT_PUBLIC_ADMIN_2FA_CODE ?? "123456";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -17,13 +15,14 @@ export default function AdminLoginPage() {
   const loginAsAdmin = useAuthStore((s) => s.loginAsAdmin);
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
-  const [step, setStep] = useState<"credentials" | "two-factor">("credentials");
-  const [otp, setOtp] = useState("");
-  const [verifiedAdminEmail, setVerifiedAdminEmail] = useState("");
 
   function handleLogin() {
     if (!identifier.trim() || !password.trim()) {
       toast({ tone: "danger", title: "Validation Error", message: "Please enter username/mail ID and password." });
+      return;
+    }
+    if (password.length < 6) {
+      toast({ tone: "danger", title: "Weak password", message: "Password must be at least 6 characters." });
       return;
     }
     const normalizedIdentifier = identifier.trim();
@@ -32,23 +31,14 @@ export default function AdminLoginPage() {
       ADMIN_EMAIL &&
       (normalizedIdentifier.toLowerCase() === ADMIN_EMAIL.toLowerCase() ||
         normalizedIdentifier.toLowerCase() === configuredUsername?.toLowerCase());
-    const matchesEnv = matchesIdentifier && ADMIN_PASSWORD && password === ADMIN_PASSWORD;
-    if (!matchesEnv) {
+    const envCredentialsConfigured = Boolean(ADMIN_EMAIL && ADMIN_PASSWORD);
+    const matchesEnv = matchesIdentifier && password === ADMIN_PASSWORD;
+    if (envCredentialsConfigured && !matchesEnv) {
       toast({ tone: "danger", title: "Invalid credentials", message: "Please check your admin username/mail ID and password." });
       return;
     }
-    setVerifiedAdminEmail(ADMIN_EMAIL);
-    setStep("two-factor");
-    toast({ tone: "default", title: "Two-factor required", message: `Enter admin code. Demo code: ${ADMIN_2FA_CODE}` });
-  }
-
-  function handleTwoFactor() {
-    if (otp.trim() !== ADMIN_2FA_CODE) {
-      toast({ tone: "danger", title: "Invalid code", message: "Please enter the correct 2FA code." });
-      return;
-    }
-    loginAsAdmin(verifiedAdminEmail);
-    toast({ tone: "success", title: "Admin verified", message: "Redirecting to Admin Gate..." });
+    loginAsAdmin(envCredentialsConfigured ? ADMIN_EMAIL! : normalizedIdentifier);
+    toast({ tone: "success", title: "Admin login successful", message: "Redirecting to Admin Gate..." });
     router.push("/dashboard/admin");
   }
 
@@ -57,17 +47,20 @@ export default function AdminLoginPage() {
       <div className="relative w-[min(460px,92vw)] rounded-3xl border border-white/10 bg-card p-6 shadow-2xl">
         <div className="mb-4">
           <div className="font-display text-3xl tracking-widest">FYP Admin Login</div>
-          <div className="text-sm text-muted">Separate admin access</div>
+          <div className="text-sm text-muted">Separate admin access for users, subscriptions, and publishing controls</div>
         </div>
 
-        {step === "credentials" ? (
-          <form
-            className="space-y-3"
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleLogin();
-            }}
-          >
+        <div className="mb-4 rounded-2xl border border-highlight/20 bg-highlight/5 p-3 text-xs text-muted">
+          After login you can view usernames, edit user credentials, manage roles, subscriptions, status, and writer uploads.
+        </div>
+
+        <form
+          className="space-y-3"
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleLogin();
+          }}
+        >
             <label className="block text-xs text-muted">
               Username / Mail ID
               <input
@@ -97,58 +90,10 @@ export default function AdminLoginPage() {
             <Button className="w-full" variant="ghost" type="button" onClick={() => router.push("/login")}>
               Go to normal login
             </Button>
-          </form>
-        ) : (
-          <form
-            className="space-y-4"
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleTwoFactor();
-            }}
-          >
-            <div className="flex items-start gap-3 rounded-2xl border border-primary/25 bg-primary/10 p-4">
-              <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-              <div>
-                <div className="font-semibold text-white">Two-factor authentication</div>
-                <div className="mt-1 text-sm text-muted">
-                  Enter the 6-digit admin verification code.
-                </div>
-              </div>
-            </div>
-
-            <label className="block text-xs text-muted">
-              2FA code
-              <input
-                value={otp}
-                onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                className="mt-1 w-full rounded-2xl border border-white/10 bg-black/25 px-4 py-3 text-center text-lg tracking-[0.35em] outline-none"
-                placeholder="000000"
-                inputMode="numeric"
-                autoFocus
-              />
-            </label>
-
-            <div className="text-center text-[11px] text-muted">
-              Demo code: <span className="font-mono text-white">{ADMIN_2FA_CODE}</span>
-            </div>
-
-            <Button className="w-full" variant="primary" size="lg" type="submit" disabled={otp.length !== 6}>
-              Verify & Login
+            <Button className="w-full" variant="outline" type="button" onClick={() => router.push("/")}>
+              Go to Home Page
             </Button>
-
-            <Button
-              className="w-full"
-              variant="ghost"
-              type="button"
-              onClick={() => {
-                setStep("credentials");
-                setOtp("");
-              }}
-            >
-              Back
-            </Button>
-          </form>
-        )}
+        </form>
       </div>
     </div>
   );

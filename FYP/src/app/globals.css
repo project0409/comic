@@ -2,19 +2,20 @@
 
 /* FYP — Dark-only design tokens */
 :root {
-  --sf-bg: #080808;
-  --sf-surface: #111111;
-  --sf-card: #1a1a1a;
-  --sf-elevated: #222222;
+  --sf-bg: #080a12;
+  --sf-surface: #121826;
+  --sf-card: rgba(255, 255, 255, 0.08);
+  --sf-elevated: rgba(255, 255, 255, 0.12);
 
-  --sf-primary: #7c3aed; /* Electric violet */
-  --sf-gold: #f59e0b; /* Amber gold */
-  --sf-danger: #ef4444; /* Crimson */
+  --sf-primary: #ff3366; /* Comic neon pink */
+  --sf-gold: #ffc107; /* Comic yellow */
+  --sf-danger: #ff3366;
+  --sf-highlight: #00e5ff;
 
-  --sf-text: #f9fafb;
-  --sf-muted: #6b7280;
+  --sf-text: #ffffff;
+  --sf-muted: #aab2c8;
 
-  --sf-ambient: #7c3aed;
+  --sf-ambient: #ff3366;
 
   color-scheme: dark;
 }
@@ -24,10 +25,18 @@ body {
   height: 100%;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  background: var(--sf-bg);
+  background:
+    radial-gradient(900px 520px at 8% 0%, rgba(255, 51, 102, 0.16), transparent 58%),
+    radial-gradient(760px 460px at 88% 8%, rgba(0, 229, 255, 0.12), transparent 55%),
+    linear-gradient(180deg, #080a12 0%, #121826 48%, #070912 100%);
   color: var(--sf-text);
   font-family: var(--sf-font-ui), system-ui, sans-serif;
+  text-rendering: optimizeLegibility;
 }
 
 /* Make sure fixed background stays behind everything */
@@ -37,18 +46,133 @@ body {
 
 /* Ambient gradient sync (set via uiStore.ambientColor) */
 .sf-ambient {
-  background: radial-gradient(
-      900px 500px at 30% 10%,
-      color-mix(in srgb, var(--sf-ambient) 22%, transparent),
-      transparent 55%
-    ),
-    radial-gradient(
-      900px 500px at 70% 30%,
-      color-mix(in srgb, var(--sf-ambient) 12%, transparent),
-      transparent 55%
-    ),
-    var(--sf-bg);
+  background:
+    radial-gradient(900px 520px at 12% 8%, color-mix(in srgb, var(--sf-ambient) 18%, transparent), transparent 58%),
+    radial-gradient(720px 460px at 88% 10%, rgba(0, 229, 255, 0.11), transparent 58%),
+    radial-gradient(760px 520px at 78% 86%, rgba(255, 193, 7, 0.1), transparent 62%),
+    linear-gradient(180deg, #080a12 0%, #121826 48%, #070912 100%);
   transition: background 450ms ease;
+}
+
+.sf-comic-surface {
+  background:
+    radial-gradient(circle at 12px 12px, rgba(255, 193, 7, 0.08) 0 1px, transparent 1.4px),
+    linear-gradient(135deg, rgba(255, 51, 102, 0.1), rgba(0, 229, 255, 0.06) 42%, rgba(255, 193, 7, 0.06)),
+    rgba(255, 255, 255, 0.08);
+  background-size: 22px 22px, auto, auto;
+  backdrop-filter: blur(12px);
+}
+
+.sf-comic-panel {
+  position: relative;
+  backdrop-filter: blur(12px);
+  box-shadow:
+    0 16px 42px rgba(0, 0, 0, 0.36),
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 0 28px rgba(255, 51, 102, 0.1);
+}
+
+.sf-comic-panel::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.09), transparent 32%),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 14px);
+  opacity: 0.55;
+}
+
+.sf-comic-card {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  transition:
+    transform 300ms ease,
+    border-color 300ms ease,
+    box-shadow 300ms ease,
+    filter 300ms ease;
+  will-change: transform;
+}
+
+.sf-comic-card:hover {
+  transform: perspective(900px) rotateX(1deg) rotateY(-1.5deg) translateY(-6px) scale(1.025);
+  box-shadow:
+    0 20px 48px rgba(0, 0, 0, 0.44),
+    0 0 0 1px rgba(255, 51, 102, 0.3),
+    0 0 34px rgba(255, 51, 102, 0.22),
+    0 0 22px rgba(0, 229, 255, 0.12);
+}
+
+.sf-comic-card:hover .sf-title-animate {
+  color: var(--sf-highlight);
+  text-shadow: 0 0 16px rgba(0, 229, 255, 0.22);
+}
+
+.sf-comic-image {
+  filter: saturate(1.08) contrast(1.04);
+  transition:
+    transform 300ms ease,
+    filter 300ms ease;
+}
+
+.group:hover .sf-comic-image,
+.sf-comic-image:hover {
+  transform: scale(1.07);
+  filter: saturate(1.16) contrast(1.07) brightness(1.08);
+}
+
+.sf-comic-bubble {
+  position: relative;
+  border-radius: 999px 999px 999px 8px;
+  box-shadow: 0 0 18px rgba(255, 193, 7, 0.14);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
+}
+
+.sf-comic-bubble::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 12px;
+  width: 8px;
+  height: 8px;
+  border-left: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  background: inherit;
+  transform: rotate(-18deg);
+  opacity: 0.35;
+}
+
+.sf-clickable {
+  transition:
+    transform 220ms ease,
+    color 220ms ease,
+    background-color 220ms ease,
+    border-color 220ms ease,
+    box-shadow 220ms ease;
+}
+
+.sf-clickable:hover {
+  transform: translateY(-1px);
+}
+
+.sf-clickable:active {
+  transform: translateY(0) scale(0.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* Haptic simulation (CSS vibrate) for high-action panels */

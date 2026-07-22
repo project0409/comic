@@ -6,12 +6,12 @@ import { Button } from "@/components/Button";
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden rounded-3xl border border-white/8 bg-surface">
+    <section className="sf-comic-panel sf-comic-surface relative overflow-hidden rounded-3xl border border-white/8 bg-surface">
       <div
         className="absolute inset-0 opacity-60"
         style={{
           background:
-            "radial-gradient(900px 500px at 20% 20%, rgba(124,58,237,0.35), transparent 60%), radial-gradient(900px 500px at 80% 10%, rgba(245,158,11,0.18), transparent 60%), linear-gradient(180deg, rgba(0,0,0,0.2), rgba(0,0,0,0.72))"
+            "radial-gradient(900px 500px at 20% 20%, rgba(255,51,102,0.28), transparent 60%), radial-gradient(900px 500px at 80% 10%, rgba(0,229,255,0.16), transparent 60%), radial-gradient(720px 460px at 72% 82%, rgba(255,193,7,0.12), transparent 64%), linear-gradient(180deg, rgba(0,0,0,0.16), rgba(0,0,0,0.72))"
         }}
       />
 
@@ -19,7 +19,7 @@ export function Hero() {
       <div className="pointer-events-none absolute inset-0 opacity-25">
         <div className="absolute left-[8%] top-[25%] h-1.5 w-1.5 rounded-full bg-white blur-[1px]" />
         <div className="absolute left-[18%] top-[55%] h-1 w-1 rounded-full bg-primary blur-[1px]" />
-        <div className="absolute left-[62%] top-[20%] h-1 w-1 rounded-full bg-gold blur-[1px]" />
+        <div className="absolute left-[62%] top-[20%] h-1 w-1 rounded-full bg-highlight blur-[1px]" />
         <div className="absolute left-[75%] top-[65%] h-1.5 w-1.5 rounded-full bg-white blur-[1px]" />
       </div>
 
@@ -28,7 +28,7 @@ export function Hero() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="font-display text-4xl tracking-widest md:text-6xl"
+          className="font-display text-4xl tracking-widest text-white drop-shadow-[0_0_22px_rgba(255,51,102,0.2)] md:text-6xl"
         >
           Where reading meets cinema
         </motion.h1>

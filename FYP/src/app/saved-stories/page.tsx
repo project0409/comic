@@ -23,17 +23,21 @@ export default function SavedStoriesPage() {
         </div>
 
         {bookmarks.length === 0 ? (
-          <div className="rounded-3xl border border-white/10 bg-card p-6 text-sm text-muted">
+          <div className="sf-comic-panel sf-comic-surface rounded-3xl border border-white/10 bg-card p-6 text-sm text-muted">
             No saved stories yet. Open a series and save panels while reading.
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2">
             {bookmarks.map((bookmark) => (
-              <div key={bookmark.id} className="overflow-hidden rounded-3xl border border-white/10 bg-card">
-                <div
-                  className="aspect-[16/8] bg-cover bg-center"
-                  style={{ backgroundImage: `url(${bookmark.thumbUrl ?? "/placeholders/panel-1.svg"})` }}
-                />
+              <div key={bookmark.id} className="sf-comic-card overflow-hidden rounded-3xl border border-white/10 bg-card">
+                <div className="aspect-[16/8] overflow-hidden">
+                  <img
+                    src={bookmark.thumbUrl ?? "/placeholders/panel-1.svg"}
+                    alt={`${bookmark.seriesName} saved panel`}
+                    className="sf-comic-image h-full w-full object-cover"
+                    loading="lazy"
+                  />
+                </div>
                 <div className="space-y-3 p-4">
                   <div>
                     <div className="font-semibold">{bookmark.seriesName}</div>

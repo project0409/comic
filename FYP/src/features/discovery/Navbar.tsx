@@ -3,7 +3,7 @@
 import { Bell, Bookmark, Coins, LogOut, Pencil, Search, Settings, User, Wallet } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/components/cn";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
@@ -12,6 +12,11 @@ import { useToastStore } from "@/store/toastStore";
 import { useAuthStore } from "@/store/authStore";
 
 const GENRES = ["Action", "Romance", "Horror", "Mystery", "Fantasy"] as const;
+const NAV_LINKS = [
+  { href: "/", label: "Home" },
+  { href: "/series", label: "Series" },
+  { href: "/vault", label: "Vault" }
+];
 
 export function Navbar({
   onSearch
@@ -19,6 +24,7 @@ export function Navbar({
   onSearch?: (q: string, genre?: (typeof GENRES)[number]) => void;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const coinBalance = useWalletStore((s) => s.coinBalance);
   const toast = useToastStore((s) => s.push);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -40,6 +46,23 @@ export function Navbar({
       .map((part) => part[0]?.toUpperCase())
       .join("") || "U";
   }, [displayName, role]);
+  const profileMenuItems = useMemo(() => {
+    const items = [
+      { href: "/profile", label: "Profile", icon: User },
+      { href: "/profile/edit", label: "Edit Profile", icon: Pencil },
+      { href: "/settings", label: "Settings", icon: Settings },
+      { href: "/saved-stories", label: "Saved Stories", icon: Bookmark },
+      { href: "/wallet", label: "Wallet", icon: Wallet }
+    ];
+    if (role === "writer" || role === "admin") {
+      items.push({ href: "/dashboard/writer", label: "Writer Dashboard", icon: Pencil });
+      items.push({ href: "/dashboard/analytics", label: "Analytics", icon: Coins });
+    }
+    if (role === "admin") {
+      items.push({ href: "/dashboard/admin", label: "Admin Gate", icon: Settings });
+    }
+    return items;
+  }, [role]);
 
   useEffect(() => {
     const t = setTimeout(() => onSearch?.(q, genre), 250);
@@ -56,8 +79,8 @@ export function Navbar({
   }, [profileOpen]);
 
   return (
-    <div className="sticky top-0 z-40 border-b border-white/8 bg-bg/80 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
+    <div className="sticky top-0 z-40 border-b border-white/8 bg-bg/82 backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.24)]">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-3 px-4 py-3 lg:flex-nowrap lg:gap-4">
         <div className="flex items-center gap-2">
           <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary/20 text-primary shadow-glow">
             <span className="font-display text-lg">FYP</span>
@@ -68,8 +91,32 @@ export function Navbar({
           </div>
         </div>
 
-        <div className="flex min-w-0 flex-1 items-center gap-3">
-          <div className="flex min-w-0 flex-1 items-center gap-2 rounded-2xl border border-white/10 bg-surface px-3 py-2">
+        <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary navigation">
+          {NAV_LINKS.map((item) => {
+            const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "sf-clickable relative rounded-xl px-3 py-2 text-xs font-semibold uppercase tracking-wide",
+                  active ? "text-white" : "text-muted hover:text-white"
+                )}
+              >
+                {item.label}
+                <span
+                  className={cn(
+                    "absolute inset-x-3 -bottom-0.5 h-0.5 rounded-full bg-[linear-gradient(90deg,var(--sf-primary),var(--sf-highlight))] transition-opacity duration-300",
+                    active ? "opacity-100 shadow-[0_0_12px_rgba(255,51,102,0.55)]" : "opacity-0"
+                  )}
+                />
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="order-3 flex min-w-full items-center gap-3 md:order-none md:min-w-0 md:flex-1">
+          <div className="flex min-w-0 flex-1 items-center gap-2 rounded-2xl border border-white/10 bg-surface/90 px-3 py-2 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.02)] transition focus-within:border-primary/45 focus-within:shadow-[0_0_22px_rgba(255,51,102,0.12)]">
             <Search className="h-4 w-4 text-muted" />
             <input
               value={q}
@@ -88,10 +135,10 @@ export function Navbar({
                   key={g}
                   onClick={() => setGenre(active ? undefined : g)}
                   className={cn(
-                    "rounded-full border px-3 py-1 text-xs transition-colors",
+                    "sf-clickable rounded-full border px-3 py-1 text-xs transition-colors",
                     active
-                      ? "border-primary/40 bg-primary/15 text-white"
-                      : "border-white/10 bg-white/5 text-muted hover:text-white hover:bg-white/8"
+                      ? "border-primary/45 bg-primary/18 text-white shadow-[0_0_18px_rgba(255,51,102,0.14)]"
+                      : "border-white/10 bg-white/5 text-muted hover:bg-white/8 hover:text-white"
                   )}
                 >
                   {g}
@@ -101,9 +148,14 @@ export function Navbar({
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="ml-auto flex items-center gap-2 md:gap-3">
           {isAuthenticated ? (
             <>
+              {role === "reader" ? (
+                <Button variant="outline" size="sm" onClick={() => router.push("/saved-stories")}>
+                  Reader Hub
+                </Button>
+              ) : null}
               {role === "writer" || role === "admin" ? (
                 <Button
                   variant="outline"
@@ -118,7 +170,7 @@ export function Navbar({
                 <span className="tabular-nums">{coinBalance}</span>
               </Badge>
               <button
-                className="grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/5 hover:bg-white/8"
+                className="sf-clickable grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/5 hover:border-highlight/30 hover:bg-white/8"
                 aria-label="Open notifications"
                 onClick={() => router.push("/notifications")}
               >
@@ -126,7 +178,7 @@ export function Navbar({
               </button>
               <div className="relative" ref={profileRef}>
                 <button
-                  className="flex h-10 items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-2.5 hover:bg-white/8"
+                  className="sf-clickable flex h-10 items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-2.5 hover:border-primary/35 hover:bg-white/8"
                   aria-haspopup="menu"
                   aria-expanded={profileOpen}
                   onClick={() => setProfileOpen((open) => !open)}
@@ -138,27 +190,21 @@ export function Navbar({
                 </button>
                 {profileOpen ? (
                   <div
-                    className="absolute right-0 mt-2 w-64 overflow-hidden rounded-2xl border border-white/10 bg-card shadow-2xl"
+                    className="sf-comic-panel sf-comic-surface absolute right-0 mt-2 w-64 overflow-hidden rounded-2xl border border-white/10 bg-card shadow-2xl"
                     role="menu"
                   >
                     <div className="border-b border-white/10 px-4 py-3">
                       <div className="text-sm font-semibold">{displayName || "FYP User"}</div>
                       <div className="text-xs capitalize text-muted">{role ?? "reader"}</div>
                     </div>
-                    {[
-                      { href: "/profile", label: "Profile", icon: User },
-                      { href: "/profile/edit", label: "Edit Profile", icon: Pencil },
-                      { href: "/settings", label: "Settings", icon: Settings },
-                      { href: "/saved-stories", label: "Saved Stories", icon: Bookmark },
-                      { href: "/wallet", label: "Wallet", icon: Wallet }
-                    ].map((item) => {
+                    {profileMenuItems.map((item) => {
                       const Icon = item.icon;
                       return (
                         <Link
                           key={item.href}
                           href={item.href}
                           role="menuitem"
-                          className="flex items-center gap-3 px-4 py-3 text-sm text-muted hover:bg-white/5 hover:text-white"
+                          className="sf-clickable flex items-center gap-3 px-4 py-3 text-sm text-muted hover:bg-white/5 hover:text-white"
                           onClick={() => setProfileOpen(false)}
                         >
                           <Icon className="h-4 w-4" />
@@ -167,7 +213,7 @@ export function Navbar({
                       );
                     })}
                     <button
-                      className="flex w-full items-center gap-3 border-t border-white/10 px-4 py-3 text-left text-sm text-muted hover:bg-white/5 hover:text-white"
+                      className="sf-clickable flex w-full items-center gap-3 border-t border-white/10 px-4 py-3 text-left text-sm text-muted hover:bg-white/5 hover:text-white"
                       role="menuitem"
                       onClick={() => {
                         setProfileOpen(false);
@@ -193,14 +239,14 @@ export function Navbar({
                 <span className="tabular-nums">{coinBalance}</span>
               </Badge>
               <button
-                className="grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/5 hover:bg-white/8"
+                className="sf-clickable grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/5 hover:border-highlight/30 hover:bg-white/8"
                 aria-label="Open notifications"
                 onClick={() => router.push("/notifications")}
               >
                 <Bell className="h-4 w-4 text-muted" />
               </button>
               <button
-                className="grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/5 hover:bg-white/8"
+                className="sf-clickable grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/5 hover:border-primary/35 hover:bg-white/8"
                 aria-label="Open profile"
                 onClick={() => router.push("/login")}
               >

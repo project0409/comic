@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
 import { Navbar } from "./Navbar";
 import { Hero } from "./Hero";
 import { CarouselRow } from "./CarouselRow";
@@ -53,7 +54,12 @@ export function HomePage() {
         }}
       />
 
-      <main className="mx-auto max-w-6xl space-y-10 px-4 py-6">
+      <motion.main
+        className="mx-auto max-w-6xl space-y-10 px-4 py-6"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.42, ease: "easeOut" }}
+      >
         <Hero />
 
         <div className="space-y-10" id="all">
@@ -64,7 +70,7 @@ export function HomePage() {
             <CarouselRow key={g} title={g} items={filtered.filter((s) => s.genre === g)} />
           ))}
         </div>
-      </main>
+      </motion.main>
 
       <footer className="border-t border-white/8 bg-bg/60">
         <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-8 text-sm text-muted md:flex-row md:items-center md:justify-between">

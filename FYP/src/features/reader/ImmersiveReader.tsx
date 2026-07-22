@@ -250,7 +250,7 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
 
       {/* Reader canvas area */}
       <div className="mx-auto max-w-6xl px-3 py-4">
-        <div className="rounded-3xl border border-white/10 bg-surface p-3 md:p-4">
+        <div className="sf-comic-panel rounded-3xl border border-white/10 bg-surface/90 p-3 md:p-4">
           <div className="flex items-center justify-between gap-3 pb-3">
             <div className="flex items-center gap-2 text-xs text-muted">
               <Shield className="h-4 w-4" />
@@ -271,7 +271,7 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
 
           <div
             className={cn(
-              "relative overflow-hidden rounded-2xl border border-white/10 bg-black/30",
+              "relative overflow-hidden rounded-2xl border border-white/10 bg-black/30 shadow-[inset_0_0_42px_rgba(0,0,0,0.32)]",
               "h-[70vh] md:h-[74vh]"
             )}
             onPointerDown={onPointerDown}
@@ -302,7 +302,10 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
           >
             <div className="mx-auto max-w-6xl px-4 pb-3">
               <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
-                <div className="h-full bg-primary transition-[width] duration-300" style={{ width: `${completionPct}%` }} />
+                <div
+                  className="h-full bg-[linear-gradient(90deg,var(--sf-primary),var(--sf-highlight))] shadow-[0_0_14px_rgba(255,51,102,0.38)] transition-[width] duration-300"
+                  style={{ width: `${completionPct}%` }}
+                />
               </div>
               <div className="mt-1 text-right text-[11px] text-muted">{completionPct}% complete</div>
             </div>
@@ -312,10 +315,10 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
 
       {/* Persistent mute + volume panel pinned bottom-left (always visible) */}
       <div className="fixed bottom-4 left-4 z-[55]">
-        <div className="rounded-2xl border border-white/10 bg-black/65 p-3 backdrop-blur-xl">
+        <div className="rounded-2xl border border-white/10 bg-black/65 p-3 shadow-[0_0_24px_rgba(0,229,255,0.1)] backdrop-blur-xl">
           <div className="flex items-center gap-2">
             <button
-              className="grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white/5 hover:bg-white/10"
+              className="sf-clickable grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white/5 hover:border-highlight/35 hover:bg-white/10"
               onClick={toggleMuted}
               aria-label="Toggle mute"
             >
@@ -353,7 +356,7 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed right-4 top-4 z-[55] rounded-2xl border border-white/10 bg-black/60 px-3 py-2 text-xs text-muted backdrop-blur-xl"
+            className="sf-clickable fixed right-4 top-4 z-[55] rounded-2xl border border-white/10 bg-black/60 px-3 py-2 text-xs text-muted backdrop-blur-xl"
             onClick={toggleDistractionFree}
           >
             Tap to restore UI
@@ -448,7 +451,7 @@ function ScrollReader({ pages }: { pages: ChapterPage[] }) {
           <div
             key={p.id}
             data-page={p.index}
-            className="rounded-2xl border border-white/10 bg-black/25 p-2"
+            className="sf-comic-card rounded-2xl border border-white/10 bg-black/25 p-2"
           >
             <div className="mb-2 text-xs text-muted">Page {p.index}</div>
             <div className="h-[70vh] overflow-hidden rounded-xl">

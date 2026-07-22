@@ -39,23 +39,24 @@ export default function VaultPage() {
       {tab === "bookmarks" ? (
         <div className="columns-1 gap-4 space-y-4 md:columns-2 lg:columns-3">
           {bookmarks.length === 0 ? (
-            <div className="rounded-3xl border border-white/10 bg-card p-6 text-sm text-muted">
+            <div className="sf-comic-panel sf-comic-surface rounded-3xl border border-white/10 bg-card p-6 text-sm text-muted">
               No bookmarks yet. Long-press inside the reader to save a panel.
             </div>
           ) : (
             bookmarks.map((b) => (
               <div
                 key={b.id}
-                className="break-inside-avoid overflow-hidden rounded-3xl border border-white/10 bg-card"
+                className="sf-comic-card break-inside-avoid overflow-hidden rounded-3xl border border-white/10 bg-card"
               >
-                <div
-                  className="aspect-[16/10] bg-cover bg-center"
-                  style={{
-                    backgroundImage: `linear-gradient(135deg, rgba(124,58,237,0.28), rgba(245,158,11,0.08)), url(${
-                      b.thumbUrl ?? "/placeholders/panel-1.svg"
-                    })`
-                  }}
-                />
+                <div className="relative aspect-[16/10] overflow-hidden">
+                  <img
+                    src={b.thumbUrl ?? "/placeholders/panel-1.svg"}
+                    alt={`${b.seriesName} saved panel`}
+                    className="sf-comic-image h-full w-full object-cover"
+                    loading="lazy"
+                  />
+                  <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,51,102,0.24),rgba(0,229,255,0.08),rgba(255,193,7,0.08))]" />
+                </div>
                 <div className="space-y-2 p-4">
                   <div className="text-sm font-semibold">{b.seriesName}</div>
                   <div className="text-xs text-muted">
@@ -81,12 +82,12 @@ export default function VaultPage() {
       {tab === "reactions" ? (
         <div className="space-y-3">
           {reactions.length === 0 ? (
-            <div className="rounded-3xl border border-white/10 bg-card p-6 text-sm text-muted">
+            <div className="sf-comic-panel sf-comic-surface rounded-3xl border border-white/10 bg-card p-6 text-sm text-muted">
               No reactions yet. Long-press inside the reader to drop emojis.
             </div>
           ) : (
             reactions.map((r) => (
-              <div key={r.id} className="rounded-3xl border border-white/10 bg-card p-4">
+              <div key={r.id} className="sf-comic-card rounded-3xl border border-white/10 bg-card p-4">
                 <div className="flex items-center justify-between">
                   <div className="text-lg">{r.emoji}</div>
                   <div className="text-xs text-muted">{new Date(r.atIso).toLocaleString()}</div>
@@ -105,7 +106,7 @@ export default function VaultPage() {
       {tab === "highlights" ? (
         <div className="space-y-3">
           {highlights.map((h) => (
-            <div key={h.id} className="rounded-3xl border border-white/10 bg-card p-5">
+            <div key={h.id} className="sf-comic-card rounded-3xl border border-white/10 bg-card p-5">
               <div className="text-sm text-muted">Chapter {h.chapterId}</div>
               <blockquote className="mt-2 border-l-2 border-primary/60 pl-4 text-lg text-white/85">
                 “{h.quote}”
@@ -119,4 +120,3 @@ export default function VaultPage() {
     </RequireAuth>
   );
 }
-

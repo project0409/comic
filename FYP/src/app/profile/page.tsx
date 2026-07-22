@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Bookmark, Coins, Pencil, Settings, User } from "lucide-react";
+import { BarChart3, Bookmark, Coins, LayoutDashboard, Pencil, Settings, ShieldCheck, Upload, User } from "lucide-react";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import { RequireAuth } from "@/components/RequireAuth";
@@ -16,6 +16,28 @@ export default function ProfilePage() {
   const provider = useAuthStore((s) => s.provider);
   const coinBalance = useWalletStore((s) => s.coinBalance);
   const savedCount = useVaultStore((s) => s.bookmarks.length);
+  const roleName = role ?? "reader";
+  const permissions =
+    roleName === "admin"
+      ? [
+          "Approve or reject writer uploads",
+          "Publish and unpublish approved chapters",
+          "Preview submitted chapters",
+          "Access writer dashboards and analytics"
+        ]
+      : roleName === "writer"
+        ? [
+            "Upload chapter pages",
+            "Edit chapter metadata",
+            "Track approval and publish status",
+            "View analytics and reader engagement"
+          ]
+        : [
+            "Read available comic chapters",
+            "Save panels and stories",
+            "Use wallet and unlock coin chapters",
+            "Manage profile, settings, and vault"
+          ];
 
   return (
     <RequireAuth>
@@ -66,6 +88,66 @@ export default function ProfilePage() {
           <Link href="/saved-stories">
             <Button variant="outline"><Bookmark className="h-4 w-4" /> Saved Stories</Button>
           </Link>
+          {roleName === "writer" || roleName === "admin" ? (
+            <Link href="/dashboard/writer">
+              <Button variant="outline"><Upload className="h-4 w-4" /> Writer Tools</Button>
+            </Link>
+          ) : null}
+          {roleName === "writer" || roleName === "admin" ? (
+            <Link href="/dashboard/analytics">
+              <Button variant="outline"><BarChart3 className="h-4 w-4" /> Analytics</Button>
+            </Link>
+          ) : null}
+          {roleName === "admin" ? (
+            <Link href="/dashboard/admin">
+              <Button variant="gold"><ShieldCheck className="h-4 w-4" /> Admin Gate</Button>
+            </Link>
+          ) : null}
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-[0.95fr_1.05fr]">
+          <div className="sf-comic-card rounded-3xl border border-white/10 bg-card p-5">
+            <div className="flex items-center gap-2 text-sm text-muted">
+              <LayoutDashboard className="h-4 w-4 text-highlight" />
+              Role Features
+            </div>
+            <div className="mt-3 font-display text-2xl tracking-widest capitalize">{roleName} Access</div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {roleName === "reader" ? (
+                <>
+                  <Link href="/series"><Button size="sm" variant="primary">Browse Comics</Button></Link>
+                  <Link href="/vault"><Button size="sm" variant="outline">Open Vault</Button></Link>
+                  <Link href="/wallet"><Button size="sm" variant="outline">Wallet</Button></Link>
+                </>
+              ) : null}
+              {roleName === "writer" ? (
+                <>
+                  <Link href="/dashboard/writer"><Button size="sm" variant="primary">Upload Chapter</Button></Link>
+                  <Link href="/dashboard/analytics"><Button size="sm" variant="outline">View Analytics</Button></Link>
+                </>
+              ) : null}
+              {roleName === "admin" ? (
+                <>
+                  <Link href="/dashboard/admin"><Button size="sm" variant="primary">Review Uploads</Button></Link>
+                  <Link href="/dashboard/writer"><Button size="sm" variant="outline">Writer Tools</Button></Link>
+                </>
+              ) : null}
+            </div>
+          </div>
+
+          <div className="sf-comic-card rounded-3xl border border-white/10 bg-card p-5">
+            <div className="flex items-center gap-2 text-sm text-muted">
+              <ShieldCheck className="h-4 w-4 text-primary" />
+              Permissions
+            </div>
+            <div className="mt-3 grid gap-2">
+              {permissions.map((permission) => (
+                <div key={permission} className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white/85">
+                  {permission}
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </RequireAuth>

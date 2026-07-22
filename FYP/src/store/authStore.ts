@@ -37,6 +37,7 @@ type AuthState = {
   resendVerificationCode: () => Promise<{ demoCode: string; ipAddress: string } | null>;
   cancelPendingEmailAuth: () => void;
 
+  loginWithCredentials: (role: Exclude<UserRole, "admin">, email: string) => void;
   loginWithGoogle: (role?: Exclude<UserRole, "admin">) => void;
   completeGoogleAuth: (profile: { email?: string; name?: string; picture?: string }) => void;
   verifyOtp: (otp: string) => boolean;
@@ -214,6 +215,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   cancelPendingEmailAuth: () => set({ pendingEmailAuth: undefined }),
+
+  loginWithCredentials: (role, email) =>
+    set({
+      isAuthenticated: true,
+      provider: "email",
+      role,
+      email: email.trim().toLowerCase(),
+      displayName: email.trim().split("@")[0] || `${role} user`,
+      photoUrl: undefined,
+      otpVerified: true,
+      pendingEmailAuth: undefined
+    }),
 
   loginWithGoogle: (role = "reader") =>
     set({

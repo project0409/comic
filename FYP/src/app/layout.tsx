@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Bebas_Neue, Inter } from "next/font/google";
 import "./globals.css";
 import { PWARegister } from "@/components/PWARegister";
@@ -20,8 +20,11 @@ const ui = Inter({
 export const metadata: Metadata = {
   title: "FYP",
   description: "Where reading meets cinema",
-  manifest: "/manifest.webmanifest",
-  themeColor: "#080808"
+  manifest: "/manifest.webmanifest"
+};
+
+export const viewport: Viewport = {
+  themeColor: "#080A12"
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

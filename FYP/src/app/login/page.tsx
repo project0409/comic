@@ -2,30 +2,24 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/Button";
-import { EmailVerificationStep } from "@/features/auth/EmailVerificationStep";
 import { consumeAuthFlash, setAuthFlash } from "@/lib/authFlash";
 import { createGoogleAuthUrl, getActiveGoogleClientId } from "@/lib/googleIdentity";
 import { useToastStore } from "@/store/toastStore";
 import { useAuthStore } from "@/store/authStore";
 
-type Step = "credentials" | "verify";
-
 export default function LoginPage() {
   const router = useRouter();
   const toast = useToastStore((s) => s.push);
   const loginWithGoogle = useAuthStore((s) => s.loginWithGoogle);
-  const requestEmailVerification = useAuthStore((s) => s.requestEmailVerification);
-  const cancelPendingEmailAuth = useAuthStore((s) => s.cancelPendingEmailAuth);
-  const pendingEmailAuth = useAuthStore((s) => s.pendingEmailAuth);
+  const loginWithCredentials = useAuthStore((s) => s.loginWithCredentials);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
   const [role, setRole] = useState<"reader" | "writer">("reader");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [step, setStep] = useState<Step>("credentials");
   const [submitting, setSubmitting] = useState(false);
 
   const title = useMemo(() => (role === "reader" ? "Reader Login" : "Writer Login"), [role]);
@@ -43,14 +37,10 @@ export default function LoginPage() {
   }, [toast]);
 
   useEffect(() => {
-    if (pendingEmailAuth?.mode === "login") setStep("verify");
-  }, [pendingEmailAuth]);
-
-  useEffect(() => {
     if (isAuthenticated) router.replace("/");
   }, [isAuthenticated, router]);
 
-  async function handleCredentialsSubmit(e?: React.FormEvent) {
+  function handleCredentialsSubmit(e?: React.FormEvent) {
     e?.preventDefault();
     if (!email.trim() || !password.trim()) {
       toast({ tone: "danger", title: "Validation Error", message: "Please enter both email and password." });
@@ -62,30 +52,16 @@ export default function LoginPage() {
     }
 
     setSubmitting(true);
-    const result = await requestEmailVerification(role, email, { mode: "login" });
+    loginWithCredentials(role, email);
     setSubmitting(false);
 
-    if (!result.ok) {
-      toast({ tone: "danger", title: "Invalid email", message: result.error });
-      return;
-    }
-
     toast({
-      tone: "default",
-      title: "Verification code sent",
-      message: `Check ${email.trim()}. Demo code: ${result.demoCode}. Verification request detected from IP: ${result.ipAddress}`
+      tone: "success",
+      title: `${role === "reader" ? "Reader" : "Writer"} login successful`,
+      message: role === "writer" ? "Writer dashboard and analytics are enabled." : "Reader features are now unlocked."
     });
-    setStep("verify");
-  }
-
-  function handleBackFromVerify() {
-    cancelPendingEmailAuth();
-    setStep("credentials");
-  }
-
-  function handleLoginVerified(result: { displayName?: string }) {
-    setAuthFlash({ type: "login_success", displayName: result.displayName });
-    router.replace("/");
+    setAuthFlash({ type: "login_success", displayName: email.trim().split("@")[0] });
+    router.replace(role === "writer" ? "/dashboard/writer" : "/");
   }
 
   function handleGoogleLogin() {
@@ -106,7 +82,7 @@ export default function LoginPage() {
         className="pointer-events-none absolute inset-0 opacity-35 blur-[2px]"
         style={{
           background:
-            "radial-gradient(900px 500px at 30% 10%, rgba(124,58,237,0.35), transparent 60%), radial-gradient(900px 500px at 80% 60%, rgba(255,255,255,0.06), transparent 60%), repeating-linear-gradient(135deg, rgba(255,255,255,0.06) 0px, rgba(255,255,255,0.06) 1px, transparent 1px, transparent 16px)"
+            "radial-gradient(900px 500px at 30% 10%, rgba(255,51,102,0.24), transparent 60%), radial-gradient(900px 500px at 80% 60%, rgba(0,229,255,0.1), transparent 60%), radial-gradient(700px 420px at 72% 85%, rgba(255,193,7,0.08), transparent 62%), repeating-linear-gradient(135deg, rgba(255,255,255,0.055) 0px, rgba(255,255,255,0.055) 1px, transparent 1px, transparent 16px)"
         }}
       />
 
@@ -117,42 +93,22 @@ export default function LoginPage() {
           </div>
           <div>
             <div className="font-display text-2xl tracking-widest">FYP</div>
-            <div className="text-sm text-muted">{step === "verify" ? "Email verification" : title}</div>
+            <div className="text-sm text-muted">{title}</div>
           </div>
         </div>
 
-        <div className="mb-4 flex gap-2">
-          {(["credentials", "verify"] as Step[]).map((s, i) => {
-            const active = step === s;
-            const done = s === "credentials" && step === "verify";
-            return (
-              <div key={s} className="flex flex-1 items-center gap-2">
-                <div
-                  className={`grid h-7 w-7 place-items-center rounded-full text-xs font-semibold transition ${
-                    active || done ? "bg-primary text-black" : "border border-white/15 text-muted"
-                  }`}
-                >
-                  {i + 1}
-                </div>
-                <span className={`text-xs ${active ? "text-white" : "text-muted"}`}>
-                  {s === "credentials" ? "Sign in" : "Verify"}
-                </span>
-                {i === 0 ? <div className={`h-px flex-1 ${done ? "bg-primary/50" : "bg-white/10"}`} /> : null}
-              </div>
-            );
-          })}
+        <div className="mb-4 rounded-2xl border border-highlight/20 bg-highlight/5 p-3 text-xs text-muted">
+          Select Reader or Writer to continue with the correct access permissions.
         </div>
 
-        <AnimatePresence mode="wait">
-          {step === "credentials" ? (
-            <motion.form
-              key="credentials"
-              initial={{ opacity: 0, x: -16 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 16 }}
-              className="space-y-3"
-              onSubmit={handleCredentialsSubmit}
-            >
+        <motion.form
+          key="credentials"
+          initial={{ opacity: 0, x: -16 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: 16 }}
+          className="space-y-3"
+          onSubmit={handleCredentialsSubmit}
+        >
               <div className="grid grid-cols-2 gap-2">
                 {(["reader", "writer"] as const).map((r) => (
                   <button
@@ -194,7 +150,7 @@ export default function LoginPage() {
               </label>
 
               <Button className="w-full" variant="primary" size="lg" type="submit" disabled={submitting}>
-                {submitting ? "Sending code…" : "Login"}
+                {submitting ? "Logging in..." : `Login as ${role === "reader" ? "Reader" : "Writer"}`}
               </Button>
 
               <Button className="w-full" variant="outline" size="lg" type="button" onClick={handleGoogleLogin}>
@@ -214,17 +170,7 @@ export default function LoginPage() {
                   /admin/login
                 </Link>
               </div>
-            </motion.form>
-          ) : (
-            <EmailVerificationStep
-              key="verify"
-              title="Verify to complete login"
-              verifyLabel="Verify & Login"
-              onVerified={handleLoginVerified}
-              onBack={handleBackFromVerify}
-            />
-          )}
-        </AnimatePresence>
+        </motion.form>
       </div>
     </div>
   );
