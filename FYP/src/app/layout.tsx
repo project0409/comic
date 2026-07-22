@@ -18,8 +18,8 @@ const ui = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "FYP",
-  description: "Where reading meets cinema",
+  title: "FYP | Premium Immersive Comic Platform",
+  description: "Director's Cut comic reading experience with AI-powered recommendations, spoiler-safe assistance, creator tools, and immersive storytelling.",
   manifest: "/manifest.webmanifest"
 };
 

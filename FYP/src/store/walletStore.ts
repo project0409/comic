@@ -10,7 +10,7 @@ type WalletState = {
 };
 
 export const useWalletStore = create<WalletState>((set, get) => ({
-  coinBalance: 248,
+  coinBalance: 15,
   unlockHistory: [],
   setBalance: (n) => set({ coinBalance: Math.max(0, n) }),
   spendCoins: (n, chapterId) => {

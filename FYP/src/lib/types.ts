@@ -5,10 +5,21 @@ export type Series = {
   genre: string;
   chapterCount: number;
   readers: number;
+  rating: number;
+  description: string;
   isLocked: boolean;
   earlyAccessPriceCoins?: number;
   coverUrl: string; // ok to use <img>/bg-image outside reader
   ambientColorHex: string;
+};
+
+export type ReleaseCalendarItem = {
+  id: string;
+  title: string;
+  genre: string;
+  subgenre: string;
+  releaseDateLabel: string;
+  status: "ComingSoon" | "InQueue";
 };
 
 export type Chapter = {

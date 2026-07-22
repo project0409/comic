@@ -4,14 +4,20 @@ import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Navbar } from "./Navbar";
 import { Hero } from "./Hero";
+import { StatsBar } from "./StatsBar";
+import { ReleaseCalendar } from "./ReleaseCalendar";
+import { SeriesCatalog } from "./SeriesCatalog";
 import { CarouselRow } from "./CarouselRow";
 import type { Series } from "@/lib/types";
+import { releaseCalendar } from "@/lib/mockData";
 import { PWAInstallBanner } from "@/components/PWAInstallBanner";
 import { consumeAuthFlash } from "@/lib/authFlash";
 import { useToastStore } from "@/store/toastStore";
+import { useWalletStore } from "@/store/walletStore";
 
 export function HomePage() {
   const toast = useToastStore((s) => s.push);
+  const coinBalance = useWalletStore((s) => s.coinBalance);
   const [all, setAll] = useState<Series[]>([]);
   const [q, setQ] = useState("");
   const [genre, setGenre] = useState<string | undefined>(undefined);
@@ -42,8 +48,8 @@ export function HomePage() {
     });
   }, [all, q, genre]);
 
+  const trendingSeries = filtered[0] ?? all[0];
   const trending = filtered.slice(0, 8);
-  const newReleases = filtered.slice(2, 10);
 
   return (
     <div className="min-h-dvh">
@@ -60,16 +66,15 @@ export function HomePage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.42, ease: "easeOut" }}
       >
-        <Hero />
+        <Hero trendingSeries={trendingSeries} coinBalance={coinBalance} />
 
-        <div className="space-y-10" id="all">
-          <CarouselRow title="🔥 Trending Now" items={trending} />
-          <CarouselRow title="🆕 New Releases" items={newReleases} />
+        <StatsBar coinBalance={coinBalance} />
 
-          {["Action", "Romance", "Horror", "Mystery", "Fantasy"].map((g) => (
-            <CarouselRow key={g} title={g} items={filtered.filter((s) => s.genre === g)} />
-          ))}
-        </div>
+        {trending.length > 0 ? <CarouselRow title="Trending Series" items={trending.slice(0, 6)} /> : null}
+
+        <ReleaseCalendar items={releaseCalendar} />
+
+        <SeriesCatalog series={filtered.length ? filtered : all} />
       </motion.main>
 
       <footer className="border-t border-white/8 bg-bg/60">

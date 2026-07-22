@@ -87,7 +87,7 @@ export function Navbar({
           </div>
           <div className="leading-tight">
             <div className="font-display text-lg tracking-wider">FYP</div>
-            <div className="text-xs text-muted">Cinema-grade reading</div>
+            <div className="text-xs text-muted">Premium Immersive Comic Platform</div>
           </div>
         </div>
 

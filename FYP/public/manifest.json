@@ -1,11 +1,11 @@
 {
-  "name": "StoryForge",
-  "short_name": "StoryForge",
-  "description": "Where reading meets cinema",
+  "name": "FYP",
+  "short_name": "FYP",
+  "description": "Premium Immersive Comic Platform",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#080808",
-  "theme_color": "#080808",
+  "background_color": "#080A12",
+  "theme_color": "#080A12",
   "icons": [
     { "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
   ]
