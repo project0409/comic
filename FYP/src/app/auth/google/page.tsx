@@ -42,7 +42,7 @@ export default function GoogleAuthPage() {
 
   useEffect(() => {
     // Prefer env var, fallback to localStorage for quick testing without .env
-    const envId = (import.meta.env.VITE_GOOGLE_CLIENT_ID ?? "").trim();
+    const envId = (process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "").trim();
     const stored = getStoredGoogleClientId().trim();
     setClientId(envId || stored);
     const params = new URLSearchParams(window.location.search);

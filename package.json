@@ -1,20 +1,14 @@
 {
   "name": "comic",
   "version": "1.0.0",
-  "description": "",
-  "homepage": "https://github.com/project0409/comic#readme",
-  "bugs": {
-    "url": "https://github.com/project0409/comic/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/project0409/comic.git"
-  },
-  "license": "ISC",
-  "author": "",
-  "type": "commonjs",
-  "main": "index.js",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  }
+    "dev": "npm --prefix FYP run dev",
+    "build": "npm --prefix FYP run build",
+    "start": "npm --prefix FYP run start",
+    "typecheck": "npm --prefix FYP run typecheck"
+  },
+  "workspaces": [
+    "FYP"
+  ]
 }

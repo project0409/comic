@@ -3,26 +3,19 @@
     "version": "0.1.0",
     "private": true,
     "scripts": {
-        "dev": "node scripts/dev.mjs",
-        "dev:web": "vite --host 0.0.0.0 --port 3000",
-        "dev:api": "tsx watch server/index.ts",
-        "build": "vite build",
-        "start": "tsx server/index.ts",
+        "dev": "next dev --hostname 0.0.0.0 --port 3000",
+        "build": "next build",
+        "start": "next start --hostname 0.0.0.0 --port 3000",
         "typecheck": "tsc --noEmit"
     },
     "dependencies": {
-        "@types/express": "^5.0.6",
-        "@vitejs/plugin-react": "^6.0.4",
         "clsx": "^2.1.1",
-        "express": "^5.2.1",
         "framer-motion": "^12.23.12",
         "howler": "^2.2.4",
         "lucide-react": "^0.525.0",
+        "next": "15.5.22",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
-        "react-router-dom": "^7.18.1",
-        "tsx": "^4.23.1",
-        "vite": "^8.1.5",
         "zustand": "^5.0.6"
     },
     "devDependencies": {
@@ -31,9 +24,11 @@
         "@types/node": "^20.12.7",
         "@types/react": "^19.0.0",
         "@types/react-dom": "^19.0.0",
-        "eslint": "^9.0.0",
         "postcss": "^8.4.47",
         "tailwindcss": "^4.0.0",
         "typescript": "^5.6.3"
+    },
+    "optionalDependencies": {
+        "@next/swc-win32-x64-msvc": "^15.5.22"
     }
 }

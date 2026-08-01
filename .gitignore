@@ -1,2 +1,7 @@
 node_modules/
 .next/
+FYP/node_modules/
+FYP/.next/
+FYP/.npm-cache/
+FYP/.tmp/
+FYP/tsconfig.tsbuildinfo

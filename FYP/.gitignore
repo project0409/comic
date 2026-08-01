@@ -29,3 +29,6 @@ pnpm-debug.log*
 .vscode/
 .DS_Store
 Thumbs.db
+# Local install/cache helpers
+.npm-cache/
+.tmp/
