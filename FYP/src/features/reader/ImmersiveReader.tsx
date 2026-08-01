@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/compat/next-link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Eye, EyeOff, Lock, Shield, Volume2, VolumeX, WandSparkles } from "lucide-react";
@@ -411,6 +411,22 @@ function FlipReader({ pages }: { pages: ChapterPage[] }) {
           {page ? <CanvasPage src={page.imageUrl} /> : null}
         </motion.div>
       </AnimatePresence>
+      <button
+        className="sf-clickable absolute left-3 top-1/2 z-10 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full border border-white/10 bg-black/45 text-white shadow-2xl backdrop-blur-xl disabled:cursor-not-allowed disabled:opacity-35"
+        aria-label="Previous page"
+        onClick={() => go(-1)}
+        disabled={currentPage <= 1}
+      >
+        <ChevronLeft className="h-5 w-5" />
+      </button>
+      <button
+        className="sf-clickable absolute right-3 top-1/2 z-10 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full border border-white/10 bg-black/45 text-white shadow-2xl backdrop-blur-xl disabled:cursor-not-allowed disabled:opacity-35"
+        aria-label="Next page"
+        onClick={() => go(1)}
+        disabled={currentPage >= totalPages}
+      >
+        <ChevronRight className="h-5 w-5" />
+      </button>
     </div>
   );
 }

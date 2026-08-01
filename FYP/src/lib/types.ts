@@ -49,4 +49,3 @@ export type ChapterPage = {
   ambientColorHex: string;
   panelCoordinates: PagePanelCoord[];
 };
-

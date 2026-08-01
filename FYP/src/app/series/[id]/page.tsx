@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
-import { useParams } from "next/navigation";
+import Link from "@/compat/next-link";
+import { useParams } from "@/compat/next-navigation";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";

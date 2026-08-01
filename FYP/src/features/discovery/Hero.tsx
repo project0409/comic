@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/compat/next-link";
 import { Coins, TrendingUp } from "lucide-react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/Badge";

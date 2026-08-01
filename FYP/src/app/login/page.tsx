@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import Link from "@/compat/next-link";
+import { useRouter } from "@/compat/next-navigation";
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/Button";
@@ -161,13 +161,6 @@ export default function LoginPage() {
                 New here?{" "}
                 <Link href="/register" className="text-white underline decoration-white/30 hover:decoration-white">
                   Create an account
-                </Link>
-              </div>
-
-              <div className="pt-2 text-xs text-muted">
-                Note: Admin login is separate:{" "}
-                <Link href="/admin/login" className="text-white underline decoration-white/30 hover:decoration-white">
-                  /admin/login
                 </Link>
               </div>
         </motion.form>

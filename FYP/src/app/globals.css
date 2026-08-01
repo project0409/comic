@@ -20,6 +20,25 @@
   color-scheme: dark;
 }
 
+:root[data-theme="light"] {
+  --sf-bg: #f6f8ff;
+  --sf-surface: #ffffff;
+  --sf-card: rgba(255, 255, 255, 0.72);
+  --sf-elevated: rgba(255, 255, 255, 0.92);
+
+  --sf-primary: #ff3366;
+  --sf-gold: #ffc107;
+  --sf-danger: #e52655;
+  --sf-highlight: #009fc7;
+
+  --sf-text: #101525;
+  --sf-muted: #596276;
+
+  --sf-ambient: #ff3366;
+
+  color-scheme: light;
+}
+
 html,
 body {
   height: 100%;
@@ -30,10 +49,7 @@ html {
 }
 
 body {
-  background:
-    radial-gradient(900px 520px at 8% 0%, rgba(255, 51, 102, 0.16), transparent 58%),
-    radial-gradient(760px 460px at 88% 8%, rgba(0, 229, 255, 0.12), transparent 55%),
-    linear-gradient(180deg, #080a12 0%, #121826 48%, #070912 100%);
+  background: var(--sf-bg);
   color: var(--sf-text);
   font-family: var(--sf-font-ui), system-ui, sans-serif;
   text-rendering: optimizeLegibility;
@@ -46,19 +62,15 @@ body {
 
 /* Ambient gradient sync (set via uiStore.ambientColor) */
 .sf-ambient {
-  background:
-    radial-gradient(900px 520px at 12% 8%, color-mix(in srgb, var(--sf-ambient) 18%, transparent), transparent 58%),
-    radial-gradient(720px 460px at 88% 10%, rgba(0, 229, 255, 0.11), transparent 58%),
-    radial-gradient(760px 520px at 78% 86%, rgba(255, 193, 7, 0.1), transparent 62%),
-    linear-gradient(180deg, #080a12 0%, #121826 48%, #070912 100%);
-  transition: background 450ms ease;
+  background: var(--sf-bg);
+  transition: background-color 250ms ease, color 250ms ease;
 }
 
 .sf-comic-surface {
   background:
-    radial-gradient(circle at 12px 12px, rgba(255, 193, 7, 0.08) 0 1px, transparent 1.4px),
-    linear-gradient(135deg, rgba(255, 51, 102, 0.1), rgba(0, 229, 255, 0.06) 42%, rgba(255, 193, 7, 0.06)),
-    rgba(255, 255, 255, 0.08);
+    radial-gradient(circle at 12px 12px, color-mix(in srgb, var(--sf-gold) 8%, transparent) 0 1px, transparent 1.4px),
+    linear-gradient(135deg, color-mix(in srgb, var(--sf-primary) 10%, transparent), color-mix(in srgb, var(--sf-highlight) 6%, transparent) 42%, color-mix(in srgb, var(--sf-gold) 6%, transparent)),
+    var(--sf-card);
   background-size: 22px 22px, auto, auto;
   backdrop-filter: blur(12px);
 }
@@ -85,7 +97,7 @@ body {
 }
 
 .sf-comic-card {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--sf-card);
   backdrop-filter: blur(12px);
   transition:
     transform 300ms ease,
@@ -102,6 +114,27 @@ body {
     0 0 0 1px rgba(255, 51, 102, 0.3),
     0 0 34px rgba(255, 51, 102, 0.22),
     0 0 22px rgba(0, 229, 255, 0.12);
+}
+
+:root[data-theme="light"] .sf-comic-panel {
+  box-shadow:
+    0 16px 42px rgba(40, 52, 90, 0.16),
+    0 0 0 1px rgba(255, 51, 102, 0.1),
+    0 0 28px rgba(0, 159, 199, 0.11);
+}
+
+:root[data-theme="light"] .sf-comic-card:hover {
+  box-shadow:
+    0 20px 48px rgba(40, 52, 90, 0.2),
+    0 0 0 1px rgba(255, 51, 102, 0.26),
+    0 0 34px rgba(255, 51, 102, 0.14),
+    0 0 22px rgba(0, 159, 199, 0.1);
+}
+
+:root[data-theme="light"] input,
+:root[data-theme="light"] select,
+:root[data-theme="light"] textarea {
+  color: var(--sf-text);
 }
 
 .sf-comic-card:hover .sf-title-animate {

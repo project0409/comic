@@ -12,4 +12,3 @@ export function AmbientProvider({ children }: { children: React.ReactNode }) {
 
   return <>{children}</>;
 }
-

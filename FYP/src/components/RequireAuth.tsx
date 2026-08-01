@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/compat/next-navigation";
 import { useAuthStore, type UserRole } from "@/store/authStore";
 import { Button } from "./Button";
 

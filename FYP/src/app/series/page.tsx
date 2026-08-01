@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
+import Link from "@/compat/next-link";
 import { motion } from "framer-motion";
 import { Navbar } from "@/features/discovery/Navbar";
 import { SeriesCard } from "@/features/discovery/SeriesCard";

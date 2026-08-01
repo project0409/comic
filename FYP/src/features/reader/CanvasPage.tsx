@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { cn } from "@/components/cn";
+import { useUiStore } from "@/store/uiStore";
 
 export function CanvasPage({
   src,
@@ -13,6 +14,7 @@ export function CanvasPage({
   onReady?: () => void;
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const resolvedTheme = useUiStore((s) => s.resolvedTheme);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -35,27 +37,9 @@ export function CanvasPage({
 
       ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
       ctx.clearRect(0, 0, w, h);
-
-      // Use the current comic page itself as a soft backdrop for the extra space around the contained page.
-      const coverScale = Math.max(w / img.width, h / img.height);
-      const coverW = img.width * coverScale;
-      const coverH = img.height * coverScale;
-      const coverX = (w - coverW) / 2;
-      const coverY = (h - coverH) / 2;
-
-      ctx.save();
-      ctx.filter = "blur(18px) brightness(0.45) saturate(1.18)";
-      ctx.globalAlpha = 0.82;
-      ctx.drawImage(img, coverX, coverY, coverW, coverH);
-      ctx.restore();
-
-      const wash = ctx.createLinearGradient(0, 0, w, h);
-      wash.addColorStop(0, "rgba(255,51,102,0.12)");
-      wash.addColorStop(0.48, "rgba(8,10,18,0.36)");
-      wash.addColorStop(1, "rgba(0,229,255,0.1)");
-      ctx.fillStyle = wash;
+      const surface = getComputedStyle(document.documentElement).getPropertyValue("--sf-bg").trim() || "#080a12";
+      ctx.fillStyle = surface;
       ctx.fillRect(0, 0, w, h);
-
       // Main page stays contained and readable.
       const scale = Math.min(w / img.width, h / img.height);
       const dw = img.width * scale;
@@ -86,7 +70,7 @@ export function CanvasPage({
     return () => {
       cancelled = true;
     };
-  }, [src, onReady]);
+  }, [src, onReady, resolvedTheme]);
 
   return (
     <canvas

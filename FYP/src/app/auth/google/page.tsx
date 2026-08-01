@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/compat/next-navigation";
 import { QrCode, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/Button";
 import { Badge } from "@/components/Badge";

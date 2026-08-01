@@ -24,4 +24,3 @@ export const useReaderStore = create<ReaderState>((set) => ({
     set((s) => ({ readingMode: s.readingMode === "flip" ? "scroll" : "flip" })),
   setGuidedViewActive: (v) => set({ guidedViewActive: v })
 }));
-

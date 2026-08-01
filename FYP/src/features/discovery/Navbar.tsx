@@ -1,12 +1,13 @@
 "use client";
 
 import { Bell, Bookmark, Coins, LogOut, Pencil, Search, Settings, User, Wallet } from "lucide-react";
-import Link from "next/link";
+import Link from "@/compat/next-link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter } from "@/compat/next-navigation";
 import { cn } from "@/components/cn";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
+import { ThemeModeToggle } from "@/components/ThemeModeToggle";
 import { useWalletStore } from "@/store/walletStore";
 import { useToastStore } from "@/store/toastStore";
 import { useAuthStore } from "@/store/authStore";
@@ -36,7 +37,7 @@ export function Navbar({
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement | null>(null);
 
-  const placeholder = useMemo(() => (genre ? `Search in ${genre}…` : "Search series…"), [genre]);
+  const placeholder = useMemo(() => (genre ? `Search in ${genre}...` : "Search series..."), [genre]);
   const initials = useMemo(() => {
     const source = displayName || role || "User";
     return source
@@ -79,17 +80,17 @@ export function Navbar({
   }, [profileOpen]);
 
   return (
-    <div className="sticky top-0 z-40 border-b border-white/8 bg-bg/82 backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.24)]">
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-3 px-4 py-3 lg:flex-nowrap lg:gap-4">
-        <div className="flex items-center gap-2">
+    <div className="sticky top-0 z-40 border-b border-white/8 bg-bg/92 backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.16)]">
+      <div className="flex w-full flex-wrap items-center gap-3 px-4 py-3 lg:flex-nowrap lg:gap-4">
+        <Link href="/" className="sf-clickable flex shrink-0 items-center gap-2" aria-label="FYP home">
           <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary/20 text-primary shadow-glow">
             <span className="font-display text-lg">FYP</span>
           </div>
           <div className="leading-tight">
             <div className="font-display text-lg tracking-wider">FYP</div>
-            <div className="text-xs text-muted">Premium Immersive Comic Platform</div>
+            <div className="hidden text-xs text-muted sm:block">Premium Immersive Comic Platform</div>
           </div>
-        </div>
+        </Link>
 
         <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary navigation">
           {NAV_LINKS.map((item) => {
@@ -116,7 +117,7 @@ export function Navbar({
         </nav>
 
         <div className="order-3 flex min-w-full items-center gap-3 md:order-none md:min-w-0 md:flex-1">
-          <div className="flex min-w-0 flex-1 items-center gap-2 rounded-2xl border border-white/10 bg-surface/90 px-3 py-2 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.02)] transition focus-within:border-primary/45 focus-within:shadow-[0_0_22px_rgba(255,51,102,0.12)]">
+          <div className="flex min-w-0 flex-1 items-center gap-2 rounded-2xl border border-white/10 bg-surface px-3 py-2 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.02)] transition focus-within:border-primary/45 focus-within:shadow-[0_0_22px_rgba(255,51,102,0.12)]">
             <Search className="h-4 w-4 text-muted" />
             <input
               value={q}
@@ -148,7 +149,8 @@ export function Navbar({
           </div>
         </div>
 
-        <div className="ml-auto flex items-center gap-2 md:gap-3">
+        <div className="ml-auto flex shrink-0 items-center gap-2 md:gap-3">
+          <ThemeModeToggle />
           {isAuthenticated ? (
             <>
               {role === "reader" ? (
@@ -234,23 +236,16 @@ export function Navbar({
               <Button variant="outline" size="sm" onClick={() => router.push("/login")}>
                 Login
               </Button>
-              <Badge tone="gold" className="gap-2">
+              <Badge tone="gold" className="hidden gap-2 sm:flex">
                 <Coins className="h-3.5 w-3.5" />
                 <span className="tabular-nums">{coinBalance}</span>
               </Badge>
               <button
-                className="sf-clickable grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/5 hover:border-highlight/30 hover:bg-white/8"
+                className="sf-clickable hidden h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/5 hover:border-highlight/30 hover:bg-white/8 sm:grid"
                 aria-label="Open notifications"
                 onClick={() => router.push("/notifications")}
               >
                 <Bell className="h-4 w-4 text-muted" />
-              </button>
-              <button
-                className="sf-clickable grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/5 hover:border-primary/35 hover:bg-white/8"
-                aria-label="Open profile"
-                onClick={() => router.push("/login")}
-              >
-                <span className="text-sm font-semibold">SR</span>
               </button>
             </>
           )}

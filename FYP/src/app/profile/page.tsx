@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/compat/next-link";
 import { BarChart3, Bookmark, Coins, LayoutDashboard, Pencil, Settings, ShieldCheck, Upload, User } from "lucide-react";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";

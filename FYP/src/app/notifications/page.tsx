@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/compat/next-navigation";
 import { Bell } from "lucide-react";
 import { Button } from "@/components/Button";
 import { RequireAuth } from "@/components/RequireAuth";

@@ -19,4 +19,3 @@ export const useAudioStore = create<AudioState>((set) => ({
   setVolume: (v) => set({ volume: Math.max(0, Math.min(1, v)) }),
   setCurrentTrack: (track) => set({ currentTrack: track })
 }));
-

@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/compat/next-link";
 import { useMemo, useState } from "react";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
@@ -18,6 +18,8 @@ type Row = {
   isPublished: boolean;
 };
 
+type AdminCredentialView = "all" | "readers" | "writers" | "subscriptions";
+
 type UserRow = {
   id: string;
   username: string;
@@ -33,6 +35,7 @@ type UserRow = {
 export default function AdminPublishingGatePage() {
   const toast = useToastStore((s) => s.push);
   const [query, setQuery] = useState("");
+  const [credentialView, setCredentialView] = useState<AdminCredentialView>("all");
   const [rows, setRows] = useState<Row[]>([
     {
       id: "r1",
@@ -104,27 +107,43 @@ export default function AdminPublishingGatePage() {
 
   const pendingCount = useMemo(() => rows.filter((r) => r.status === "Pending").length, [rows]);
   const filteredUsers = useMemo(() => {
+    const scoped = users.filter((user) => {
+      if (credentialView === "readers") return user.role === "reader";
+      if (credentialView === "writers") return user.role === "writer";
+      if (credentialView === "subscriptions") return user.subscription !== "Free";
+      return true;
+    });
     const needle = query.trim().toLowerCase();
-    if (!needle) return users;
-    return users.filter((user) =>
+    if (!needle) return scoped;
+    return scoped.filter((user) =>
       [user.username, user.email, user.role, user.subscription, user.status].some((value) =>
         value.toLowerCase().includes(needle)
       )
     );
-  }, [query, users]);
+  }, [credentialView, query, users]);
   const adminStats = useMemo(
     () => [
-      { label: "Total Users", value: String(users.length), tone: "primary" as const },
-      { label: "Readers", value: String(users.filter((user) => user.role === "reader").length), tone: "muted" as const },
-      { label: "Writers", value: String(users.filter((user) => user.role === "writer").length), tone: "gold" as const },
+      { label: "Total Users", value: String(users.length), tone: "primary" as const, view: "all" as const },
+      { label: "Readers", value: String(users.filter((user) => user.role === "reader").length), tone: "muted" as const, view: "readers" as const },
+      { label: "Writers", value: String(users.filter((user) => user.role === "writer").length), tone: "gold" as const, view: "writers" as const },
       {
         label: "Subscription Members",
         value: String(users.filter((user) => user.subscription !== "Free").length),
-        tone: "primary" as const
+        tone: "primary" as const,
+        view: "subscriptions" as const
       }
     ],
     [users]
   );
+
+  const credentialTitle = credentialView === "readers" ? "Reader Credentials" : credentialView === "writers" ? "Writer Credentials" : credentialView === "subscriptions" ? "Subscription Members" : "Website Users & Credentials";
+  const credentialDescription = credentialView === "readers"
+    ? "All reader usernames, email IDs, subscription status, coins, and access controls."
+    : credentialView === "writers"
+      ? "All writer usernames, creator subscriptions, coins, upload access, and account status."
+      : credentialView === "subscriptions"
+        ? "All paid subscription users with their usernames, roles, subscription plans, and account status."
+        : "View usernames, roles, subscription members, and access status.";
 
   function setStatus(id: string, status: Row["status"]) {
     setRows((s) =>
@@ -234,15 +253,24 @@ export default function AdminPublishingGatePage() {
       </div>
 
       <div className="grid gap-3 md:grid-cols-4">
-        {adminStats.map((stat) => (
-          <div key={stat.label} className="sf-comic-card rounded-3xl border border-white/10 bg-card p-5">
-            <div className="flex items-center justify-between gap-3">
-              <div className="text-xs text-muted">{stat.label}</div>
-              <Badge tone={stat.tone}>Live</Badge>
-            </div>
-            <div className="mt-3 text-3xl font-semibold tabular-nums">{stat.value}</div>
-          </div>
-        ))}
+        {adminStats.map((stat) => {
+          const active = credentialView === stat.view;
+          return (
+            <button
+              key={stat.label}
+              type="button"
+              onClick={() => setCredentialView(stat.view)}
+              className={`sf-comic-card rounded-3xl border p-5 text-left transition ${active ? "border-primary/45 bg-primary/10 shadow-glow" : "border-white/10 bg-card hover:border-highlight/35"}`}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div className="text-xs text-muted">{stat.label}</div>
+                <Badge tone={active ? "primary" : stat.tone}>{active ? "Selected" : "Live"}</Badge>
+              </div>
+              <div className="mt-3 text-3xl font-semibold tabular-nums">{stat.value}</div>
+              <div className="mt-2 text-[11px] text-muted">Click to view details</div>
+            </button>
+          );
+        })}
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
@@ -304,14 +332,14 @@ export default function AdminPublishingGatePage() {
       <div id="credentials" className="scroll-mt-24 rounded-3xl border border-white/10 bg-card p-5">
         <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
-            <div className="font-display text-2xl tracking-widest">Website Users & Credentials</div>
-            <div className="text-sm text-muted">View usernames, roles, subscription members, and access status.</div>
+            <div className="font-display text-2xl tracking-widest">{credentialTitle}</div>
+            <div className="text-sm text-muted">{credentialDescription}</div>
           </div>
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="h-11 w-full rounded-2xl border border-white/10 bg-black/25 px-4 text-sm outline-none focus:border-primary/45 md:w-72"
-            placeholder="Search users, roles, subscriptions..."
+            placeholder={`Search ${credentialView === "all" ? "users" : credentialTitle.toLowerCase()}...`}
           />
         </div>
 

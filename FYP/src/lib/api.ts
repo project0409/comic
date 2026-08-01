@@ -11,4 +11,3 @@ export async function getChapterPages(chapterId: string): Promise<ChapterPage[]>
   if (!res.ok) throw new Error("Failed to load pages");
   return res.json();
 }
-

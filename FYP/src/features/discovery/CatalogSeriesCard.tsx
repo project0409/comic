@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/compat/next-link";
 import { Star } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Series } from "@/lib/types";

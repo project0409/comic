@@ -1,4 +1,3 @@
-import type { NextRequest } from "next/server";
 
 export type OtpMode = "login" | "register";
 export type UserRole = "reader" | "writer";
@@ -41,7 +40,7 @@ const state =
 
 const { otpRequests, loginAudits } = state;
 
-export function extractRequestIp(request: NextRequest | Request) {
+export function extractRequestIp(request: Request) {
   const forwardedFor = request.headers.get("x-forwarded-for");
   const realIp = request.headers.get("x-real-ip");
   const socketIp =
