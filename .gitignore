@@ -32,3 +32,5 @@ Thumbs.db
 # Local install/cache helpers
 .npm-cache/
 .tmp/
+
+tsconfig.tsbuildinfo
