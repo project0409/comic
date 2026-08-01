@@ -14,6 +14,8 @@ function formatReads(n: number) {
 }
 
 export function CatalogSeriesCard({ series }: { series: Series }) {
+  const chaptersHref = `/series/${series.id}#chapters`;
+
   return (
     <motion.article
       initial={{ opacity: 0, y: 14 }}
@@ -23,7 +25,11 @@ export function CatalogSeriesCard({ series }: { series: Series }) {
       className="sf-comic-panel sf-comic-surface group overflow-hidden rounded-2xl border border-white/10 bg-surface/70"
     >
       <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-stretch">
-        <div className="relative shrink-0 overflow-hidden rounded-xl sm:w-36 md:w-44">
+        <Link
+          href={chaptersHref}
+          className="relative shrink-0 overflow-hidden rounded-xl sm:w-36 md:w-44"
+          aria-label={`Open chapters for ${series.title}`}
+        >
           <div className="aspect-[3/4] w-full sm:aspect-auto sm:h-full sm:min-h-[180px]">
             <img
               src={series.coverUrl}
@@ -35,19 +41,21 @@ export function CatalogSeriesCard({ series }: { series: Series }) {
           <div className="absolute left-2 top-2">
             <Badge tone="muted">{series.genre}</Badge>
           </div>
-        </div>
+        </Link>
 
         <div className="flex min-w-0 flex-1 flex-col justify-between gap-3">
           <div>
             <div className="mb-1 flex flex-wrap items-center gap-2 text-xs text-muted">
               <span className="font-semibold text-white/90">{series.writerName}</span>
-              <span>·</span>
+              <span>|</span>
               <span>{formatReads(series.readers)}</span>
             </div>
 
-            <h3 className="font-display text-xl tracking-wide text-white transition group-hover:text-highlight md:text-2xl">
-              {series.title}
-            </h3>
+            <Link href={chaptersHref} className="inline-block max-w-full" aria-label={`Open chapters for ${series.title}`}>
+              <h3 className="sf-title-animate font-display text-xl tracking-wide text-white transition hover:text-highlight md:text-2xl">
+                {series.title}
+              </h3>
+            </Link>
 
             <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-muted">{series.description}</p>
           </div>

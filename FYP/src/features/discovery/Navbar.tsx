@@ -81,12 +81,12 @@ export function Navbar({
 
   return (
     <div className="sticky top-0 z-40 border-b border-white/8 bg-bg/92 backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.16)]">
-      <div className="flex w-full flex-wrap items-center gap-3 px-4 py-3 lg:flex-nowrap lg:gap-4">
+      <div className="flex w-full flex-wrap items-center gap-3 px-4 py-2 lg:flex-nowrap lg:gap-4">
         <Link href="/" className="sf-clickable flex shrink-0 items-center" aria-label="FYP home">
           <img
             src="/branding/fyp-logo.png"
             alt="FYP"
-            className="h-12 w-auto max-w-[150px] object-contain sm:h-14 sm:max-w-[180px]"
+            className="h-16 w-auto max-w-[220px] object-contain sm:h-20 sm:max-w-[260px]"
           />
         </Link>
 
@@ -252,4 +252,3 @@ export function Navbar({
     </div>
   );
 }
-

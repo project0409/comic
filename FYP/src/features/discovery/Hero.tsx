@@ -11,10 +11,10 @@ export function Hero({ trendingSeries, coinBalance }: { trendingSeries?: Series;
   return (
     <section className="sf-comic-panel sf-comic-surface relative overflow-hidden rounded-3xl border border-white/8 bg-surface">
       <div
-        className="absolute inset-0 opacity-70"
+        className="absolute inset-0 opacity-85"
         style={{
           background:
-            "radial-gradient(900px 500px at 15% 20%, rgba(255,51,102,0.28), transparent 60%), radial-gradient(900px 500px at 85% 10%, rgba(0,229,255,0.16), transparent 60%), radial-gradient(720px 460px at 72% 82%, rgba(255,193,7,0.12), transparent 64%), linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0.65))"
+            "radial-gradient(900px 500px at 15% 20%, color-mix(in srgb, var(--sf-primary) 26%, transparent), transparent 60%), radial-gradient(900px 500px at 85% 10%, color-mix(in srgb, var(--sf-highlight) 18%, transparent), transparent 60%), radial-gradient(720px 460px at 72% 82%, color-mix(in srgb, var(--sf-gold) 16%, transparent), transparent 64%), linear-gradient(135deg, color-mix(in srgb, var(--sf-surface) 96%, var(--sf-primary)), color-mix(in srgb, var(--sf-surface) 94%, var(--sf-highlight)))"
         }}
       />
 
@@ -33,7 +33,7 @@ export function Hero({ trendingSeries, coinBalance }: { trendingSeries?: Series;
             transition={{ duration: 0.45 }}
           >
             <Badge tone="gold" className="mb-4 gap-1.5 px-3 py-1.5 text-xs">
-              👑 Premium Comic Platform
+              Premium Comic Platform
             </Badge>
           </motion.div>
 

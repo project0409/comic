@@ -33,7 +33,7 @@ export function setStoredGoogleClientId(clientId: string) {
 }
 
 export function getActiveGoogleClientId() {
-  const envId = (process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "").trim();
+  const envId = (import.meta.env.VITE_GOOGLE_CLIENT_ID ?? "").trim();
   return envId || getStoredGoogleClientId().trim();
 }
 

@@ -6,7 +6,7 @@ export function PWARegister() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!("serviceWorker" in navigator)) return;
-    if (process.env.NODE_ENV === "development") {
+    if (import.meta.env.DEV) {
       navigator.serviceWorker.getRegistrations().then((registrations) => {
         registrations.forEach((registration) => registration.unregister());
       });

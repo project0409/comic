@@ -6,8 +6,8 @@ import { Button } from "@/components/Button";
 import { useToastStore } from "@/store/toastStore";
 import { useAuthStore } from "@/store/authStore";
 
-const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
-const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD;
+const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL ?? "";
+const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD ?? "";
 
 export default function AdminLoginPage() {
   const router = useRouter();

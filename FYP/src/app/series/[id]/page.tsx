@@ -104,7 +104,7 @@ export default function SeriesDetailPage() {
         transition={{ duration: 0.36 }}
       >
         {tab === "chapters" ? (
-          <div className="space-y-3">
+          <div id="chapters" className="scroll-mt-28 space-y-3">
             {chapters.map((c) => {
               const badgeTone = c.status === "Free" ? "primary" : c.status === "Coins" ? "gold" : "muted";
               const badgeText = c.status === "Coins" ? `${c.coinPrice ?? 5} Coins` : c.status;
