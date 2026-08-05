@@ -38,10 +38,10 @@ export function SeriesCatalog({ series }: { series: Series[] }) {
                 aria-selected={active}
                 onClick={() => setGenre(g)}
                 className={cn(
-                  "sf-clickable rounded-full border px-4 py-1.5 text-xs font-semibold uppercase tracking-wide transition",
-                    active
-                      ? "border-primary/45 bg-primary/18 text-white shadow-sm"
-                      : "border-white/10 bg-white/5 text-muted hover:bg-white/8 hover:text-white"
+                  "sf-clickable rounded-full border px-4 py-1.5 text-xs font-semibold uppercase tracking-wider transition-all duration-200",
+                  active
+                    ? "border-transparent bg-gradient-to-r from-primary to-highlight text-white shadow-[0_4px_16px_rgba(255,51,102,0.32)] scale-[1.03]"
+                    : "border-white/10 bg-white/5 text-muted hover:border-white/20 hover:bg-white/10 hover:text-white"
                 )}
               >
                 {g}

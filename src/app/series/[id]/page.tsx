@@ -7,12 +7,6 @@ import { motion } from "framer-motion";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import { Tabs } from "@/components/Tabs";
-import { Bookmark } from "lucide-react";
-import { cn } from "@/components/cn";
-import { useVaultStore } from "@/store/vaultStore";
-import { useToastStore } from "@/store/toastStore";
-import { useWalletStore } from "@/store/walletStore";
-import { firstChapterBySeries } from "@/lib/mockData";
 import type { Chapter, Series } from "@/lib/types";
 import { UnlockModal } from "@/features/economy/UnlockModal";
 import { useUiStore } from "@/store/uiStore";
@@ -26,16 +20,6 @@ export default function SeriesDetailPage() {
   const [tab, setTab] = useState<TabKey>("chapters");
   const [unlockTarget, setUnlockTarget] = useState<Chapter | null>(null);
   const setAmbient = useUiStore((s) => s.setAmbientColor);
-
-  const bookmarks = useVaultStore((s) => s.bookmarks);
-  const addBookmark = useVaultStore((s) => s.addBookmark);
-  const removeBookmarkBySeries = useVaultStore((s) => s.removeBookmarkBySeries);
-  const toast = useToastStore((s) => s.push);
-
-  const unlockHistory = useWalletStore((s) => s.unlockHistory);
-  const unlockedChapterIds = useMemo(() => new Set(unlockHistory.map((x) => x.chapterId)), [unlockHistory]);
-
-  const isBookmarked = useMemo(() => bookmarks.some((b) => b.seriesName === series?.title), [bookmarks, series?.title]);
 
   useEffect(() => {
     fetch("/api/series")
@@ -60,24 +44,6 @@ export default function SeriesDetailPage() {
         "linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.72))"
     } as const;
   }, []);
-
-  function toggleBookmark() {
-    if (!series) return;
-    if (isBookmarked) {
-      removeBookmarkBySeries(series.title);
-      toast({ tone: "default", title: "Removed", message: "Story removed from Saved Stories." });
-    } else {
-      addBookmark({
-        seriesName: series.title,
-        chapterId: firstChapterBySeries[series.id] ?? "c1",
-        pageIndex: 1,
-        x: 0,
-        y: 0,
-        thumbUrl: series.coverUrl
-      });
-      toast({ tone: "success", title: "Saved", message: "Story saved in Saved Stories!" });
-    }
-  }
 
   if (!series) {
     return (
@@ -116,19 +82,6 @@ export default function SeriesDetailPage() {
               {series.earlyAccessPriceCoins ? <Badge tone="gold">Early Access</Badge> : null}
             </div>
 
-            {/* Save to library button */}
-            <div className="pt-1">
-              <Button
-                variant={isBookmarked ? "primary" : "outline"}
-                size="sm"
-                onClick={toggleBookmark}
-                className="gap-2 rounded-xl"
-              >
-                <Bookmark className={cn("h-4 w-4 transition-transform duration-200 active:scale-95", isBookmarked && "fill-white text-white")} />
-                {isBookmarked ? "Saved in Stories" : "Save Story"}
-              </Button>
-            </div>
-
             <div className="pt-2">
               <Tabs<TabKey>
                 value={tab}
@@ -153,9 +106,40 @@ export default function SeriesDetailPage() {
         {tab === "chapters" ? (
           <div id="chapters" className="scroll-mt-28 space-y-3">
             {chapters.map((c) => {
+              if (c.status === "ComingSoon") {
+                return (
+                  <motion.div
+                    key={c.id}
+                    className="relative overflow-hidden rounded-2xl border border-dashed border-white/20 bg-white/5 p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 backdrop-blur-md"
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="grid h-12 w-12 place-items-center rounded-xl bg-white/5 border border-white/10 text-lg shrink-0 select-none">
+                        🚧
+                      </div>
+                      <div>
+                        <div className="font-display text-lg tracking-wider font-semibold text-white/90">
+                          Chapter {c.number}: Coming Soon
+                        </div>
+                        <p className="text-sm text-muted">
+                          Stay tuned for exciting updates. Est. release: {new Date(c.releaseDateIso).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="shrink-0">
+                      <Badge tone="muted" className="px-3 py-1.5 rounded-full border border-white/10 text-xs font-semibold">
+                        Under Construction
+                      </Badge>
+                    </div>
+                  </motion.div>
+                );
+              }
+
               const badgeTone = c.status === "Free" ? "primary" : c.status === "Coins" ? "gold" : "muted";
               const badgeText = c.status === "Coins" ? `${c.coinPrice ?? 5} Coins` : c.status;
-              const isChapterLocked = c.isLocked && !unlockedChapterIds.has(c.id);
               return (
                 <motion.div
                   key={c.id}
@@ -175,7 +159,7 @@ export default function SeriesDetailPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {isChapterLocked ? (
+                    {c.isLocked ? (
                       <Button variant="gold" onClick={() => setUnlockTarget(c)}>
                         Unlock
                       </Button>

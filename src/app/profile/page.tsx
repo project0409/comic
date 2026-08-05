@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "@/compat/next-link";
-import { BarChart3, Bookmark, Coins, LayoutDashboard, Pencil, Settings, ShieldCheck, Upload, User } from "lucide-react";
+import { BarChart3, Bookmark, Coins, LayoutDashboard, Pencil, Settings, ShieldCheck, Upload, User, Star } from "lucide-react";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import { RequireAuth } from "@/components/RequireAuth";
@@ -57,7 +57,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
           <div className="rounded-3xl border border-white/10 bg-card p-5">
             <div className="flex items-center gap-2 text-sm text-muted">
               <Coins className="h-4 w-4 text-gold" />
@@ -65,6 +65,19 @@ export default function ProfilePage() {
             </div>
             <div className="mt-3 text-3xl font-semibold tabular-nums">{coinBalance}</div>
           </div>
+
+          <div className="relative overflow-hidden rounded-3xl border border-transparent bg-gradient-to-br from-violet-600 via-indigo-700 to-pink-500 p-5 shadow-[0_8px_32px_rgba(124,58,237,0.22)] transition hover:scale-[1.02] hover:shadow-[0_12px_42px_rgba(124,58,237,0.3)] duration-300">
+            <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-white/10 blur-xl" />
+            <div className="absolute -left-4 -bottom-4 h-16 w-16 rounded-full bg-white/5 blur-lg" />
+            
+            <div className="relative flex items-center gap-2 text-sm text-white/90">
+              <Star className="h-4 w-4 fill-white text-white" />
+              Points
+            </div>
+            <div className="relative mt-3 text-3xl font-bold tabular-nums text-white">12,560</div>
+            <div className="relative mt-1 text-[11px] font-semibold text-white/80">+250 earned today</div>
+          </div>
+
           <div className="rounded-3xl border border-white/10 bg-card p-5">
             <div className="flex items-center gap-2 text-sm text-muted">
               <Bookmark className="h-4 w-4 text-primary" />
