@@ -38,8 +38,9 @@ export function Button({
   return (
     <motion.button
       type={type}
-      whileTap={{ scale: 0.96 }}
-      whileHover={{ y: -2, scale: 1.015 }}
+      whileTap={{ scale: 0.98 }}
+      whileHover={{ y: -1 }}
+      transition={{ duration: 0.2 }}
       className={cn(base, byVariant[variant], bySize[size], className)}
       {...props}
     />

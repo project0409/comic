@@ -40,7 +40,7 @@ export function ThemeModeToggle({ className }: { className?: string }) {
     >
       <button
         type="button"
-        className="sf-clickable sf-comic-panel sf-comic-surface grid h-12 w-12 place-items-center rounded-full border border-white/12 bg-card/90 text-white shadow-glow hover:border-highlight/35"
+        className="sf-clickable sf-comic-panel sf-comic-surface grid h-12 w-12 place-items-center rounded-full border border-white/8 bg-card/90 text-white shadow-md hover:border-primary/45"
         aria-label={`Open theme options. Current mode ${themeMode}. Resolved theme ${resolvedTheme}.`}
         aria-haspopup="menu"
         aria-expanded={open}
@@ -52,7 +52,7 @@ export function ThemeModeToggle({ className }: { className?: string }) {
 
       {open ? (
         <div
-          className="sf-comic-panel sf-comic-surface absolute right-0 top-14 z-50 flex items-center gap-1 rounded-full border border-white/10 bg-card/95 p-1 shadow-2xl"
+          className="sf-comic-panel sf-comic-surface absolute right-0 top-14 z-50 flex items-center gap-1 rounded-full border border-white/10 bg-card/95 p-1 shadow-xl"
           role="menu"
           aria-label="Theme options"
         >
@@ -66,8 +66,8 @@ export function ThemeModeToggle({ className }: { className?: string }) {
                 className={cn(
                   "sf-clickable grid h-10 w-10 place-items-center rounded-full border transition",
                   active
-                    ? "border-white/80 bg-primary/20 text-white shadow-[0_0_22px_rgba(255,51,102,0.22)]"
-                    : "border-transparent text-muted hover:border-highlight/35 hover:bg-white/8 hover:text-white"
+                    ? "border-primary/30 bg-primary/20 text-white shadow-sm"
+                    : "border-transparent text-muted hover:border-primary/35 hover:bg-white/8 hover:text-white"
                 )}
                 role="menuitemradio"
                 aria-label={`Use ${option.label} theme`}

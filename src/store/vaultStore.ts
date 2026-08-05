@@ -38,6 +38,7 @@ type VaultState = {
   addBookmark: (b: Omit<VaultBookmark, "id">) => void;
   updateBookmarkNote: (id: string, note: string) => void;
   addReaction: (r: Omit<VaultReaction, "id" | "atIso">) => void;
+  removeBookmarkBySeries: (seriesName: string) => void;
 };
 
 export const useVaultStore = create<VaultState>((set) => ({
@@ -66,5 +67,9 @@ export const useVaultStore = create<VaultState>((set) => ({
         { id: `rx_${crypto.randomUUID()}`, atIso: new Date().toISOString(), ...r },
         ...s.reactions
       ]
+    })),
+  removeBookmarkBySeries: (seriesName) =>
+    set((s) => ({
+      bookmarks: s.bookmarks.filter((b) => b.seriesName !== seriesName)
     }))
 }));

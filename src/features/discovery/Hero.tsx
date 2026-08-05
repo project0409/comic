@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "@/compat/next-link";
-import { Coins, TrendingUp } from "lucide-react";
+import { Coins, TrendingUp, Play, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
@@ -10,11 +10,17 @@ import type { Series } from "@/lib/types";
 export function Hero({ trendingSeries, coinBalance }: { trendingSeries?: Series; coinBalance: number }) {
   return (
     <section className="sf-comic-panel sf-comic-surface relative overflow-hidden rounded-3xl border border-white/8 bg-surface">
+      {/* Grid Pattern & Radial glow (Point 2 & 10) */}
       <div
-        className="absolute inset-0 opacity-85"
+        className="absolute inset-0 opacity-80"
         style={{
-          background:
-            "radial-gradient(900px 500px at 15% 20%, color-mix(in srgb, var(--sf-primary) 26%, transparent), transparent 60%), radial-gradient(900px 500px at 85% 10%, color-mix(in srgb, var(--sf-highlight) 18%, transparent), transparent 60%), radial-gradient(720px 460px at 72% 82%, color-mix(in srgb, var(--sf-gold) 16%, transparent), transparent 64%), linear-gradient(135deg, color-mix(in srgb, var(--sf-surface) 96%, var(--sf-primary)), color-mix(in srgb, var(--sf-surface) 94%, var(--sf-highlight)))"
+          backgroundImage: `
+            radial-gradient(900px 500px at 15% 20%, rgba(139, 92, 246, 0.28), transparent 60%),
+            radial-gradient(900px 500px at 85% 10%, rgba(6, 182, 212, 0.15), transparent 60%),
+            radial-gradient(720px 460px at 72% 82%, rgba(251, 191, 36, 0.1), transparent 64%),
+            radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px)
+          `,
+          backgroundSize: "auto, auto, auto, 24px 24px"
         }}
       />
 
@@ -41,7 +47,7 @@ export function Hero({ trendingSeries, coinBalance }: { trendingSeries?: Series;
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.05 }}
-            className="font-display text-4xl tracking-widest text-white drop-shadow-[0_0_22px_rgba(255,51,102,0.2)] md:text-6xl"
+            className="font-display text-4xl font-extrabold tracking-tight text-white drop-shadow-sm md:text-6xl"
           >
             Welcome to FYP
           </motion.h1>
@@ -63,13 +69,15 @@ export function Hero({ trendingSeries, coinBalance }: { trendingSeries?: Series;
             className="mt-7 flex flex-wrap items-center gap-3"
           >
             <Link href="/read/c1">
-              <Button variant="primary" size="lg">
+              <Button variant="primary" size="lg" className="gap-2">
+                <Play className="h-4 w-4 fill-white" />
                 Read Demo Comic
               </Button>
             </Link>
             <Link href="#catalog">
-              <Button variant="outline" size="lg">
+              <Button variant="outline" size="lg" className="group gap-2">
                 Explore Catalog
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Button>
             </Link>
           </motion.div>

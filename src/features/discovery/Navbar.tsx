@@ -35,6 +35,7 @@ export function Navbar({
   const [q, setQ] = useState("");
   const [genre, setGenre] = useState<(typeof GENRES)[number] | undefined>(undefined);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const profileRef = useRef<HTMLDivElement | null>(null);
 
   const placeholder = useMemo(() => (genre ? `Search in ${genre}...` : "Search series..."), [genre]);
@@ -47,6 +48,7 @@ export function Navbar({
       .map((part) => part[0]?.toUpperCase())
       .join("") || "U";
   }, [displayName, role]);
+
   const profileMenuItems = useMemo(() => {
     const items = [
       { href: "/profile", label: "Profile", icon: User },
@@ -64,6 +66,22 @@ export function Navbar({
     }
     return items;
   }, [role]);
+
+  // Mock suggestions based on popular series in mockData
+  const mockSuggestions = [
+    { title: "Cyberpunk: Edgerunners", genre: "Sci-Fi" },
+    { title: "One Piece", genre: "Action" },
+    { title: "Demon Slayer", genre: "Action" },
+    { title: "Jujutsu Kaisen", genre: "Action" },
+    { title: "Attack on Titan", genre: "Action" }
+  ];
+
+  const filteredSuggestions = useMemo(() => {
+    if (!q) return [];
+    return mockSuggestions.filter((item) =>
+      item.title.toLowerCase().includes(q.toLowerCase())
+    );
+  }, [q]);
 
   useEffect(() => {
     const t = setTimeout(() => onSearch?.(q, genre), 250);
@@ -105,25 +123,50 @@ export function Navbar({
                 {item.label}
                 <span
                   className={cn(
-                    "absolute inset-x-3 -bottom-0.5 h-0.5 rounded-full bg-[linear-gradient(90deg,var(--sf-primary),var(--sf-highlight))] transition-opacity duration-300",
-                    active ? "opacity-100 shadow-[0_0_12px_rgba(255,51,102,0.55)]" : "opacity-0"
+                    "absolute inset-x-3 -bottom-0.5 h-0.5 rounded-full bg-primary transition-all duration-300",
+                    active ? "opacity-100 scale-x-100" : "opacity-0 scale-x-50"
                   )}
+                  style={{
+                    boxShadow: active ? "0 0 12px var(--sf-primary)" : "none"
+                  }}
                 />
               </Link>
             );
           })}
         </nav>
 
+        {/* Search Input Container with Suggestions Dropdown */}
         <div className="order-3 flex min-w-full items-center gap-3 md:order-none md:min-w-0 md:flex-1">
-          <div className="flex min-w-0 flex-1 items-center gap-2 rounded-2xl border border-white/10 bg-surface px-3 py-2 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.02)] transition focus-within:border-primary/45 focus-within:shadow-[0_0_22px_rgba(255,51,102,0.12)]">
-            <Search className="h-4 w-4 text-muted" />
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              className="w-full bg-transparent text-sm outline-none placeholder:text-muted"
-              placeholder={placeholder}
-              aria-label="Search series"
-            />
+          <div className="relative flex min-w-0 flex-1 flex-col">
+            <div className="flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-white/10 bg-surface px-3.5 py-2 transition-all duration-200 focus-within:border-primary/45 focus-within:ring-2 focus-within:ring-primary/20 focus-within:shadow-md">
+              <Search className="h-4 w-4 text-muted" />
+              <input
+                value={q}
+                onFocus={() => setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                onChange={(e) => setQ(e.target.value)}
+                className="w-full bg-transparent text-sm outline-none placeholder:text-muted"
+                placeholder={placeholder}
+                aria-label="Search series"
+              />
+            </div>
+            {showSuggestions && filteredSuggestions.length > 0 ? (
+              <div className="sf-search-suggestions">
+                {filteredSuggestions.map((item, idx) => (
+                  <button
+                    key={idx}
+                    onMouseDown={() => {
+                      setQ(item.title);
+                      setShowSuggestions(false);
+                    }}
+                    className="flex w-full items-center justify-between px-4 py-2.5 text-left text-sm hover:bg-white/5 transition-colors"
+                  >
+                    <span className="font-medium text-white">{item.title}</span>
+                    <span className="text-xs text-muted">{item.genre}</span>
+                  </button>
+                ))}
+              </div>
+            ) : null}
           </div>
 
           <div className="hidden items-center gap-2 md:flex" role="group" aria-label="Genre filters">
@@ -136,7 +179,7 @@ export function Navbar({
                   className={cn(
                     "sf-clickable rounded-full border px-3 py-1 text-xs transition-colors",
                     active
-                      ? "border-primary/45 bg-primary/18 text-white shadow-[0_0_18px_rgba(255,51,102,0.14)]"
+                      ? "border-primary/45 bg-primary/18 text-white shadow-sm"
                       : "border-white/10 bg-white/5 text-muted hover:bg-white/8 hover:text-white"
                   )}
                 >
@@ -170,7 +213,7 @@ export function Navbar({
                 <span className="tabular-nums">{coinBalance}</span>
               </Badge>
               <button
-                className="sf-clickable grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/5 hover:border-highlight/30 hover:bg-white/8"
+                className="sf-clickable grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/5 hover:border-primary/30 hover:bg-white/8"
                 aria-label="Open notifications"
                 onClick={() => router.push("/notifications")}
               >
@@ -178,7 +221,7 @@ export function Navbar({
               </button>
               <div className="relative" ref={profileRef}>
                 <button
-                  className="sf-clickable flex h-10 items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-2.5 hover:border-primary/35 hover:bg-white/8"
+                  className="sf-clickable flex h-10 items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-2.5 hover:border-primary/30 hover:bg-white/8"
                   aria-haspopup="menu"
                   aria-expanded={profileOpen}
                   onClick={() => setProfileOpen((open) => !open)}
@@ -239,7 +282,7 @@ export function Navbar({
                 <span className="tabular-nums">{coinBalance}</span>
               </Badge>
               <button
-                className="sf-clickable hidden h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/5 hover:border-highlight/30 hover:bg-white/8 sm:grid"
+                className="sf-clickable hidden h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/5 hover:border-primary/30 hover:bg-white/8 sm:grid"
                 aria-label="Open notifications"
                 onClick={() => router.push("/notifications")}
               >

@@ -39,9 +39,9 @@ export function SeriesCatalog({ series }: { series: Series[] }) {
                 onClick={() => setGenre(g)}
                 className={cn(
                   "sf-clickable rounded-full border px-4 py-1.5 text-xs font-semibold uppercase tracking-wide transition",
-                  active
-                    ? "border-primary/45 bg-primary/18 text-white shadow-[0_0_18px_rgba(255,51,102,0.14)]"
-                    : "border-white/10 bg-white/5 text-muted hover:bg-white/8 hover:text-white"
+                    active
+                      ? "border-primary/45 bg-primary/18 text-white shadow-sm"
+                      : "border-white/10 bg-white/5 text-muted hover:bg-white/8 hover:text-white"
                 )}
               >
                 {g}
