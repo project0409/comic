@@ -126,9 +126,9 @@ export function HomePage() {
               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white mb-4">Explore</h4>
               <ul className="space-y-2.5 text-xs text-muted">
                 <li><Link href="/" className="hover:text-primary transition-colors">Home</Link></li>
+                <li><Link href="/discover" className="hover:text-primary transition-colors">Discover</Link></li>
                 <li><Link href="/series" className="hover:text-primary transition-colors">Series</Link></li>
                 <li><Link href="/vault" className="hover:text-primary transition-colors">Vault</Link></li>
-                <li><Link href="/wallet" className="hover:text-primary transition-colors">Wallet</Link></li>
               </ul>
             </div>
 

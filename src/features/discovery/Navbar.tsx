@@ -15,6 +15,7 @@ import { useAuthStore } from "@/store/authStore";
 const GENRES = ["Action", "Romance", "Horror", "Mystery", "Fantasy"] as const;
 const NAV_LINKS = [
   { href: "/", label: "Home" },
+  { href: "/discover", label: "Discover" },
   { href: "/series", label: "Series" },
   { href: "/vault", label: "Vault" }
 ];

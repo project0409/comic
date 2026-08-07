@@ -1,5 +1,5 @@
-import { HomePage } from "@/features/discovery/HomePage";
+import { LandingPage } from "@/features/landing/LandingPage";
 
 export default function Page() {
-  return <HomePage />;
+  return <LandingPage />;
 }
