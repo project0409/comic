@@ -7,10 +7,9 @@ import { RequireAuth } from "@/components/RequireAuth";
 import { useToastStore } from "@/store/toastStore";
 import { useUiStore, type ThemeMode } from "@/store/uiStore";
 
-const THEME_OPTIONS: { value: ThemeMode; label: string; helper: string }[] = [
+const THEME_OPTIONS: { value: Exclude<ThemeMode, "system">; label: string; helper: string }[] = [
   { value: "dark", label: "Dark", helper: "Deep comic night" },
-  { value: "light", label: "Light", helper: "Bright reading view" },
-  { value: "system", label: "System", helper: "Follow device" }
+  { value: "light", label: "Light", helper: "Bright reading view" }
 ];
 
 export default function SettingsPage() {
@@ -37,7 +36,7 @@ export default function SettingsPage() {
                   Current view: <span className="capitalize text-highlight">{resolvedTheme}</span>
                 </div>
               </div>
-              <div className="grid w-full grid-cols-3 gap-2 sm:w-auto">
+              <div className="grid w-full grid-cols-2 gap-2 sm:w-auto">
                 {THEME_OPTIONS.map((option) => {
                   const active = themeMode === option.value;
                   return (

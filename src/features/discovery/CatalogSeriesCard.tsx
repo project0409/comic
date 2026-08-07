@@ -1,11 +1,8 @@
 "use client";
 
 import Link from "@/compat/next-link";
-import { Star, Bookmark } from "lucide-react";
+import { Star } from "lucide-react";
 import { motion } from "framer-motion";
-import { cn } from "@/components/cn";
-import { useVaultStore } from "@/store/vaultStore";
-import { useToastStore } from "@/store/toastStore";
 import type { Series } from "@/lib/types";
 import { firstChapterBySeries } from "@/lib/mockData";
 import { Badge } from "@/components/Badge";
@@ -19,39 +16,16 @@ function formatReads(n: number) {
 export function CatalogSeriesCard({ series }: { series: Series }) {
   const chaptersHref = `/series/${series.id}#chapters`;
 
-  const bookmarks = useVaultStore((s) => s.bookmarks);
-  const addBookmark = useVaultStore((s) => s.addBookmark);
-  const removeBookmarkBySeries = useVaultStore((s) => s.removeBookmarkBySeries);
-  const toast = useToastStore((s) => s.push);
-
-  const isBookmarked = bookmarks.some((b) => b.seriesName === series.title);
-
-  function toggleBookmark() {
-    if (isBookmarked) {
-      removeBookmarkBySeries(series.title);
-      toast({ tone: "default", title: "Removed", message: "Story removed from Saved Stories." });
-    } else {
-      addBookmark({
-        seriesName: series.title,
-        chapterId: firstChapterBySeries[series.id] ?? "c1",
-        pageIndex: 1,
-        x: 0,
-        y: 0,
-        thumbUrl: series.coverUrl
-      });
-      toast({ tone: "success", title: "Saved", message: "Story saved in Saved Stories!" });
-    }
-  }
-
   return (
     <motion.article
       initial={{ opacity: 0, y: 14 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-40px" }}
-      transition={{ duration: 0.38 }}
-      className="sf-comic-card group overflow-hidden rounded-2xl bg-surface/70"
+      whileHover={{ y: -4 }}
+      transition={{ duration: 0.3 }}
+      className="sf-comic-panel sf-comic-surface group overflow-hidden rounded-2xl border border-white/10 bg-surface/70 transition-all duration-300 hover:border-primary/35 hover:shadow-[0_12px_36px_rgba(255,51,102,0.12)]"
     >
-      <div className="flex flex-col gap-4 p-4 md:p-5 sm:flex-row sm:items-stretch">
+      <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-stretch">
         <Link
           href={chaptersHref}
           className="relative shrink-0 overflow-hidden rounded-xl sm:w-36 md:w-44"
@@ -79,7 +53,7 @@ export function CatalogSeriesCard({ series }: { series: Series }) {
             </div>
 
             <Link href={chaptersHref} className="inline-block max-w-full" aria-label={`Open chapters for ${series.title}`}>
-              <h3 className="sf-title-animate font-display text-xl font-bold tracking-wide text-white transition hover:text-highlight md:text-2xl">
+              <h3 className="sf-title-animate font-display text-xl tracking-wide text-white transition hover:text-highlight md:text-2xl">
                 {series.title}
               </h3>
             </Link>
@@ -98,23 +72,13 @@ export function CatalogSeriesCard({ series }: { series: Series }) {
             </div>
 
             <div className="flex flex-wrap gap-2">
-              {/* Bookmark Save Button */}
-              <Button
-                variant={isBookmarked ? "primary" : "outline"}
-                size="sm"
-                onClick={toggleBookmark}
-                title={isBookmarked ? "Saved in Stories" : "Save Story"}
-                className="px-2.5 rounded-xl"
-              >
-                <Bookmark className={cn("h-4 w-4", isBookmarked && "fill-white text-white")} />
-              </Button>
               <Link href={`/series/${series.id}`}>
-                <Button variant="outline" size="sm" className="rounded-xl">
+                <Button variant="outline" size="sm">
                   Details
                 </Button>
               </Link>
               <Link href={`/read/${firstChapterBySeries[series.id] ?? series.id}`}>
-                <Button variant="primary" size="sm" className="rounded-xl">
+                <Button variant="primary" size="sm">
                   Read Ch. 1
                 </Button>
               </Link>

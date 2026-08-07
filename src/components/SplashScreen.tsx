@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useUiStore } from "@/store/uiStore";
 import { cn } from "@/components/cn";
 
-export function SplashScreen() {
+export function SplashScreen({ onComplete }: { onComplete?: () => void }) {
   const [show, setShow] = useState(false);
   const [active, setActive] = useState(false);
   const [animationStage, setAnimationStage] = useState<"line" | "morph">("line");
@@ -35,13 +35,16 @@ export function SplashScreen() {
         clearTimeout(t1);
         clearTimeout(t2);
       };
+    } else {
+      // If already shown in session, trigger completion immediately
+      onComplete?.();
     }
-  }, []);
+  }, [onComplete]);
 
   if (!show) return null;
 
   return (
-    <AnimatePresence onExitComplete={() => setShow(false)}>
+    <AnimatePresence onExitComplete={() => { setShow(false); onComplete?.(); }}>
       {active ? (
         <motion.div
           key="splash"

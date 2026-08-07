@@ -92,7 +92,7 @@ export function HomePage() {
         <SeriesCatalog series={filtered.length ? filtered : all} />
       </motion.main>
 
-      {/* Floating Back to Top Button (Point 15) */}
+      {/* Floating Back to Top Button */}
       {showScrollTop && (
         <button
           onClick={scrollToTop}
@@ -103,13 +103,13 @@ export function HomePage() {
         </button>
       )}
 
-      {/* Modernized Column-based Footer (Point 11) */}
+      {/* Modernized Column-based Footer */}
       <footer className="border-t border-white/8 bg-bg/60 mt-16">
         <div className="mx-auto max-w-6xl px-4 py-12">
           <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
             <div className="flex flex-col gap-3 col-span-2 md:col-span-1">
               <div className="flex items-center gap-2">
-                <span className="font-display text-xl font-bold tracking-widest text-slate-900 dark:text-white">FYP</span>
+                <span className="font-display text-xl font-bold tracking-widest text-[#22c55e]">FYP</span>
               </div>
               <p className="text-xs text-muted leading-relaxed max-w-xs">
                 Your premium portal for indie comics, spoiler-free lore assistants, and immersive digital reading.
@@ -123,7 +123,7 @@ export function HomePage() {
             </div>
             
             <div>
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white mb-4">Explore</h4>
+              <h4 className="text-xs font-bold uppercase tracking-wider mb-4">Explore</h4>
               <ul className="space-y-2.5 text-xs text-muted">
                 <li><Link href="/" className="hover:text-primary transition-colors">Home</Link></li>
                 <li><Link href="/discover" className="hover:text-primary transition-colors">Discover</Link></li>
@@ -133,7 +133,7 @@ export function HomePage() {
             </div>
 
             <div>
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white mb-4">Community</h4>
+              <h4 className="text-xs font-bold uppercase tracking-wider mb-4">Community</h4>
               <ul className="space-y-2.5 text-xs text-muted">
                 <li><a href="#" className="hover:text-primary transition-colors">Discord Server</a></li>
                 <li><a href="#" className="hover:text-primary transition-colors">Twitter Feed</a></li>
@@ -143,7 +143,7 @@ export function HomePage() {
             </div>
 
             <div>
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white mb-4">Support</h4>
+              <h4 className="text-xs font-bold uppercase tracking-wider mb-4">Support</h4>
               <ul className="space-y-2.5 text-xs text-muted">
                 <li><a href="#" className="hover:text-primary transition-colors">Help Center</a></li>
                 <li><a href="#" className="hover:text-primary transition-colors">Contact Us</a></li>
@@ -153,7 +153,7 @@ export function HomePage() {
             </div>
           </div>
 
-          <div className="border-t border-slate-200 dark:border-white/5 mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted">
+          <div className="border-t border-white/5 mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted">
             <div>© {new Date().getFullYear()} FYP. All rights reserved.</div>
             <div className="flex gap-4">
               <a href="/login" className="hover:text-primary transition-colors">Login</a>

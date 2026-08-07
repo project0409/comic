@@ -4,7 +4,6 @@ import { AmbientProvider } from "@/features/reader/AmbientProvider";
 import { PWARegister } from "@/components/PWARegister";
 import { ThemeModeProvider } from "@/components/ThemeModeProvider";
 import { Toaster } from "@/components/Toaster";
-import { SplashScreen } from "@/components/SplashScreen";
 
 export const metadata: Metadata = {
   title: "FYP Comic Platform",
@@ -17,7 +16,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <div className="sf-ambient min-h-dvh">
           <ThemeModeProvider />
-          <SplashScreen />
           <div className="relative z-10">
             <AmbientProvider>{children}</AmbientProvider>
           </div>
