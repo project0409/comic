@@ -1,12 +1,15 @@
 "use client";
 
 import Link from "@/compat/next-link";
-import { Star } from "lucide-react";
+import { Bookmark, Star } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Series } from "@/lib/types";
 import { firstChapterBySeries } from "@/lib/mockData";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
+import { useVaultStore } from "@/store/vaultStore";
+import { useToastStore } from "@/store/toastStore";
+import { cn } from "@/components/cn";
 
 function formatReads(n: number) {
   if (n >= 1000) return `${(n / 1000).toFixed(1)}K reads`;
@@ -15,6 +18,40 @@ function formatReads(n: number) {
 
 export function CatalogSeriesCard({ series }: { series: Series }) {
   const chaptersHref = `/series/${series.id}#chapters`;
+  const toast = useToastStore((s) => s.push);
+  const bookmarks = useVaultStore((s) => s.bookmarks);
+  const addBookmark = useVaultStore((s) => s.addBookmark);
+  const removeBookmarkBySeries = useVaultStore((s) => s.removeBookmarkBySeries);
+
+  const isSaved = bookmarks.some((b) => b.seriesName === series.title);
+
+  const handleToggleSave = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (isSaved) {
+      removeBookmarkBySeries(series.title);
+      toast({
+        tone: "default",
+        title: "Story Removed",
+        message: `Removed "${series.title}" from your Saved Stories.`
+      });
+    } else {
+      addBookmark({
+        seriesName: series.title,
+        chapterId: firstChapterBySeries[series.id] ?? "c1",
+        pageIndex: 1,
+        x: 0,
+        y: 0,
+        thumbUrl: series.coverUrl
+      });
+      toast({
+        tone: "success",
+        title: "Story Saved!",
+        message: `Added "${series.title}" to your Saved Stories.`
+      });
+    }
+  };
 
   return (
     <motion.article
@@ -42,18 +79,27 @@ export function CatalogSeriesCard({ series }: { series: Series }) {
           <div className="absolute left-2 top-2">
             <Badge tone="muted">{series.genre}</Badge>
           </div>
+          {/* Quick Bookmark button on image */}
+          <button
+            onClick={handleToggleSave}
+            className="absolute right-2 top-2 z-10 grid h-8 w-8 place-items-center rounded-full border border-white/20 bg-black/60 backdrop-blur-md transition-all hover:scale-110 hover:border-primary hover:bg-black/80"
+            aria-label={isSaved ? "Remove from Saved Stories" : "Save Story"}
+            title={isSaved ? "Saved in Stories" : "Save Story"}
+          >
+            <Bookmark className={cn("h-4 w-4 transition-colors", isSaved ? "fill-primary text-primary" : "text-white")} />
+          </button>
         </Link>
 
         <div className="flex min-w-0 flex-1 flex-col justify-between gap-3">
           <div>
             <div className="mb-1 flex flex-wrap items-center gap-2 text-xs text-muted">
-              <span className="font-semibold text-white/90">{series.writerName}</span>
+              <span className="font-semibold text-white">{series.writerName}</span>
               <span>|</span>
               <span>{formatReads(series.readers)}</span>
             </div>
 
             <Link href={chaptersHref} className="inline-block max-w-full" aria-label={`Open chapters for ${series.title}`}>
-              <h3 className="sf-title-animate font-display text-xl tracking-wide text-white transition hover:text-highlight md:text-2xl">
+              <h3 className="sf-title-animate font-display text-xl font-bold tracking-wide text-white transition hover:text-highlight md:text-2xl">
                 {series.title}
               </h3>
             </Link>
@@ -61,7 +107,7 @@ export function CatalogSeriesCard({ series }: { series: Series }) {
             <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-muted">{series.description}</p>
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
             <div className="flex items-center gap-3 text-sm">
               <span className="flex items-center gap-1 text-muted">
                 Rating:
@@ -71,7 +117,19 @@ export function CatalogSeriesCard({ series }: { series: Series }) {
               <span className="text-muted">{series.chapterCount} Chapters</span>
             </div>
 
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleToggleSave}
+                className={cn(
+                  "gap-1.5 transition-colors",
+                  isSaved ? "border-primary/50 text-primary bg-primary/10" : ""
+                )}
+              >
+                <Bookmark className={cn("h-3.5 w-3.5", isSaved ? "fill-primary text-primary" : "")} />
+                <span>{isSaved ? "Saved" : "Save"}</span>
+              </Button>
               <Link href={`/series/${series.id}`}>
                 <Button variant="outline" size="sm">
                   Details

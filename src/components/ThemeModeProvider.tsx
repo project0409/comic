@@ -17,11 +17,13 @@ export function ThemeModeProvider() {
     setThemeMode(resolved);
   }, [setThemeMode]);
 
-  // Apply resolved theme and save preference in localStorage
+  // Apply resolved theme, toggle classes, and save preference in localStorage
   useEffect(() => {
     const resolved = themeMode === "light" || themeMode === "dark" ? themeMode : "dark";
     document.documentElement.dataset.theme = resolved;
     document.documentElement.style.colorScheme = resolved;
+    document.documentElement.classList.toggle("dark", resolved === "dark");
+    document.documentElement.classList.toggle("light", resolved === "light");
     setResolvedTheme(resolved as ResolvedTheme);
     window.localStorage.setItem(STORAGE_KEY, resolved);
   }, [setResolvedTheme, themeMode]);

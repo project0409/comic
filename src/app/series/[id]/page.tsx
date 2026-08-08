@@ -10,6 +10,7 @@ import { Tabs } from "@/components/Tabs";
 import type { Chapter, Series } from "@/lib/types";
 import { UnlockModal } from "@/features/economy/UnlockModal";
 import { useUiStore } from "@/store/uiStore";
+import { useWalletStore } from "@/store/walletStore";
 
 type TabKey = "chapters" | "about" | "community";
 
@@ -20,6 +21,7 @@ export default function SeriesDetailPage() {
   const [tab, setTab] = useState<TabKey>("chapters");
   const [unlockTarget, setUnlockTarget] = useState<Chapter | null>(null);
   const setAmbient = useUiStore((s) => s.setAmbientColor);
+  const unlockedChapterIds = useWalletStore((s) => s.unlockedChapterIds);
 
   useEffect(() => {
     fetch("/api/series")
@@ -72,10 +74,10 @@ export default function SeriesDetailPage() {
           </div>
 
           <div className="space-y-3">
-            <h1 className="font-display text-4xl tracking-widest drop-shadow-[0_0_18px_rgba(255,51,102,0.18)] md:text-5xl">
+            <h1 className="font-display text-4xl font-bold tracking-widest text-white drop-shadow-[0_0_18px_rgba(255,51,102,0.18)] md:text-5xl">
               {series.title}
             </h1>
-            <div className="text-sm text-white/70">by {series.writerName}</div>
+            <div className="text-sm text-white/80">by <span className="font-semibold text-white">{series.writerName}</span></div>
             <div className="flex flex-wrap items-center gap-2">
               <Badge tone="muted">{series.genre}</Badge>
               <Badge tone="primary">{series.readers.toLocaleString()} readers</Badge>
@@ -121,7 +123,7 @@ export default function SeriesDetailPage() {
                         🚧
                       </div>
                       <div>
-                        <div className="font-display text-lg tracking-wider font-semibold text-white/90">
+                        <div className="font-display text-lg tracking-wider font-semibold text-white">
                           Chapter {c.number}: Coming Soon
                         </div>
                         <p className="text-sm text-muted">
@@ -138,8 +140,10 @@ export default function SeriesDetailPage() {
                 );
               }
 
-              const badgeTone = c.status === "Free" ? "primary" : c.status === "Coins" ? "gold" : "muted";
-              const badgeText = c.status === "Coins" ? `${c.coinPrice ?? 5} Coins` : c.status;
+              const isUnlocked = !c.isLocked || unlockedChapterIds.includes(c.id);
+              const badgeTone = isUnlocked ? (c.status === "Free" ? "primary" : "gold") : (c.status === "Free" ? "primary" : c.status === "Coins" ? "gold" : "muted");
+              const badgeText = isUnlocked && c.status === "Coins" ? "Unlocked" : c.status === "Coins" ? `${c.coinPrice ?? 5} Coins` : c.status;
+
               return (
                 <motion.div
                   key={c.id}
@@ -150,7 +154,7 @@ export default function SeriesDetailPage() {
                   transition={{ duration: 0.3 }}
                 >
                   <div>
-                    <div className="font-semibold">
+                    <div className="font-semibold text-white text-base">
                       Chapter {c.number}: {c.title}
                     </div>
                     <div className="mt-1 text-xs text-muted">
@@ -159,7 +163,7 @@ export default function SeriesDetailPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {c.isLocked ? (
+                    {!isUnlocked ? (
                       <Button variant="gold" onClick={() => setUnlockTarget(c)}>
                         Unlock
                       </Button>
@@ -180,19 +184,18 @@ export default function SeriesDetailPage() {
 
         {tab === "about" ? (
           <div className="sf-comic-panel sf-comic-surface rounded-3xl border border-white/10 bg-card p-5">
-            <div className="font-display text-2xl tracking-widest">About</div>
-            <p className="mt-2 text-sm text-white/70">
-              This is a UI prototype. Wire these fields to your real backend later (series synopsis, tags, content warnings,
-              community guidelines, etc.).
+            <div className="font-display text-2xl tracking-widest text-white">About</div>
+            <p className="mt-2 text-sm text-white/80">
+              {series.description}
             </p>
           </div>
         ) : null}
 
         {tab === "community" ? (
           <div className="sf-comic-panel sf-comic-surface rounded-3xl border border-white/10 bg-card p-5">
-            <div className="font-display text-2xl tracking-widest">Community Reactions</div>
-            <p className="mt-2 text-sm text-white/70">
-              Readers’ emoji drops appear here (fed by <code className="rounded bg-black/30 px-1.5 py-0.5">/api/interactions/react</code>).
+            <div className="font-display text-2xl tracking-widest text-white">Community Reactions</div>
+            <p className="mt-2 text-sm text-white/80">
+              Readers’ emoji drops appear here (fed by <code className="rounded bg-black/30 px-1.5 py-0.5 text-primary">/api/interactions/react</code>).
             </p>
           </div>
         ) : null}
@@ -202,7 +205,14 @@ export default function SeriesDetailPage() {
         open={!!unlockTarget}
         chapter={unlockTarget}
         onClose={() => setUnlockTarget(null)}
-        onUnlocked={() => setUnlockTarget(null)}
+        onUnlocked={(unlockedId) => {
+          if (unlockedId) {
+            setChapters((prev) =>
+              prev.map((c) => (c.id === unlockedId ? { ...c, isLocked: false } : c))
+            );
+          }
+          setUnlockTarget(null);
+        }}
       />
     </div>
   );

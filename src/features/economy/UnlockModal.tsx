@@ -17,7 +17,7 @@ export function UnlockModal({
   open: boolean;
   chapter: Chapter | null;
   onClose: () => void;
-  onUnlocked: () => void;
+  onUnlocked: (chapterId?: string) => void;
 }) {
   const balance = useWalletStore((s) => s.coinBalance);
   const spendCoins = useWalletStore((s) => s.spendCoins);
@@ -47,8 +47,8 @@ export function UnlockModal({
     }).catch(() => {});
 
     setState("success");
-    toast({ tone: "success", title: "Unlocked", message: `Chapter ${chapter.number} unlocked (demo).` });
-    setTimeout(() => onUnlocked(), 650);
+    toast({ tone: "success", title: "Unlocked", message: `Chapter ${chapter.number} unlocked!` });
+    setTimeout(() => onUnlocked(chapter.id), 650);
   }
 
   return (
@@ -56,7 +56,7 @@ export function UnlockModal({
       open={open}
       title={
         <div className="flex items-center justify-between gap-4">
-          <div className="font-display text-2xl tracking-widest">Unlock</div>
+          <div className="font-display text-2xl tracking-widest text-white">Unlock</div>
           <div className="text-xs text-muted">Balance: {balance} Coins</div>
         </div>
       }
@@ -67,13 +67,13 @@ export function UnlockModal({
       ) : (
         <div className="space-y-4">
           <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
-            <div className="text-sm font-semibold">Unlock Chapter {chapter.number} — Early Access</div>
+            <div className="text-sm font-semibold text-white">Unlock Chapter {chapter.number} — Early Access</div>
             <div className="mt-2 flex items-center gap-2 text-sm">
               <Coins className="h-4 w-4 text-gold" />
-              <span className="font-semibold">{cost} Coins</span>
+              <span className="font-semibold text-gold">{cost} Coins</span>
             </div>
             <div className="mt-1 text-xs text-muted">
-              Current balance: <span className="tabular-nums">{balance}</span>
+              Current balance: <span className="tabular-nums font-medium text-white">{balance}</span>
             </div>
           </div>
 
@@ -90,7 +90,7 @@ export function UnlockModal({
           {state === "success" ? (
             <div className="flex items-center gap-2 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm">
               <LockOpen className="h-4 w-4 text-emerald-400" />
-              <div className="font-semibold">Chapter Unlocked!</div>
+              <div className="font-semibold text-emerald-400">Chapter Unlocked!</div>
             </div>
           ) : null}
 
