@@ -9,6 +9,7 @@ import { setAuthFlash } from "@/lib/authFlash";
 import { createGoogleAuthUrl, getActiveGoogleClientId } from "@/lib/googleIdentity";
 import { useToastStore } from "@/store/toastStore";
 import { useAuthStore } from "@/store/authStore";
+import { useWalletStore } from "@/store/walletStore";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -46,13 +47,14 @@ export default function RegisterPage() {
     }
 
     setSubmitting(true);
+    useWalletStore.getState().grantWelcomeBonus();
     setAuthFlash({ type: "register_success", email: email.trim().toLowerCase() });
     setSubmitting(false);
 
     toast({
       tone: "success",
-      title: "Account created",
-      message: `${role === "reader" ? "Reader" : "Writer"} account created. Please log in.`
+      title: "Account Created! 🎉",
+      message: "You received 1,000 Free Welcome Coins! Please log in to start reading."
     });
     router.replace("/login");
   }

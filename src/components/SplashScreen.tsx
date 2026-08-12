@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useUiStore } from "@/store/uiStore";
 import { cn } from "@/components/cn";
@@ -12,6 +12,9 @@ export function SplashScreen({ onComplete }: { onComplete?: () => void }) {
 
   const resolvedTheme = useUiStore((s) => s.resolvedTheme);
   const isDark = resolvedTheme === "dark";
+
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
 
   useEffect(() => {
     // Show only once per browser session
@@ -37,14 +40,14 @@ export function SplashScreen({ onComplete }: { onComplete?: () => void }) {
       };
     } else {
       // If already shown in session, trigger completion immediately
-      onComplete?.();
+      onCompleteRef.current?.();
     }
-  }, [onComplete]);
+  }, []);
 
   if (!show) return null;
 
   return (
-    <AnimatePresence onExitComplete={() => { setShow(false); onComplete?.(); }}>
+    <AnimatePresence onExitComplete={() => { setShow(false); onCompleteRef.current?.(); }}>
       {active ? (
         <motion.div
           key="splash"

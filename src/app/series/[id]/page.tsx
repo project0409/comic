@@ -2,20 +2,27 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "@/compat/next-link";
-import { useParams } from "@/compat/next-navigation";
+import { useParams, useRouter } from "@/compat/next-navigation";
 import { motion } from "framer-motion";
+import { ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import { Tabs } from "@/components/Tabs";
 import type { Chapter, Series } from "@/lib/types";
 import { UnlockModal } from "@/features/economy/UnlockModal";
+import { canGuestRead } from "@/lib/guestReaderLimit";
 import { useUiStore } from "@/store/uiStore";
 import { useWalletStore } from "@/store/walletStore";
+import { useAuthStore } from "@/store/authStore";
+import { useToastStore } from "@/store/toastStore";
 
 type TabKey = "chapters" | "about" | "community";
 
 export default function SeriesDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const router = useRouter();
+  const toast = useToastStore((s) => s.push);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const [series, setSeries] = useState<Series | null>(null);
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [tab, setTab] = useState<TabKey>("chapters");
@@ -36,6 +43,19 @@ export default function SeriesDetailPage() {
       .then(setChapters)
       .catch(() => setChapters([]));
   }, [id, setAmbient]);
+
+  const handleReadChapter = (chapterId: string) => {
+    if (!isAuthenticated && !canGuestRead(chapterId)) {
+      toast({
+        tone: "danger",
+        title: "Free Preview Limit Reached (2/2)",
+        message: "You've read your 2 free preview comics! Please log in or create an account to continue reading."
+      });
+      router.push(`/login?redirectTo=/read/${chapterId}`);
+    } else {
+      router.push(`/read/${chapterId}`);
+    }
+  };
 
   const heroStyle = useMemo(() => {
     return {
@@ -59,8 +79,21 @@ export default function SeriesDetailPage() {
     <div className="min-h-dvh">
       <div className="relative overflow-hidden border-b border-white/8 bg-surface">
         <div className="absolute inset-0 opacity-70" style={heroStyle} />
+        
+        {/* Dedicated "Exit Comic" Navigation button */}
+        <div className="relative mx-auto max-w-5xl px-4 pt-4 z-20">
+          <Link
+            href="/discover"
+            className="sf-clickable inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-semibold text-white/90 hover:bg-white/10 hover:text-white transition shadow-sm"
+            title="Exit Comic: Back to Comic Library"
+          >
+            <ArrowLeft className="h-4 w-4 text-primary" />
+            <span>Exit Comic (Back to Library)</span>
+          </Link>
+        </div>
+
         <motion.div
-          className="relative mx-auto grid max-w-5xl grid-cols-1 gap-6 px-4 py-8 md:grid-cols-[220px_1fr] md:py-10"
+          className="relative mx-auto grid max-w-5xl grid-cols-1 gap-6 px-4 py-6 md:grid-cols-[220px_1fr] md:py-8"
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.42, ease: "easeOut" }}
@@ -164,13 +197,27 @@ export default function SeriesDetailPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     {!isUnlocked ? (
-                      <Button variant="gold" onClick={() => setUnlockTarget(c)}>
+                      <Button
+                        variant="gold"
+                        onClick={() => {
+                          if (!isAuthenticated) {
+                            toast({
+                              tone: "danger",
+                              title: "Login Required",
+                              message: "Please log in to unlock chapters with coins."
+                            });
+                            router.push("/login");
+                            return;
+                          }
+                          setUnlockTarget(c);
+                        }}
+                      >
                         Unlock
                       </Button>
                     ) : (
-                      <Link href={`/read/${c.id}`}>
-                        <Button variant="primary">Read Now</Button>
-                      </Link>
+                      <Button variant="primary" onClick={() => handleReadChapter(c.id)}>
+                        Read Now
+                      </Button>
                     )}
                     <Button variant="ghost" onClick={() => setTab("about")}>
                       Details

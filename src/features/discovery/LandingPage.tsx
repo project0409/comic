@@ -46,10 +46,13 @@ export function LandingPage() {
 
       {/* Header Bar */}
       <header className="relative z-10 mx-auto max-w-6xl px-4 py-4 flex items-center justify-between border-b border-white/5">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push("/")}>
           <img src="/branding/fyp-logo.png" alt="FYP Logo" className="h-12 w-auto object-contain" />
         </div>
         <div className="flex items-center gap-3">
+          <Button variant="ghost" size="sm" onClick={() => router.push("/discover")} className="gap-2">
+            Explore All
+          </Button>
           <Button variant="ghost" size="sm" onClick={() => router.push("/login")} className="gap-2">
             <LogIn className="h-4 w-4" /> Login
           </Button>
@@ -92,8 +95,8 @@ export function LandingPage() {
           </motion.p>
 
           <motion.div variants={itemVariants} className="flex flex-wrap items-center justify-center gap-4 pt-4">
-            <Button variant="primary" size="lg" onClick={() => router.push("/register")} className="gap-2 group">
-              Get Started <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+            <Button variant="primary" size="lg" onClick={() => router.push("/discover")} className="gap-2 group">
+              Explore Comics <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
             </Button>
             <Button
               variant="outline"
@@ -104,7 +107,7 @@ export function LandingPage() {
               }}
               className="gap-2"
             >
-              <BookOpen className="h-4 w-4" /> Explore Comics
+              <BookOpen className="h-4 w-4" /> Popular Releases
             </Button>
           </motion.div>
         </motion.section>
@@ -159,10 +162,10 @@ export function LandingPage() {
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
             <div>
               <h2 className="font-display text-2xl sm:text-3xl tracking-wider text-white">Popular Releases</h2>
-              <p className="text-sm text-muted">Join millions of readers exploring top stories.</p>
+              <p className="text-sm text-muted">Explore top stories freely without login barriers.</p>
             </div>
-            <Button variant="ghost" size="sm" onClick={() => router.push("/login")} className="self-start md:self-auto">
-              Unlock All Series
+            <Button variant="ghost" size="sm" onClick={() => router.push("/discover")} className="self-start md:self-auto">
+              Browse Entire Catalog
             </Button>
           </div>
 
@@ -174,7 +177,7 @@ export function LandingPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: idx * 0.08 }}
-                onClick={() => router.push("/login")}
+                onClick={() => router.push(`/series/${series.id}`)}
                 className="sf-comic-card group relative block overflow-hidden rounded-2xl border border-white/10 bg-card/65 transition cursor-pointer hover:border-primary/35 hover:bg-white/7"
               >
                 <div className="aspect-[3/4] w-full overflow-hidden">

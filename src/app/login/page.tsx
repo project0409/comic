@@ -9,6 +9,7 @@ import { consumeAuthFlash, setAuthFlash } from "@/lib/authFlash";
 import { createGoogleAuthUrl, getActiveGoogleClientId } from "@/lib/googleIdentity";
 import { useToastStore } from "@/store/toastStore";
 import { useAuthStore } from "@/store/authStore";
+import { useWalletStore } from "@/store/walletStore";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -53,12 +54,13 @@ export default function LoginPage() {
 
     setSubmitting(true);
     loginWithCredentials(role, email);
+    useWalletStore.getState().grantWelcomeBonus();
     setSubmitting(false);
 
     toast({
       tone: "success",
-      title: `${role === "reader" ? "Reader" : "Writer"} login successful`,
-      message: role === "writer" ? "Writer dashboard and analytics are enabled." : "Reader features are now unlocked."
+      title: "Welcome Bonus 🎉",
+      message: "1,000 Free Coins added to your wallet! Enjoy unlimited reading."
     });
     setAuthFlash({ type: "login_success", displayName: email.trim().split("@")[0] });
     router.replace(role === "writer" ? "/dashboard/writer" : "/");

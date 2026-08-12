@@ -177,7 +177,7 @@ export function Navbar({
               >
                 <Bell className="h-4 w-4 text-muted" />
               </button>
-              <div className="relative" ref={profileRef}>
+              <div className="relative z-50" ref={profileRef}>
                 <button
                   className="sf-clickable flex h-10 items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-2.5 hover:border-primary/35 hover:bg-white/8"
                   aria-haspopup="menu"
@@ -191,11 +191,11 @@ export function Navbar({
                 </button>
                 {profileOpen ? (
                   <div
-                    className="sf-comic-panel sf-comic-surface absolute right-0 mt-2 w-64 overflow-hidden rounded-2xl border border-white/10 bg-card shadow-2xl"
+                    className="absolute right-0 top-full mt-2.5 w-64 overflow-hidden rounded-2xl border border-white/10 bg-surface/95 backdrop-blur-2xl shadow-2xl z-50 pointer-events-auto"
                     role="menu"
                   >
                     <div className="border-b border-white/10 px-4 py-3">
-                      <div className="text-sm font-semibold">{displayName || "FYP User"}</div>
+                      <div className="text-sm font-semibold text-white">{displayName || "FYP User"}</div>
                       <div className="text-xs capitalize text-muted">{role ?? "reader"}</div>
                     </div>
                     {profileMenuItems.map((item) => {
@@ -205,16 +205,16 @@ export function Navbar({
                           key={item.href}
                           href={item.href}
                           role="menuitem"
-                          className="sf-clickable flex items-center gap-3 px-4 py-3 text-sm text-muted hover:bg-white/5 hover:text-white"
+                          className="sf-clickable flex items-center gap-3 px-4 py-3 text-sm text-muted hover:bg-white/5 hover:text-white transition-colors"
                           onClick={() => setProfileOpen(false)}
                         >
-                          <Icon className="h-4 w-4" />
+                          <Icon className="h-4 w-4 text-primary" />
                           {item.label}
                         </Link>
                       );
                     })}
                     <button
-                      className="sf-clickable flex w-full items-center gap-3 border-t border-white/10 px-4 py-3 text-left text-sm text-muted hover:bg-white/5 hover:text-white"
+                      className="sf-clickable flex w-full items-center gap-3 border-t border-white/10 px-4 py-3 text-left text-sm text-muted hover:bg-white/5 hover:text-white transition-colors"
                       role="menuitem"
                       onClick={() => {
                         setProfileOpen(false);
@@ -223,7 +223,7 @@ export function Navbar({
                         router.push("/");
                       }}
                     >
-                      <LogOut className="h-4 w-4" />
+                      <LogOut className="h-4 w-4 text-rose-400" />
                       Logout
                     </button>
                   </div>
@@ -232,17 +232,37 @@ export function Navbar({
             </>
           ) : (
             <>
-              <Button variant="outline" size="sm" onClick={() => router.push("/login")}>
+              <Button variant="primary" size="sm" onClick={() => router.push("/login")}>
                 Login
               </Button>
-              <Badge tone="gold" className="hidden gap-2 sm:flex">
-                <Coins className="h-3.5 w-3.5" />
-                <span className="tabular-nums">{coinBalance}</span>
-              </Badge>
+              <button
+                onClick={() => {
+                  toast({
+                    tone: "danger",
+                    title: "Login Required",
+                    message: "Please log in to access your wallet and coins."
+                  });
+                  router.push("/login");
+                }}
+                className="sf-clickable hidden gap-2 sm:flex items-center"
+                title="Wallet Coins (Login required)"
+              >
+                <Badge tone="gold" className="gap-2 cursor-pointer hover:scale-105 transition-transform">
+                  <Coins className="h-3.5 w-3.5" />
+                  <span className="tabular-nums">{coinBalance}</span>
+                </Badge>
+              </button>
               <button
                 className="sf-clickable hidden h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/5 hover:border-highlight/30 hover:bg-white/8 sm:grid"
                 aria-label="Open notifications"
-                onClick={() => router.push("/notifications")}
+                onClick={() => {
+                  toast({
+                    tone: "danger",
+                    title: "Login Required",
+                    message: "Please log in to view notifications."
+                  });
+                  router.push("/login");
+                }}
               >
                 <Bell className="h-4 w-4 text-muted" />
               </button>

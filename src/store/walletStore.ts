@@ -9,10 +9,11 @@ type WalletState = {
   setBalance: (n: number) => void;
   spendCoins: (n: number, chapterId: string) => boolean;
   isUnlocked: (chapterId: string) => boolean;
+  grantWelcomeBonus: () => void;
 };
 
 export const useWalletStore = create<WalletState>((set, get) => ({
-  coinBalance: 15,
+  coinBalance: 1000,
   unlockHistory: [],
   unlockedChapterIds: [],
   setBalance: (n) => set({ coinBalance: Math.max(0, n) }),
@@ -26,5 +27,8 @@ export const useWalletStore = create<WalletState>((set, get) => ({
     }));
     return true;
   },
-  isUnlocked: (chapterId) => get().unlockedChapterIds.includes(chapterId)
+  isUnlocked: (chapterId) => get().unlockedChapterIds.includes(chapterId),
+  grantWelcomeBonus: () => {
+    set((s) => ({ coinBalance: Math.max(s.coinBalance, 1000) }));
+  }
 }));

@@ -9,9 +9,12 @@ import type { Series } from "@/lib/types";
 import { firstChapterBySeries } from "@/lib/mockData";
 import { useVaultStore } from "@/store/vaultStore";
 import { useToastStore } from "@/store/toastStore";
+import { useRouter } from "@/compat/next-navigation";
+import { useAuthStore } from "@/store/authStore";
 
-export function SeriesCard({ series }: { series: Series }) {
-  const statusBadge = series.earlyAccessPriceCoins ? "New" : series.readers > 100000 ? "Popular" : "Trending";
+export function SeriesCard({ series, statusBadge = "New" }: { series: Series; statusBadge?: "New" | "Popular" | "Updated" }) {
+  const router = useRouter();
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const toast = useToastStore((s) => s.push);
   const bookmarks = useVaultStore((s) => s.bookmarks);
   const addBookmark = useVaultStore((s) => s.addBookmark);
@@ -22,6 +25,16 @@ export function SeriesCard({ series }: { series: Series }) {
   const handleToggleSave = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (!isAuthenticated) {
+      toast({
+        tone: "danger",
+        title: "Login Required",
+        message: "Please log in to save stories to your library."
+      });
+      router.push("/login");
+      return;
+    }
 
     if (isSaved) {
       removeBookmarkBySeries(series.title);

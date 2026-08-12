@@ -1,14 +1,17 @@
 "use client";
 
 import Link from "@/compat/next-link";
+import { useRouter } from "@/compat/next-navigation";
 import { Bookmark, Star } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Series } from "@/lib/types";
 import { firstChapterBySeries } from "@/lib/mockData";
+import { canGuestRead } from "@/lib/guestReaderLimit";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import { useVaultStore } from "@/store/vaultStore";
 import { useToastStore } from "@/store/toastStore";
+import { useAuthStore } from "@/store/authStore";
 import { cn } from "@/components/cn";
 
 function formatReads(n: number) {
@@ -17,8 +20,10 @@ function formatReads(n: number) {
 }
 
 export function CatalogSeriesCard({ series }: { series: Series }) {
+  const router = useRouter();
   const chaptersHref = `/series/${series.id}#chapters`;
   const toast = useToastStore((s) => s.push);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const bookmarks = useVaultStore((s) => s.bookmarks);
   const addBookmark = useVaultStore((s) => s.addBookmark);
   const removeBookmarkBySeries = useVaultStore((s) => s.removeBookmarkBySeries);
@@ -28,6 +33,16 @@ export function CatalogSeriesCard({ series }: { series: Series }) {
   const handleToggleSave = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (!isAuthenticated) {
+      toast({
+        tone: "danger",
+        title: "Login Required",
+        message: "Please log in to save stories to your library."
+      });
+      router.push("/login");
+      return;
+    }
 
     if (isSaved) {
       removeBookmarkBySeries(series.title);
@@ -50,6 +65,20 @@ export function CatalogSeriesCard({ series }: { series: Series }) {
         title: "Story Saved!",
         message: `Added "${series.title}" to your Saved Stories.`
       });
+    }
+  };
+
+  const handleReadCh1 = () => {
+    const targetChapter = firstChapterBySeries[series.id] ?? "c1";
+    if (!isAuthenticated && !canGuestRead(targetChapter)) {
+      toast({
+        tone: "danger",
+        title: "Free Preview Limit Reached (2/2)",
+        message: "You've read your 2 free preview comics! Please log in to continue reading."
+      });
+      router.push(`/login?redirectTo=/read/${targetChapter}`);
+    } else {
+      router.push(`/read/${targetChapter}`);
     }
   };
 
@@ -135,11 +164,9 @@ export function CatalogSeriesCard({ series }: { series: Series }) {
                   Details
                 </Button>
               </Link>
-              <Link href={`/read/${firstChapterBySeries[series.id] ?? series.id}`}>
-                <Button variant="primary" size="sm">
-                  Read Ch. 1
-                </Button>
-              </Link>
+              <Button variant="primary" size="sm" onClick={handleReadCh1}>
+                Read Ch. 1
+              </Button>
             </div>
           </div>
         </div>
