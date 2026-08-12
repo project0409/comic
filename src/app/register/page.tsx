@@ -47,7 +47,7 @@ export default function RegisterPage() {
     }
 
     setSubmitting(true);
-    useWalletStore.getState().grantWelcomeBonus();
+    useWalletStore.getState().grantWelcomeBonusForNewUser(email.trim().toLowerCase());
     setAuthFlash({ type: "register_success", email: email.trim().toLowerCase() });
     setSubmitting(false);
 

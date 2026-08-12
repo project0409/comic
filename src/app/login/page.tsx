@@ -54,14 +54,22 @@ export default function LoginPage() {
 
     setSubmitting(true);
     loginWithCredentials(role, email);
-    useWalletStore.getState().grantWelcomeBonus();
+    const bonusAwarded = useWalletStore.getState().grantWelcomeBonusForNewUser(email);
     setSubmitting(false);
 
-    toast({
-      tone: "success",
-      title: "Welcome Bonus 🎉",
-      message: "1,000 Free Coins added to your wallet! Enjoy unlimited reading."
-    });
+    if (bonusAwarded) {
+      toast({
+        tone: "success",
+        title: "Welcome Bonus 🎉",
+        message: "1,000 Free Coins added to your wallet for signing up!"
+      });
+    } else {
+      toast({
+        tone: "success",
+        title: `${role === "reader" ? "Reader" : "Writer"} Login`,
+        message: "Welcome back! Your wallet balance and reading progress are active."
+      });
+    }
     setAuthFlash({ type: "login_success", displayName: email.trim().split("@")[0] });
     router.replace(role === "writer" ? "/dashboard/writer" : "/");
   }
