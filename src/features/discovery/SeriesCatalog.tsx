@@ -1,21 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import type { Series } from "@/lib/types";
-import { cn } from "@/components/cn";
 import { CatalogSeriesCard } from "./CatalogSeriesCard";
 
-const CATALOG_GENRES = ["All", "Sci-Fi", "Fantasy", "Action"] as const;
-
-export function SeriesCatalog({ series }: { series: Series[] }) {
-  const [genre, setGenre] = useState<(typeof CATALOG_GENRES)[number]>("All");
-
-  const filtered = useMemo(() => {
-    if (genre === "All") return series;
-    return series.filter((s) => s.genre === genre);
-  }, [series, genre]);
-
+export function SeriesCatalog({ series, activeGenre }: { series: Series[]; activeGenre?: string }) {
   return (
     <motion.section
       className="space-y-5"
@@ -25,39 +14,22 @@ export function SeriesCatalog({ series }: { series: Series[] }) {
       transition={{ duration: 0.38, ease: "easeOut" }}
       id="catalog"
     >
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <h2 className="font-display text-2xl tracking-wider text-white">Series Catalog</h2>
-
-        <div className="flex flex-wrap gap-2" role="tablist" aria-label="Catalog genre filters">
-          {CATALOG_GENRES.map((g) => {
-            const active = genre === g;
-            return (
-              <button
-                key={g}
-                role="tab"
-                aria-selected={active}
-                onClick={() => setGenre(g)}
-                className={cn(
-                  "sf-clickable rounded-full border px-4 py-1.5 text-xs font-semibold uppercase tracking-wider transition-all duration-200",
-                  active
-                    ? "border-transparent bg-gradient-to-r from-primary to-highlight text-white shadow-[0_4px_16px_rgba(255,51,102,0.32)] scale-[1.03]"
-                    : "border-white/10 bg-white/5 text-muted hover:border-white/20 hover:bg-white/10 hover:text-white"
-                )}
-              >
-                {g}
-              </button>
-            );
-          })}
+      <div>
+        <h2 className="font-display text-2xl tracking-wider text-white">
+          {activeGenre ? `${activeGenre} Comics` : "Series Catalog"}
+        </h2>
+        <div className="mt-1 text-sm text-muted">
+          {activeGenre ? `Showing comics in ${activeGenre}.` : "All comics from every category."}
         </div>
       </div>
 
       <div className="space-y-4">
-        {filtered.length === 0 ? (
+        {series.length === 0 ? (
           <div className="sf-comic-panel rounded-2xl border border-white/10 bg-surface/60 p-8 text-center text-sm text-muted">
-            No series found in this genre.
+            No series found for this filter.
           </div>
         ) : (
-          filtered.map((s) => <CatalogSeriesCard key={s.id} series={s} />)
+          series.map((s) => <CatalogSeriesCard key={s.id} series={s} />)
         )}
       </div>
     </motion.section>

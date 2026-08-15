@@ -7,6 +7,7 @@ import { cn } from "@/components/cn";
 import { useToastStore } from "@/store/toastStore";
 import { useAuthStore } from "@/store/authStore";
 import { RequireAuth } from "@/components/RequireAuth";
+import { useCommentStore } from "@/store/commentStore";
 
 type UploadStatus = "Processing" | "Pending Approval" | "Published" | "Rejected";
 type FileRow = { id: string; name: string; progress: number; stage: "Processing" | "Compressing" | "Uploading" | "Done" };
@@ -14,6 +15,8 @@ type FileRow = { id: string; name: string; progress: number; stage: "Processing"
 export default function WriterDashboardPage() {
   const [files, setFiles] = useState<FileRow[]>([]);
   const toast = useToastStore((s) => s.push);
+  const comments = useCommentStore((s) => s.comments);
+  const markReviewed = useCommentStore((s) => s.markReviewed);
 
   const stats = useMemo(
     () => [
@@ -215,6 +218,42 @@ export default function WriterDashboardPage() {
               </div>
             </div>
           ))}
+        </div>
+      </div>
+
+      <div className="rounded-3xl border border-white/10 bg-card p-6">
+        <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+          <div>
+            <div className="font-display text-2xl tracking-widest">Reader Comments Inbox</div>
+            <div className="text-sm text-muted">Comic and chapter comments sent from readers for writers and admins.</div>
+          </div>
+          <Badge tone="primary">{comments.filter((comment) => comment.status === "New").length} new</Badge>
+        </div>
+        <div className="mt-4 space-y-3">
+          {comments.length === 0 ? (
+            <div className="rounded-2xl border border-white/10 bg-black/20 p-4 text-sm text-muted">
+              No reader comments yet.
+            </div>
+          ) : (
+            comments.slice(0, 8).map((comment) => (
+              <div key={comment.id} className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="text-sm font-semibold">{comment.seriesName}</div>
+                  <Badge tone={comment.status === "New" ? "gold" : "muted"}>{comment.status}</Badge>
+                </div>
+                <div className="mt-1 text-xs text-muted">
+                  {comment.targetType === "Comic" ? "Whole comic" : `Chapter ${comment.chapterId}`}
+                  {comment.pageIndex ? ` / Page ${comment.pageIndex}` : ""} / {comment.readerName} / {new Date(comment.atIso).toLocaleString()}
+                </div>
+                <div className="mt-2 text-sm text-white/80">{comment.body}</div>
+                {comment.status === "New" ? (
+                  <Button className="mt-3" variant="outline" size="sm" onClick={() => markReviewed(comment.id)}>
+                    Mark reviewed
+                  </Button>
+                ) : null}
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>

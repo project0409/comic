@@ -6,6 +6,7 @@ import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import { RequireAuth } from "@/components/RequireAuth";
 import { useToastStore } from "@/store/toastStore";
+import { useCommentStore } from "@/store/commentStore";
 
 type Row = {
   id: string;
@@ -34,6 +35,8 @@ type UserRow = {
 
 export default function AdminPublishingGatePage() {
   const toast = useToastStore((s) => s.push);
+  const comments = useCommentStore((s) => s.comments);
+  const markReviewed = useCommentStore((s) => s.markReviewed);
   const [query, setQuery] = useState("");
   const [credentialView, setCredentialView] = useState<AdminCredentialView>("all");
   const [rows, setRows] = useState<Row[]>([
@@ -484,6 +487,50 @@ export default function AdminPublishingGatePage() {
             </div>
           </div>
         ))}
+      </div>
+
+      <div className="rounded-3xl border border-white/10 bg-card p-6">
+        <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+          <div>
+            <div className="font-display text-2xl tracking-widest">All Reader Comments</div>
+            <div className="text-sm text-muted">Comic and chapter comments delivered to admins and writers.</div>
+          </div>
+          <Badge tone="gold">{comments.filter((comment) => comment.status === "New").length} new</Badge>
+        </div>
+        <div className="mt-4 overflow-hidden rounded-2xl border border-white/10">
+          <div className="grid grid-cols-5 bg-white/5 px-4 py-3 text-xs text-muted">
+            <div>Comic</div>
+            <div>Chapter</div>
+            <div>Reader</div>
+            <div>Comment</div>
+            <div className="text-right">Status</div>
+          </div>
+          {comments.length === 0 ? (
+            <div className="px-4 py-6 text-sm text-muted">No comments yet.</div>
+          ) : (
+            comments.slice(0, 10).map((comment) => (
+              <div key={comment.id} className="grid grid-cols-5 items-start border-t border-white/8 px-4 py-4 text-sm">
+                <div className="font-semibold">{comment.seriesName}</div>
+                <div className="text-muted">
+                  {comment.targetType === "Comic" ? "Whole comic" : comment.chapterId}
+                  {comment.pageIndex ? ` / Page ${comment.pageIndex}` : ""}
+                </div>
+                <div className="text-muted">{comment.readerName}</div>
+                <div className="pr-3 text-white/80">{comment.body}</div>
+                <div className="text-right">
+                  <Badge tone={comment.status === "New" ? "gold" : "muted"}>{comment.status}</Badge>
+                  {comment.status === "New" ? (
+                    <div className="mt-2">
+                      <Button variant="outline" size="sm" onClick={() => markReviewed(comment.id)}>
+                        Review
+                      </Button>
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </div>
     </RequireAuth>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useAuthStore } from "@/store/authStore";
 import { SplashScreen } from "@/components/SplashScreen";
 import { LandingPage } from "@/features/landing/LandingPage";
@@ -15,7 +15,9 @@ export default function Page() {
       {showSplash ? (
         <SplashScreen onComplete={() => setShowSplash(false)} />
       ) : isAuthenticated ? (
-        <HomePage />
+        <Suspense fallback={null}>
+          <HomePage />
+        </Suspense>
       ) : (
         <LandingPage />
       )}

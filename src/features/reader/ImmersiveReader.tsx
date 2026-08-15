@@ -3,25 +3,24 @@
 import Link from "@/compat/next-link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, ChevronLeft, ChevronRight, Eye, EyeOff, Layers, Lock, Shield, Volume2, VolumeX, WandSparkles, X } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Eye, EyeOff, Layers, MessageSquare, Send, Shield, Volume2, VolumeX, WandSparkles, X } from "lucide-react";
 import { Button } from "@/components/Button";
 import { cn } from "@/components/cn";
 import { getChapterPages } from "@/lib/api";
 import { chaptersBySeries, seriesList } from "@/lib/mockData";
 import type { ChapterPage } from "@/lib/types";
-import { useMediaQuery } from "@/lib/useMediaQuery";
 import { audioEngine } from "@/lib/audioEngine";
 import { useAudioStore } from "@/store/audioStore";
 import { useReaderStore } from "@/store/readerStore";
 import { useUiStore } from "@/store/uiStore";
 import { useVaultStore } from "@/store/vaultStore";
+import { useAuthStore } from "@/store/authStore";
+import { useCommentStore } from "@/store/commentStore";
 import { CanvasPage } from "./CanvasPage";
 import { ReactionPicker } from "./ReactionPicker";
 import { LoreMasterOverlay } from "@/features/loremaster/LoreMasterOverlay";
 
 export function ImmersiveReader({ chapterId }: { chapterId: string }) {
-  const isMobile = useMediaQuery("(max-width: 767px)");
-
   const series = useMemo(() => {
     for (const [sId, chs] of Object.entries(chaptersBySeries)) {
       if (chs.some((c) => c.id === chapterId)) {
@@ -53,9 +52,17 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
 
   const addReaction = useVaultStore((s) => s.addReaction);
   const addBookmark = useVaultStore((s) => s.addBookmark);
+  const displayName = useAuthStore((s) => s.displayName);
+  const addComment = useCommentStore((s) => s.addComment);
+  const comments = useCommentStore((s) => s.comments);
+  const chapterComments = useMemo(
+    () => comments.filter((comment) => comment.targetType === "Chapter" && comment.chapterId === chapterId),
+    [chapterId, comments]
+  );
 
   const [pages, setPages] = useState<ChapterPage[]>([]);
   const [loading, setLoading] = useState(true);
+  const [commentText, setCommentText] = useState("");
 
   // Long-press reactions
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -77,11 +84,6 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
       })
       .finally(() => setLoading(false));
   }, [chapterId, setAmbient, setCurrentPage, setTotalPages]);
-
-  // Guided view auto-enable on mobile
-  useEffect(() => {
-    setGuidedViewActive(isMobile);
-  }, [isMobile, setGuidedViewActive]);
 
   // Ambient sync + audio sync on page change
   const page = pages[currentPage - 1];
@@ -199,6 +201,21 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
     }).catch(() => {});
   }
 
+  function submitChapterComment() {
+    const body = commentText.trim();
+    if (!body) return;
+    addComment({
+      targetType: "Chapter",
+      seriesId: series?.id,
+      seriesName: series?.title ?? "FYP Series",
+      chapterId,
+      pageIndex: currentPage,
+      readerName: displayName || "Reader",
+      body
+    });
+    setCommentText("");
+  }
+
   return (
     <div className="relative min-h-dvh bg-bg" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
       {/* Top bar */}
@@ -303,7 +320,7 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
           >
             {loading ? <LoadingOverlay /> : null}
 
-            {guidedViewActive && isMobile ? (
+            {guidedViewActive ? (
               <GuidedViewReader chapterId={chapterId} pages={pages} />
             ) : readingMode === "scroll" ? (
               <ScrollReader pages={pages} />
@@ -331,6 +348,45 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
               </div>
             </div>
           ) : null}
+
+          <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2 text-sm font-semibold text-white">
+                <MessageSquare className="h-4 w-4 text-primary" />
+                Chapter comments
+              </div>
+              <div className="text-xs text-muted">Sent to writer and admin inboxes</div>
+            </div>
+            <div className="mt-3 flex flex-col gap-2 md:flex-row">
+              <textarea
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                className="min-h-20 flex-1 resize-none rounded-2xl border border-white/10 bg-black/25 p-3 text-sm outline-none placeholder:text-muted focus:border-primary/45"
+                placeholder="Share feedback about this chapter..."
+              />
+              <Button
+                variant="primary"
+                className="gap-2 self-stretch md:self-auto"
+                onClick={submitChapterComment}
+                disabled={!commentText.trim()}
+              >
+                <Send className="h-4 w-4" /> Send
+              </Button>
+            </div>
+            {chapterComments.length > 0 ? (
+              <div className="mt-3 space-y-2">
+                {chapterComments.slice(0, 3).map((comment) => (
+                  <div key={comment.id} className="rounded-2xl border border-white/8 bg-white/5 px-3 py-2 text-sm">
+                    <div className="flex items-center justify-between gap-2 text-xs text-muted">
+                      <span>{comment.readerName}</span>
+                      <span>{new Date(comment.atIso).toLocaleString()}</span>
+                    </div>
+                    <div className="mt-1 text-white/80">{comment.body}</div>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+          </div>
         </div>
       </div>
 

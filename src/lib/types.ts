@@ -7,6 +7,7 @@ export type Series = {
   readers: number;
   rating: number;
   description: string;
+  searchKeywords?: string[];
   isLocked: boolean;
   earlyAccessPriceCoins?: number;
   coverUrl: string; // ok to use <img>/bg-image outside reader

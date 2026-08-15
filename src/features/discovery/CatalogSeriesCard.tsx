@@ -30,6 +30,24 @@ export function CatalogSeriesCard({ series }: { series: Series }) {
 
   const isSaved = bookmarks.some((b) => b.seriesName === series.title);
 
+  const handleOpenChapters = () => {
+    router.push(chaptersHref);
+  };
+
+  const handleCardClick = (e: React.MouseEvent<HTMLElement>) => {
+    const target = e.target as HTMLElement;
+    if (target.closest("a, button, input, textarea, select")) return;
+    handleOpenChapters();
+  };
+
+  const handleCardKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    const target = e.target as HTMLElement;
+    if (target.closest("a, button, input, textarea, select")) return;
+    e.preventDefault();
+    handleOpenChapters();
+  };
+
   const handleToggleSave = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -68,7 +86,9 @@ export function CatalogSeriesCard({ series }: { series: Series }) {
     }
   };
 
-  const handleReadCh1 = () => {
+  const handleReadCh1 = (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
     const targetChapter = firstChapterBySeries[series.id] ?? "c1";
     if (!isAuthenticated && !canGuestRead(targetChapter)) {
       toast({
@@ -89,7 +109,12 @@ export function CatalogSeriesCard({ series }: { series: Series }) {
       viewport={{ once: true, margin: "-40px" }}
       whileHover={{ y: -4 }}
       transition={{ duration: 0.3 }}
-      className="sf-comic-panel sf-comic-surface group overflow-hidden rounded-2xl border border-white/10 bg-surface/70 transition-all duration-300 hover:border-primary/35 hover:shadow-[0_12px_36px_rgba(255,51,102,0.12)]"
+      onClick={handleCardClick}
+      onKeyDown={handleCardKeyDown}
+      role="button"
+      tabIndex={0}
+      aria-label={`Open chapters for ${series.title}`}
+      className="sf-comic-panel sf-comic-surface group cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-surface/70 transition-all duration-300 hover:border-primary/35 hover:shadow-[0_12px_36px_rgba(255,51,102,0.12)] focus:outline-none focus:ring-2 focus:ring-primary/45"
     >
       <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-stretch">
         <Link
@@ -159,7 +184,7 @@ export function CatalogSeriesCard({ series }: { series: Series }) {
                 <Bookmark className={cn("h-3.5 w-3.5", isSaved ? "fill-primary text-primary" : "")} />
                 <span>{isSaved ? "Saved" : "Save"}</span>
               </Button>
-              <Link href={`/series/${series.id}`}>
+              <Link href={`/series/${series.id}`} onClick={(e) => e.stopPropagation()}>
                 <Button variant="outline" size="sm">
                   Details
                 </Button>

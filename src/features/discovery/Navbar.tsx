@@ -8,22 +8,30 @@ import { cn } from "@/components/cn";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import { ThemeModeToggle } from "@/components/ThemeModeToggle";
+import { chaptersBySeries, seriesList } from "@/lib/mockData";
+import type { Series } from "@/lib/types";
 import { useWalletStore } from "@/store/walletStore";
 import { useToastStore } from "@/store/toastStore";
 import { useAuthStore } from "@/store/authStore";
 
-const GENRES = ["Action", "Romance", "Horror", "Mystery", "Fantasy"] as const;
 const NAV_LINKS = [
   { href: "/", label: "Home" },
   { href: "/discover", label: "Discover" },
   { href: "/series", label: "Series" },
   { href: "/vault", label: "Vault" }
 ];
+const PREFERRED_GENRE_ORDER = ["Action", "Romance", "Horror", "Mystery", "Fantasy", "Sci-Fi"];
 
 export function Navbar({
-  onSearch
+  onSearch,
+  searchValue = "",
+  genreValue,
+  seriesOptions
 }: {
-  onSearch?: (q: string, genre?: (typeof GENRES)[number]) => void;
+  onSearch?: (q: string, genre?: string) => void;
+  searchValue?: string;
+  genreValue?: string;
+  seriesOptions?: Series[];
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -33,12 +41,51 @@ export function Navbar({
   const role = useAuthStore((s) => s.role);
   const displayName = useAuthStore((s) => s.displayName);
   const logout = useAuthStore((s) => s.logout);
-  const [q, setQ] = useState("");
-  const [genre, setGenre] = useState<(typeof GENRES)[number] | undefined>(undefined);
+  const menuSeries = seriesOptions?.length ? seriesOptions : seriesList;
+  const genres = useMemo(() => {
+    const available = Array.from(new Set(menuSeries.map((series) => series.genre)));
+    return available.sort((a, b) => {
+      const aIndex = PREFERRED_GENRE_ORDER.indexOf(a);
+      const bIndex = PREFERRED_GENRE_ORDER.indexOf(b);
+      if (aIndex >= 0 && bIndex >= 0) return aIndex - bIndex;
+      if (aIndex >= 0) return -1;
+      if (bIndex >= 0) return 1;
+      return a.localeCompare(b);
+    });
+  }, [menuSeries]);
+  const [q, setQ] = useState(searchValue);
+  const [genre, setGenre] = useState<string | undefined>(genreValue);
+  const [searchFocused, setSearchFocused] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement | null>(null);
+  const searchRef = useRef<HTMLDivElement | null>(null);
 
   const placeholder = useMemo(() => (genre ? `Search in ${genre}...` : "Search series..."), [genre]);
+  const suggestions = useMemo(() => {
+    const query = q.trim().toLowerCase();
+    if (!query) return [];
+    return menuSeries
+      .filter((series) => {
+        const chapterText = (chaptersBySeries[series.id] ?? [])
+          .map((chapter) => chapter.title)
+          .join(" ")
+          .toLowerCase();
+        const keywordText = (series.searchKeywords ?? []).join(" ").toLowerCase();
+        const matchesComicKeyword = query === "comic" || query === "comics";
+        const matchesQuery =
+          matchesComicKeyword ||
+          series.title.toLowerCase().includes(query) ||
+          series.writerName.toLowerCase().includes(query) ||
+          series.genre.toLowerCase().includes(query) ||
+          series.description.toLowerCase().includes(query) ||
+          keywordText.includes(query) ||
+          chapterText.includes(query);
+        const matchesGenre = genre ? series.genre === genre : true;
+        return matchesQuery && matchesGenre;
+      })
+      .slice(0, 6);
+  }, [genre, menuSeries, q]);
+  const showSuggestions = searchFocused && q.trim().length > 0;
   const initials = useMemo(() => {
     const source = displayName || role || "User";
     return source
@@ -72,6 +119,14 @@ export function Navbar({
   }, [q, genre, onSearch]);
 
   useEffect(() => {
+    setQ(searchValue);
+  }, [searchValue]);
+
+  useEffect(() => {
+    setGenre(genreValue);
+  }, [genreValue]);
+
+  useEffect(() => {
     if (!profileOpen) return;
     function onPointerDown(e: MouseEvent) {
       if (!profileRef.current?.contains(e.target as Node)) setProfileOpen(false);
@@ -79,6 +134,27 @@ export function Navbar({
     document.addEventListener("mousedown", onPointerDown);
     return () => document.removeEventListener("mousedown", onPointerDown);
   }, [profileOpen]);
+
+  useEffect(() => {
+    if (!searchFocused) return;
+    function onPointerDown(e: MouseEvent) {
+      if (!searchRef.current?.contains(e.target as Node)) setSearchFocused(false);
+    }
+    document.addEventListener("mousedown", onPointerDown);
+    return () => document.removeEventListener("mousedown", onPointerDown);
+  }, [searchFocused]);
+
+  function selectGenre(nextGenre: string) {
+    setQ("");
+    setGenre(nextGenre);
+    setSearchFocused(false);
+    onSearch?.("", nextGenre);
+  }
+
+  function openSeries(seriesId: string) {
+    setSearchFocused(false);
+    router.push(`/series/${seriesId}`);
+  }
 
   return (
     <div className="sticky top-0 z-40 border-b border-white/5 bg-bg/75 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.22)] transition-all">
@@ -115,25 +191,63 @@ export function Navbar({
           })}
         </nav>
 
-        <div className="order-3 flex min-w-full items-center gap-3 md:order-none md:min-w-0 md:flex-1">
-          <div className="flex min-w-0 flex-1 items-center gap-2 rounded-2xl border border-white/10 bg-surface px-4 py-2.5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.02)] transition duration-200 focus-within:border-primary/45 focus-within:shadow-[0_0_22px_rgba(255,51,102,0.15)]">
-            <Search className="h-4 w-4 text-muted" />
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              className="w-full bg-transparent text-sm outline-none placeholder:text-muted"
-              placeholder={placeholder}
-              aria-label="Search series"
-            />
+        <div className="order-3 flex min-w-full flex-col gap-3 md:order-none md:min-w-0 md:flex-1">
+          <div ref={searchRef} className="relative w-full md:max-w-[650px]">
+            <div className="flex min-w-0 items-center gap-2 rounded-2xl border border-white/10 bg-surface px-4 py-2.5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.02)] transition duration-200 focus-within:border-primary/45 focus-within:shadow-[0_0_22px_rgba(255,51,102,0.15)]">
+              <Search className="h-4 w-4 text-muted" />
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                onFocus={() => setSearchFocused(true)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && suggestions[0]) openSeries(suggestions[0].id);
+                }}
+                className="w-full bg-transparent text-sm outline-none placeholder:text-muted"
+                placeholder={placeholder}
+                aria-label="Search series"
+                autoComplete="off"
+              />
+            </div>
+
+            {showSuggestions ? (
+              <div className="sf-search-dropdown absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-2xl border border-white/10 bg-surface shadow-[0_18px_46px_rgba(0,0,0,0.42)]">
+                {suggestions.length > 0 ? (
+                  suggestions.map((series) => (
+                    <button
+                      key={series.id}
+                      type="button"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => openSeries(series.id)}
+                      className="sf-clickable flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-white/8"
+                    >
+                      <img
+                        src={series.coverUrl}
+                        alt=""
+                        className="h-12 w-9 shrink-0 rounded-md border border-white/10 object-cover"
+                      />
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm font-semibold text-white">{series.title}</span>
+                        <span className="block truncate text-xs text-muted">
+                          {series.genre} / {series.writerName}
+                        </span>
+                      </span>
+                    </button>
+                  ))
+                ) : (
+                  <div className="px-4 py-3 text-sm text-muted">No comics found.</div>
+                )}
+              </div>
+            ) : null}
           </div>
 
           <div className="hidden items-center gap-2 md:flex" role="group" aria-label="Genre filters">
-            {GENRES.map((g) => {
+            {genres.map((g) => {
               const active = genre === g;
               return (
-                <button
+                <Link
                   key={g}
-                  onClick={() => setGenre(active ? undefined : g)}
+                  href={`/series?genre=${encodeURIComponent(g)}`}
+                  onClick={() => selectGenre(g)}
                   className={cn(
                     "sf-clickable rounded-full border px-4 py-1.5 text-xs font-semibold uppercase tracking-wider transition-all duration-200",
                     active
@@ -142,7 +256,7 @@ export function Navbar({
                   )}
                 >
                   {g}
-                </button>
+                </Link>
               );
             })}
           </div>

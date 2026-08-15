@@ -19,7 +19,6 @@ export default function SettingsPage() {
   const setThemeMode = useUiStore((s) => s.setThemeMode);
   const [emailAlerts, setEmailAlerts] = useState(true);
   const [autoPlayAudio, setAutoPlayAudio] = useState(false);
-  const [spoilerShield, setSpoilerShield] = useState(true);
 
   return (
     <RequireAuth>
@@ -64,8 +63,7 @@ export default function SettingsPage() {
           <div className="mt-6 divide-y divide-white/10 rounded-2xl border border-white/10">
             {[
               { label: "Email notifications", value: emailAlerts, setValue: setEmailAlerts },
-              { label: "Auto-play reader audio", value: autoPlayAudio, setValue: setAutoPlayAudio },
-              { label: "Spoiler shield", value: spoilerShield, setValue: setSpoilerShield }
+              { label: "Auto-play reader audio", value: autoPlayAudio, setValue: setAutoPlayAudio }
             ].map((item) => (
               <label key={item.label} className="flex cursor-pointer items-center justify-between gap-4 px-4 py-4">
                 <span className="text-sm">{item.label}</span>

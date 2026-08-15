@@ -143,6 +143,16 @@ body {
   text-shadow: 0 0 16px rgba(0, 229, 255, 0.22);
 }
 
+.sf-search-dropdown {
+  background: var(--sf-surface);
+}
+
+:root[data-theme="light"] .sf-search-dropdown {
+  background: #ffffff !important;
+  border-color: rgba(16, 32, 51, 0.16) !important;
+  box-shadow: 0 18px 42px rgba(26, 54, 83, 0.16) !important;
+}
+
 .sf-comic-image {
   filter: saturate(1.08) contrast(1.04);
   transition:

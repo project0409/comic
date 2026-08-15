@@ -1,0 +1,57 @@
+
+> comic@0.1.0 dev
+> next dev --hostname 0.0.0.0 --port 3000 --port 3000
+
+   ▲ Next.js 15.5.22
+   - Local:        http://localhost:3000
+   - Network:      http://0.0.0.0:3000
+
+ ✓ Starting...
+ ✓ Ready in 9.2s
+ ○ Compiling / ...
+ ✓ Compiled / in 22.9s (1557 modules)
+ GET / 200 in 168ms
+ ○ Compiling /read/[chapterId] ...
+ ✓ Compiled /read/[chapterId] in 2.9s (1638 modules)
+ GET /series 200 in 3855ms
+ GET /discover 200 in 4142ms
+ GET /series/s1 200 in 5633ms
+ GET /read/c1 200 in 5642ms
+ GET / 200 in 311ms
+ ○ Compiling /login ...
+ ✓ Compiled /login in 1446ms (1600 modules)
+ GET /login 200 in 1879ms
+ GET / 200 in 147ms
+ GET / 200 in 108ms
+ ○ Compiling /api/series ...
+ ✓ Compiled /api/series in 955ms (1618 modules)
+ GET /api/series 200 in 1496ms
+ GET /api/series 200 in 61ms
+ ✓ Compiled /series/[id] in 401ms (890 modules)
+ GET /series/s1 200 in 912ms
+ GET /api/series 200 in 126ms
+ ○ Compiling /api/series/[id]/chapters ...
+ ✓ Compiled /api/series/[id]/chapters in 1484ms (1635 modules)
+ GET /api/series 200 in 1604ms
+ GET /api/series 200 in 61ms
+ GET /api/series 200 in 59ms
+ GET /api/series/s1/chapters 200 in 3606ms
+ GET /api/series/s1/chapters 200 in 73ms
+ GET /series/s1 200 in 264ms
+ GET /api/series 200 in 97ms
+ GET /api/series/s1/chapters 200 in 121ms
+ GET /api/series 200 in 109ms
+ GET /api/series/s1/chapters 200 in 112ms
+ GET /api/series 200 in 55ms
+ GET /api/series 200 in 57ms
+ GET /series/s2 200 in 125ms
+ GET /api/series 200 in 82ms
+ GET /api/series/s2/chapters 200 in 125ms
+ GET /api/series 200 in 126ms
+ GET /api/series/s2/chapters 200 in 90ms
+ GET /api/series 200 in 57ms
+ GET /api/series 200 in 66ms
+ GET / 200 in 1049ms
+ GET / 200 in 150ms
+ GET / 200 in 183ms
+ GET / 200 in 171ms

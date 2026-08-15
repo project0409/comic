@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "@/compat/next-link";
 import { useParams, useRouter } from "@/compat/next-navigation";
 import { motion } from "framer-motion";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, MessageSquare, Send } from "lucide-react";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import { Tabs } from "@/components/Tabs";
@@ -15,6 +15,7 @@ import { useUiStore } from "@/store/uiStore";
 import { useWalletStore } from "@/store/walletStore";
 import { useAuthStore } from "@/store/authStore";
 import { useToastStore } from "@/store/toastStore";
+import { useCommentStore } from "@/store/commentStore";
 
 type TabKey = "chapters" | "about" | "community";
 
@@ -23,10 +24,14 @@ export default function SeriesDetailPage() {
   const router = useRouter();
   const toast = useToastStore((s) => s.push);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const displayName = useAuthStore((s) => s.displayName);
+  const comments = useCommentStore((s) => s.comments);
+  const addComment = useCommentStore((s) => s.addComment);
   const [series, setSeries] = useState<Series | null>(null);
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [tab, setTab] = useState<TabKey>("chapters");
   const [unlockTarget, setUnlockTarget] = useState<Chapter | null>(null);
+  const [comicCommentText, setComicCommentText] = useState("");
   const setAmbient = useUiStore((s) => s.setAmbientColor);
   const unlockedChapterIds = useWalletStore((s) => s.unlockedChapterIds);
 
@@ -66,6 +71,25 @@ export default function SeriesDetailPage() {
         "linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.72))"
     } as const;
   }, []);
+
+  const comicComments = useMemo(
+    () => comments.filter((comment) => comment.targetType === "Comic" && comment.seriesId === id),
+    [comments, id]
+  );
+
+  function submitComicComment() {
+    if (!series) return;
+    const body = comicCommentText.trim();
+    if (!body) return;
+    addComment({
+      targetType: "Comic",
+      seriesId: series.id,
+      seriesName: series.title,
+      readerName: displayName || "Reader",
+      body
+    });
+    setComicCommentText("");
+  }
 
   if (!series) {
     return (
@@ -246,6 +270,44 @@ export default function SeriesDetailPage() {
             </p>
           </div>
         ) : null}
+        <div className="sf-comic-panel sf-comic-surface rounded-3xl border border-white/10 bg-card p-5">
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-center gap-2 font-display text-2xl tracking-widest text-white">
+              <MessageSquare className="h-5 w-5 text-primary" />
+              Comic comments
+            </div>
+            <div className="text-xs text-muted">Sent to writer and admin inboxes</div>
+          </div>
+          <div className="mt-4 flex flex-col gap-2 md:flex-row">
+            <textarea
+              value={comicCommentText}
+              onChange={(event) => setComicCommentText(event.target.value)}
+              className="min-h-20 flex-1 resize-none rounded-2xl border border-white/10 bg-black/25 p-3 text-sm outline-none placeholder:text-muted focus:border-primary/45"
+              placeholder="Share feedback about this comic..."
+            />
+            <Button
+              variant="primary"
+              className="gap-2 self-stretch md:self-auto"
+              onClick={submitComicComment}
+              disabled={!comicCommentText.trim()}
+            >
+              <Send className="h-4 w-4" /> Send
+            </Button>
+          </div>
+          {comicComments.length > 0 ? (
+            <div className="mt-4 space-y-2">
+              {comicComments.slice(0, 4).map((comment) => (
+                <div key={comment.id} className="rounded-2xl border border-white/8 bg-white/5 px-3 py-2 text-sm">
+                  <div className="flex items-center justify-between gap-2 text-xs text-muted">
+                    <span>{comment.readerName}</span>
+                    <span>{new Date(comment.atIso).toLocaleString()}</span>
+                  </div>
+                  <div className="mt-1 text-white/80">{comment.body}</div>
+                </div>
+              ))}
+            </div>
+          ) : null}
+        </div>
       </motion.main>
 
       <UnlockModal

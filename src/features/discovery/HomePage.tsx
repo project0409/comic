@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowUp, Twitter, Instagram, Github, MessageSquare } from "lucide-react";
 import Link from "@/compat/next-link";
+import { useSearchParams } from "@/compat/next-navigation";
 import { Navbar } from "./Navbar";
 import { Hero } from "./Hero";
 import { StatsBar } from "./StatsBar";
@@ -11,13 +12,14 @@ import { ReleaseCalendar } from "./ReleaseCalendar";
 import { SeriesCatalog } from "./SeriesCatalog";
 import { CarouselRow } from "./CarouselRow";
 import type { Series } from "@/lib/types";
-import { releaseCalendar } from "@/lib/mockData";
+import { chaptersBySeries, releaseCalendar } from "@/lib/mockData";
 import { PWAInstallBanner } from "@/components/PWAInstallBanner";
 import { consumeAuthFlash } from "@/lib/authFlash";
 import { useToastStore } from "@/store/toastStore";
 import { useWalletStore } from "@/store/walletStore";
 
 export function HomePage() {
+  const searchParams = useSearchParams();
   const toast = useToastStore((s) => s.push);
   const coinBalance = useWalletStore((s) => s.coinBalance);
   const [all, setAll] = useState<Series[]>([]);
@@ -44,6 +46,11 @@ export function HomePage() {
   }, []);
 
   useEffect(() => {
+    setQ(searchParams.get("q") ?? "");
+    setGenre(searchParams.get("genre") ?? undefined);
+  }, [searchParams]);
+
+  useEffect(() => {
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 300);
     };
@@ -57,7 +64,14 @@ export function HomePage() {
 
   const filtered = useMemo(() => {
     return all.filter((s) => {
-      const matchQ = q ? s.title.toLowerCase().includes(q.toLowerCase()) : true;
+      const query = q.trim().toLowerCase();
+      const chapterText = (chaptersBySeries[s.id] ?? []).map((chapter) => chapter.title).join(" ").toLowerCase();
+      const keywordText = (s.searchKeywords ?? []).join(" ").toLowerCase();
+      const matchQ = query
+        ? [s.title, s.writerName, s.genre, s.description].some((value) => value.toLowerCase().includes(query)) ||
+          keywordText.includes(query) ||
+          chapterText.includes(query)
+        : true;
       const matchG = genre ? s.genre === genre : true;
       return matchQ && matchG;
     });
@@ -69,6 +83,9 @@ export function HomePage() {
   return (
     <div className="min-h-dvh relative">
       <Navbar
+        searchValue={q}
+        genreValue={genre}
+        seriesOptions={all}
         onSearch={(query, g) => {
           setQ(query);
           setGenre(g);
@@ -89,7 +106,7 @@ export function HomePage() {
 
         <ReleaseCalendar items={releaseCalendar} />
 
-        <SeriesCatalog series={filtered.length ? filtered : all} />
+        <SeriesCatalog series={filtered} activeGenre={genre} />
       </motion.main>
 
       {/* Floating Back to Top Button */}
