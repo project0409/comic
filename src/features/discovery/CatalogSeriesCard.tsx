@@ -4,6 +4,7 @@ import Link from "@/compat/next-link";
 import { useRouter } from "@/compat/next-navigation";
 import { Bookmark, Star } from "lucide-react";
 import { motion } from "framer-motion";
+import { useState } from "react";
 import type { Series } from "@/lib/types";
 import { firstChapterBySeries } from "@/lib/mockData";
 import { canGuestRead } from "@/lib/guestReaderLimit";
@@ -13,6 +14,7 @@ import { useVaultStore } from "@/store/vaultStore";
 import { useToastStore } from "@/store/toastStore";
 import { useAuthStore } from "@/store/authStore";
 import { cn } from "@/components/cn";
+import { SaveToPlaylistModal } from "@/components/SaveToPlaylistModal";
 
 function formatReads(n: number) {
   if (n >= 1000) return `${(n / 1000).toFixed(1)}K reads`;
@@ -25,8 +27,7 @@ export function CatalogSeriesCard({ series }: { series: Series }) {
   const toast = useToastStore((s) => s.push);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const bookmarks = useVaultStore((s) => s.bookmarks);
-  const addBookmark = useVaultStore((s) => s.addBookmark);
-  const removeBookmarkBySeries = useVaultStore((s) => s.removeBookmarkBySeries);
+  const [playlistOpen, setPlaylistOpen] = useState(false);
 
   const isSaved = bookmarks.some((b) => b.seriesName === series.title);
 
@@ -62,28 +63,7 @@ export function CatalogSeriesCard({ series }: { series: Series }) {
       return;
     }
 
-    if (isSaved) {
-      removeBookmarkBySeries(series.title);
-      toast({
-        tone: "default",
-        title: "Story Removed",
-        message: `Removed "${series.title}" from your Saved Stories.`
-      });
-    } else {
-      addBookmark({
-        seriesName: series.title,
-        chapterId: firstChapterBySeries[series.id] ?? "c1",
-        pageIndex: 1,
-        x: 0,
-        y: 0,
-        thumbUrl: series.coverUrl
-      });
-      toast({
-        tone: "success",
-        title: "Story Saved!",
-        message: `Added "${series.title}" to your Saved Stories.`
-      });
-    }
+    setPlaylistOpen(true);
   };
 
   const handleReadCh1 = (e?: React.MouseEvent) => {
@@ -196,6 +176,11 @@ export function CatalogSeriesCard({ series }: { series: Series }) {
           </div>
         </div>
       </div>
+      <SaveToPlaylistModal
+        open={playlistOpen}
+        series={series}
+        onClose={() => setPlaylistOpen(false)}
+      />
     </motion.article>
   );
 }

@@ -3,22 +3,22 @@
 import Link from "@/compat/next-link";
 import { Bookmark, Lock } from "lucide-react";
 import { motion } from "framer-motion";
+import { useState } from "react";
 import { Badge } from "@/components/Badge";
 import { cn } from "@/components/cn";
 import type { Series } from "@/lib/types";
-import { firstChapterBySeries } from "@/lib/mockData";
 import { useVaultStore } from "@/store/vaultStore";
 import { useToastStore } from "@/store/toastStore";
 import { useRouter } from "@/compat/next-navigation";
 import { useAuthStore } from "@/store/authStore";
+import { SaveToPlaylistModal } from "@/components/SaveToPlaylistModal";
 
 export function SeriesCard({ series, statusBadge = "New" }: { series: Series; statusBadge?: "New" | "Popular" | "Updated" }) {
   const router = useRouter();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const toast = useToastStore((s) => s.push);
   const bookmarks = useVaultStore((s) => s.bookmarks);
-  const addBookmark = useVaultStore((s) => s.addBookmark);
-  const removeBookmarkBySeries = useVaultStore((s) => s.removeBookmarkBySeries);
+  const [playlistOpen, setPlaylistOpen] = useState(false);
 
   const isSaved = bookmarks.some((b) => b.seriesName === series.title);
 
@@ -36,28 +36,7 @@ export function SeriesCard({ series, statusBadge = "New" }: { series: Series; st
       return;
     }
 
-    if (isSaved) {
-      removeBookmarkBySeries(series.title);
-      toast({
-        tone: "default",
-        title: "Story Removed",
-        message: `Removed "${series.title}" from Saved Stories.`
-      });
-    } else {
-      addBookmark({
-        seriesName: series.title,
-        chapterId: firstChapterBySeries[series.id] ?? "c1",
-        pageIndex: 1,
-        x: 0,
-        y: 0,
-        thumbUrl: series.coverUrl
-      });
-      toast({
-        tone: "success",
-        title: "Story Saved!",
-        message: `Added "${series.title}" to your Saved Stories.`
-      });
-    }
+    setPlaylistOpen(true);
   };
 
   return (
@@ -126,6 +105,11 @@ export function SeriesCard({ series, statusBadge = "New" }: { series: Series; st
           </div>
         </div>
       </Link>
+      <SaveToPlaylistModal
+        open={playlistOpen}
+        series={series}
+        onClose={() => setPlaylistOpen(false)}
+      />
     </motion.div>
   );
 }

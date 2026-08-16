@@ -60,9 +60,18 @@ type WalletState = {
 };
 
 const initialData = getStoredWalletData();
+const initialBalance = initialData ? (initialData.coinBalance === 1000 ? 50 : initialData.coinBalance) : 50;
+
+if (initialData && initialData.coinBalance === 1000) {
+  saveStoredWalletData({
+    coinBalance: 50,
+    unlockHistory: initialData.unlockHistory,
+    unlockedChapterIds: initialData.unlockedChapterIds
+  });
+}
 
 export const useWalletStore = create<WalletState>((set, get) => ({
-  coinBalance: initialData?.coinBalance ?? 15,
+  coinBalance: initialBalance,
   unlockHistory: initialData?.unlockHistory ?? [],
   unlockedChapterIds: initialData?.unlockedChapterIds ?? [],
 
@@ -107,9 +116,9 @@ export const useWalletStore = create<WalletState>((set, get) => ({
       return false;
     }
 
-    // Brand new user - award 1,000 coins one time
+    // Brand new user - award 50 coins one time
     markBonusClaimed(key);
-    const nextBal = 1000;
+    const nextBal = 50;
     set({ coinBalance: nextBal });
     saveStoredWalletData({
       coinBalance: nextBal,

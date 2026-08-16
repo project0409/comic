@@ -3,11 +3,13 @@ import { cn } from "./cn";
 export function Badge({
   children,
   tone = "default",
-  className
+  className,
+  id
 }: {
   children: React.ReactNode;
   tone?: "default" | "primary" | "gold" | "danger" | "muted";
   className?: string;
+  id?: string;
 }) {
   const tones = {
     default: "bg-white/8 text-white/90 border-white/10",
@@ -18,6 +20,7 @@ export function Badge({
   };
   return (
     <span
+      id={id}
       className={cn(
         "sf-comic-bubble inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-bold tracking-wide",
         tones[tone],

@@ -10,6 +10,7 @@ import { createGoogleAuthUrl, getActiveGoogleClientId } from "@/lib/googleIdenti
 import { useToastStore } from "@/store/toastStore";
 import { useAuthStore } from "@/store/authStore";
 import { useWalletStore } from "@/store/walletStore";
+import { DatePicker } from "@/components/DatePicker";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -33,6 +34,13 @@ export default function RegisterPage() {
       toast({ tone: "danger", title: "Missing fields", message: "Please fill all signup fields." });
       return;
     }
+
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    if (dob > todayStr) {
+      toast({ tone: "danger", title: "Invalid date of birth", message: "Date of birth cannot be in the future." });
+      return;
+    }
     if (username.trim().length < 3) {
       toast({ tone: "danger", title: "Invalid username", message: "Username must be at least 3 characters." });
       return;
@@ -54,7 +62,7 @@ export default function RegisterPage() {
     toast({
       tone: "success",
       title: "Account Created! 🎉",
-      message: "You received 1,000 Free Welcome Coins! Please log in to start reading."
+      message: "You received 50 Free Welcome Coins! Please log in to start reading."
     });
     router.replace("/login");
   }
@@ -128,14 +136,12 @@ export default function RegisterPage() {
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
-                <label className="block text-xs font-semibold text-white/80">
+                <label htmlFor="dob-input" className="block text-xs font-semibold text-white/80">
                   Date of birth
-                  <input
-                    type="date"
+                  <DatePicker
+                    id="dob-input"
                     value={dob}
-                    onChange={(e) => setDob(e.target.value)}
-                    className="mt-2 h-12 w-full rounded-2xl border border-white/10 bg-black/30 px-4 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-primary/50"
-                    autoComplete="bday"
+                    onChange={setDob}
                   />
                 </label>
 

@@ -61,7 +61,7 @@ export default function LoginPage() {
       toast({
         tone: "success",
         title: "Welcome Bonus 🎉",
-        message: "1,000 Free Coins added to your wallet for signing up!"
+        message: "50 Free Coins added to your wallet for signing up!"
       });
     } else {
       toast({

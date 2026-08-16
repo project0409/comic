@@ -43,7 +43,7 @@ type VaultState = {
   reactions: VaultReaction[];
   highlights: VaultHighlight[];
   collections: VaultCollection[];
-  addBookmark: (b: Omit<VaultBookmark, "id">) => void;
+  addBookmark: (b: Omit<VaultBookmark, "id">) => string;
   updateBookmarkNote: (id: string, note: string) => void;
   addReaction: (r: Omit<VaultReaction, "id" | "atIso">) => void;
   removeBookmarkBySeries: (seriesName: string) => void;
@@ -67,10 +67,13 @@ export const useVaultStore = create<VaultState>((set) => ({
     }
   ],
   collections: [],
-  addBookmark: (b) =>
+  addBookmark: (b) => {
+    const id = `bm_${crypto.randomUUID()}`;
     set((s) => ({
-      bookmarks: [{ id: `bm_${crypto.randomUUID()}`, ...b }, ...s.bookmarks]
-    })),
+      bookmarks: [{ id, ...b }, ...s.bookmarks]
+    }));
+    return id;
+  },
   updateBookmarkNote: (id, note) =>
     set((s) => ({
       bookmarks: s.bookmarks.map((b) => (b.id === id ? { ...b, note } : b))

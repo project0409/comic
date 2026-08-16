@@ -158,7 +158,7 @@ export const seriesList: Series[] = [
   }
 ];
 
-export const chaptersBySeries: Record<string, Chapter[]> = {
+const initialChaptersBySeries: Record<string, Chapter[]> = {
   s1: [
     { id: "c1", seriesId: "s1", number: 1, title: "Forge Spark", releaseDateIso: "2026-05-01", status: "Free", isLocked: false },
     { id: "c2", seriesId: "s1", number: 2, title: "Neon Oath", releaseDateIso: "2026-05-06", status: "Free", isLocked: false },
@@ -169,26 +169,39 @@ export const chaptersBySeries: Record<string, Chapter[]> = {
   s2: [
     { id: "c12", seriesId: "s2", number: 1, title: "Gilded Letters", releaseDateIso: "2026-05-12", status: "Free", isLocked: false },
     { id: "c13", seriesId: "s2", number: 2, title: "Ash Kisses", releaseDateIso: "2026-05-22", status: "Coins", coinPrice: 5, isLocked: true }
-  ],
-  s3: [
-    { id: "c2", seriesId: "s3", number: 2, title: "The Door That Breathes", releaseDateIso: "2026-05-07", status: "Free", isLocked: false }
-  ],
-  s4: [
-    { id: "c20", seriesId: "s4", number: 1, title: "First Fold", releaseDateIso: "2026-05-01", status: "Free", isLocked: false }
-  ],
-  s5: [
-    { id: "c30", seriesId: "s5", number: 1, title: "Starting Signal", releaseDateIso: "2026-05-09", status: "Free", isLocked: false },
-    { id: "c31", seriesId: "s5", number: 2, title: "Encrypted Roses", releaseDateIso: "2026-05-16", status: "Coins", coinPrice: 5, isLocked: true }
-  ],
-  s6: [
-    { id: "c40", seriesId: "s6", number: 1, title: "Dead Air", releaseDateIso: "2026-05-11", status: "Free", isLocked: false },
-    { id: "c41", seriesId: "s6", number: 2, title: "The Caller Waits", releaseDateIso: "2026-05-19", status: "Coins", coinPrice: 5, isLocked: true }
-  ],
-  s7: [
-    { id: "c50", seriesId: "s7", number: 1, title: "Room of Witnesses", releaseDateIso: "2026-05-14", status: "Free", isLocked: false },
-    { id: "c51", seriesId: "s7", number: 2, title: "A Perfect Reflection", releaseDateIso: "2026-05-21", status: "Coins", coinPrice: 5, isLocked: true }
   ]
 };
+
+export const chaptersBySeries: Record<string, Chapter[]> = {};
+
+seriesList.forEach((series) => {
+  const existing = initialChaptersBySeries[series.id];
+  if (existing) {
+    chaptersBySeries[series.id] = existing;
+    return;
+  }
+
+  const list: Chapter[] = [];
+  for (let i = 1; i <= series.chapterCount; i++) {
+    const isFree = i <= 2;
+    const dayOffset = i * 5;
+    const releaseDate = new Date("2026-05-01");
+    releaseDate.setDate(releaseDate.getDate() + dayOffset);
+    const dateStr = releaseDate.toISOString().split("T")[0]!;
+
+    list.push({
+      id: `c_${series.id}_ch${i}`,
+      seriesId: series.id,
+      number: i,
+      title: `${series.title.split(":")[0]} Chapter ${i}`,
+      releaseDateIso: dateStr,
+      status: isFree ? "Free" : "Coins",
+      coinPrice: isFree ? undefined : 5,
+      isLocked: !isFree
+    });
+  }
+  chaptersBySeries[series.id] = list;
+});
 
 export function buildMockPages(chapterId: string): ChapterPage[] {
   const palettes = {

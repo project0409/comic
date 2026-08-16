@@ -16,6 +16,8 @@ import { useUiStore } from "@/store/uiStore";
 import { useVaultStore } from "@/store/vaultStore";
 import { useAuthStore } from "@/store/authStore";
 import { useCommentStore } from "@/store/commentStore";
+import { useReviewStore } from "@/store/reviewStore";
+import { useToastStore } from "@/store/toastStore";
 import { CanvasPage } from "./CanvasPage";
 import { ReactionPicker } from "./ReactionPicker";
 import { LoreMasterOverlay } from "@/features/loremaster/LoreMasterOverlay";
@@ -53,12 +55,60 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
   const addReaction = useVaultStore((s) => s.addReaction);
   const addBookmark = useVaultStore((s) => s.addBookmark);
   const displayName = useAuthStore((s) => s.displayName);
+  const userEmail = useAuthStore((s) => s.email);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const toast = useToastStore((s) => s.push);
   const addComment = useCommentStore((s) => s.addComment);
   const comments = useCommentStore((s) => s.comments);
   const chapterComments = useMemo(
     () => comments.filter((comment) => comment.targetType === "Chapter" && comment.chapterId === chapterId),
     [chapterId, comments]
   );
+
+  const reviews = useReviewStore((s) => s.reviews);
+  const addOrUpdateReview = useReviewStore((s) => s.addOrUpdateReview);
+  const existingReview = useMemo(() => {
+    if (!series || !userEmail) return null;
+    return reviews.find((r) => r.seriesId === series.id && r.userEmail === userEmail) ?? null;
+  }, [reviews, series, userEmail]);
+
+  const [rating, setRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [reviewText, setReviewText] = useState("");
+
+  useEffect(() => {
+    if (existingReview) {
+      setRating(existingReview.rating);
+      setReviewText(existingReview.reviewText);
+    } else {
+      setRating(0);
+      setReviewText("");
+    }
+  }, [existingReview]);
+
+  function handleSubmitReview() {
+    if (!series) return;
+    if (rating === 0) {
+      toast({
+        tone: "danger",
+        title: "Rating required",
+        message: "Please select a star rating between 1 and 5."
+      });
+      return;
+    }
+    addOrUpdateReview({
+      seriesId: series.id,
+      userEmail: userEmail!,
+      userName: displayName || userEmail!.split("@")[0] || "Reader",
+      rating,
+      reviewText: reviewText.trim()
+    });
+    toast({
+      tone: "success",
+      title: existingReview ? "Review Updated! ⭐" : "Review Submitted! ⭐",
+      message: "Thank you for sharing your feedback on this comic."
+    });
+  }
 
   const [pages, setPages] = useState<ChapterPage[]>([]);
   const [loading, setLoading] = useState(true);
@@ -345,6 +395,68 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
                     Explore Other Comics
                   </Button>
                 </Link>
+              </div>
+
+              {/* Review & Rating Form */}
+              <div className="mt-4 border-t border-white/10 pt-4 text-left max-w-md mx-auto space-y-3">
+                <div className="text-sm font-semibold text-white text-center sm:text-left">
+                  {existingReview ? "Edit your review of this series" : "Rate & review this series"}
+                </div>
+                {isAuthenticated ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 justify-center sm:justify-start">
+                      <span className="text-xs text-muted">Your Rating:</span>
+                      <div className="flex gap-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button
+                            key={star}
+                            type="button"
+                            onClick={() => setRating(star)}
+                            onMouseEnter={() => setHoverRating(star)}
+                            onMouseLeave={() => setHoverRating(0)}
+                            className="text-xl transition cursor-pointer"
+                            aria-label={`Rate ${star} stars`}
+                          >
+                            <span
+                              className={cn(
+                                star <= (hoverRating || rating)
+                                  ? "text-amber-400 font-bold"
+                                  : "text-muted/40"
+                              )}
+                            >
+                              ★
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <textarea
+                        value={reviewText}
+                        onChange={(e) => setReviewText(e.target.value)}
+                        placeholder="Write your review here... (optional)"
+                        className="min-h-16 w-full resize-none rounded-xl border border-white/10 bg-black/25 p-2 text-xs text-white outline-none placeholder:text-muted focus:border-primary/45"
+                      />
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        className="self-end"
+                        onClick={handleSubmitReview}
+                      >
+                        {existingReview ? "Update Review" : "Submit Review"}
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted text-center sm:text-left font-display">
+                    Please{" "}
+                    <Link href={`/login?redirectTo=/read/${chapterId}`} className="text-white underline font-semibold">
+                      log in
+                    </Link>{" "}
+                    to leave a rating &amp; review.
+                  </p>
+                )}
               </div>
             </div>
           ) : null}
