@@ -21,6 +21,7 @@ export function ThemeModeToggle({ className }: { className?: string }) {
   return (
     <button
       type="button"
+      id="tour-theme-toggle"
       onClick={toggleTheme}
       className={cn(
         "sf-clickable relative overflow-hidden grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/5 text-white transition hover:border-primary/40 hover:bg-white/8 cursor-pointer",

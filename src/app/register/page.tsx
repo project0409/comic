@@ -55,8 +55,10 @@ export default function RegisterPage() {
     }
 
     setSubmitting(true);
-    useWalletStore.getState().grantWelcomeBonusForNewUser(email.trim().toLowerCase());
-    setAuthFlash({ type: "register_success", email: email.trim().toLowerCase() });
+    const cleanedEmail = email.trim().toLowerCase();
+    useWalletStore.getState().grantWelcomeBonusForNewUser(cleanedEmail);
+    setAuthFlash({ type: "register_success", email: cleanedEmail });
+    localStorage.setItem(`fyp-onboarding-trigger-${cleanedEmail}`, "true");
     setSubmitting(false);
 
     toast({

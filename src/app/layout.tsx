@@ -4,6 +4,8 @@ import { AmbientProvider } from "@/features/reader/AmbientProvider";
 import { PWARegister } from "@/components/PWARegister";
 import { ThemeModeProvider } from "@/components/ThemeModeProvider";
 import { Toaster } from "@/components/Toaster";
+import { OnboardingTour } from "@/components/OnboardingTour";
+import { FloatingGuideAssistant } from "@/components/FloatingGuideAssistant";
 
 export const metadata: Metadata = {
   title: "FYP Comic Platform",
@@ -21,6 +23,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
           <PWARegister />
           <Toaster />
+          <OnboardingTour />
+          <FloatingGuideAssistant />
         </div>
       </body>
     </html>

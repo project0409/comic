@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Bookmark, Coins, LogOut, Pencil, Search, Settings, User, Wallet } from "lucide-react";
+import { Bell, Bookmark, Coins, HelpCircle, LogOut, Pencil, Search, Settings, User, Wallet } from "lucide-react";
 import Link from "@/compat/next-link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "@/compat/next-navigation";
@@ -13,6 +13,7 @@ import type { Series } from "@/lib/types";
 import { useWalletStore } from "@/store/walletStore";
 import { useToastStore } from "@/store/toastStore";
 import { useAuthStore } from "@/store/authStore";
+import { useOnboardingStore } from "@/store/onboardingStore";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -157,7 +158,7 @@ export function Navbar({
   }
 
   return (
-    <div className="sticky top-0 z-40 border-b border-white/5 bg-bg/75 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.22)] transition-all">
+    <div id="tour-navbar" className="sticky top-0 z-40 border-b border-white/5 bg-bg/75 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.22)] transition-all">
       <div className="flex w-full flex-wrap items-center gap-3 px-4 py-3 lg:flex-nowrap lg:gap-4">
         <Link href="/" className="sf-clickable flex shrink-0 items-center" aria-label="FYP home">
           <img
@@ -192,7 +193,7 @@ export function Navbar({
         </nav>
 
         <div className="order-3 flex min-w-full flex-col gap-3 md:order-none md:min-w-0 md:flex-1">
-          <div ref={searchRef} className="relative w-full md:max-w-[650px]">
+          <div ref={searchRef} id="tour-search-bar" className="relative w-full md:max-w-[650px]">
             <div className="flex min-w-0 items-center gap-2 rounded-2xl border border-white/10 bg-surface px-4 py-2.5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.02)] transition duration-200 focus-within:border-primary/45 focus-within:shadow-[0_0_22px_rgba(255,51,102,0.15)]">
               <Search className="h-4 w-4 text-muted" />
               <input
@@ -240,7 +241,7 @@ export function Navbar({
             ) : null}
           </div>
 
-          <div className="hidden items-center gap-2 md:flex" role="group" aria-label="Genre filters">
+          <div id="tour-genres" className="hidden items-center gap-2 md:flex" role="group" aria-label="Genre filters">
             {genres.map((g) => {
               const active = genre === g;
               return (
@@ -267,7 +268,7 @@ export function Navbar({
           {isAuthenticated ? (
             <>
               {role === "reader" ? (
-                <Button variant="outline" size="sm" onClick={() => router.push("/saved-stories")}>
+                <Button id="tour-reader-hub" variant="outline" size="sm" onClick={() => router.push("/saved-stories")}>
                   Reader Hub
                 </Button>
               ) : null}
@@ -291,8 +292,30 @@ export function Navbar({
               >
                 <Bell className="h-4 w-4 text-muted" />
               </button>
+
+              <button
+                id="tour-help-button"
+                className="sf-clickable grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/5 hover:border-highlight/30 hover:bg-white/8"
+                aria-label="Restart tour guide"
+                title="Take the Tour Again"
+                onClick={() => {
+                  const path = pathname || "/";
+                  if (path !== "/") {
+                    router.push("/");
+                    setTimeout(() => {
+                      useOnboardingStore.getState().set({ isTourActive: true, currentStep: 0, showWelcomeModal: false, showCompletionModal: false });
+                    }, 600);
+                  } else {
+                    useOnboardingStore.getState().set({ isTourActive: true, currentStep: 0, showWelcomeModal: false, showCompletionModal: false });
+                  }
+                }}
+              >
+                <HelpCircle className="h-4 w-4 text-muted" />
+              </button>
+
               <div className="relative z-50" ref={profileRef}>
                 <button
+                  id="tour-profile-menu"
                   className="sf-clickable flex h-10 items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-2.5 hover:border-primary/35 hover:bg-white/8"
                   aria-haspopup="menu"
                   aria-expanded={profileOpen}

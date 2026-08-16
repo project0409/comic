@@ -55,6 +55,9 @@ export default function GoogleAuthPage() {
 
     const profile = decodeGoogleCredential(result.credential);
     completeGoogleAuth(profile);
+    if (result.mode === "signup" && profile.email) {
+      localStorage.setItem(`fyp-onboarding-trigger-${profile.email.trim().toLowerCase()}`, "true");
+    }
     setAuthFlash({
       type: "login_success",
       displayName: profile.name || profile.email
@@ -91,6 +94,9 @@ export default function GoogleAuthPage() {
         if (resp.credential) {
           const profile = decodeGoogleCredential(resp.credential);
           completeGoogleAuth(profile);
+          if (mode === "signup" && profile.email) {
+            localStorage.setItem(`fyp-onboarding-trigger-${profile.email.trim().toLowerCase()}`, "true");
+          }
           toast({
             tone: "success",
             title: "Google connected",
