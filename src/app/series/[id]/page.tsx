@@ -1,16 +1,17 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "@/compat/next-link";
 import { useParams, useRouter } from "@/compat/next-navigation";
+import Link from "@/compat/next-link";
 import { motion } from "framer-motion";
-import { ArrowLeft, MessageSquare, Send } from "lucide-react";
+import { ArrowLeft, Bookmark, MessageSquare, Send } from "lucide-react";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import { Tabs } from "@/components/Tabs";
 import { cn } from "@/components/cn";
 import type { Chapter, Series } from "@/lib/types";
 import { UnlockModal } from "@/features/economy/UnlockModal";
+import { SaveToPlaylistModal } from "@/components/SaveToPlaylistModal";
 import { canGuestRead } from "@/lib/guestReaderLimit";
 import { useUiStore } from "@/store/uiStore";
 import { useWalletStore } from "@/store/walletStore";
@@ -18,6 +19,7 @@ import { useAuthStore } from "@/store/authStore";
 import { useToastStore } from "@/store/toastStore";
 import { useCommentStore } from "@/store/commentStore";
 import { useReviewStore } from "@/store/reviewStore";
+import { useVaultStore } from "@/store/vaultStore";
 
 type TabKey = "chapters" | "about" | "community";
 
@@ -104,6 +106,22 @@ export default function SeriesDetailPage() {
   const [comicCommentText, setComicCommentText] = useState("");
   const setAmbient = useUiStore((s) => s.setAmbientColor);
   const unlockedChapterIds = useWalletStore((s) => s.unlockedChapterIds);
+  const bookmarks = useVaultStore((s) => s.bookmarks);
+  const isSaved = series ? bookmarks.some((b) => b.seriesName === series.title) : false;
+  const [playlistOpen, setPlaylistOpen] = useState(false);
+
+  const handleToggleSave = () => {
+    if (!isAuthenticated) {
+      toast({
+        tone: "danger",
+        title: "Login Required",
+        message: "Please log in to save stories to your library."
+      });
+      router.push("/login");
+      return;
+    }
+    setPlaylistOpen(true);
+  };
 
   useEffect(() => {
     fetch("/api/series")
@@ -219,6 +237,18 @@ export default function SeriesDetailPage() {
                   <span className="text-white/40">No reviews yet</span>
                 </div>
               )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleToggleSave}
+                className={cn(
+                  "gap-1.5 h-8 text-xs transition-all border-white/10 hover:bg-white/10 hover:text-white text-white/90",
+                  isSaved ? "border-primary/50 text-primary bg-primary/10 hover:bg-primary/15" : ""
+                )}
+              >
+                <Bookmark className={cn("h-3.5 w-3.5", isSaved ? "fill-primary text-primary" : "")} />
+                <span>{isSaved ? "Saved" : "Save to Playlist"}</span>
+              </Button>
             </div>
 
             <div className="pt-2">
@@ -374,170 +404,190 @@ export default function SeriesDetailPage() {
             <h2 className="font-display text-2xl tracking-widest text-white">Customer Reviews &amp; Ratings</h2>
           </div>
 
-          <div className="grid gap-8 md:grid-cols-[280px_1fr]">
-            {/* Left Column: Breakdown */}
-            <div className="space-y-5">
-              <div className="space-y-1">
-                <div className="flex items-baseline gap-2">
-                  <span className="text-4xl font-extrabold text-white">{averageRating}</span>
-                  <span className="text-sm text-muted">out of 5</span>
-                </div>
-                <div className="flex gap-0.5">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <span
-                      key={star}
-                      className={cn(
-                        "text-xl",
-                        star <= Math.round(Number(averageRating)) ? "text-amber-400" : "text-muted/25"
-                      )}
-                    >
-                      ★
-                    </span>
-                  ))}
-                </div>
-                <div className="text-xs text-muted">
-                  {seriesReviews.length} total customer {seriesReviews.length === 1 ? 'rating' : 'ratings'}
-                </div>
-              </div>
-
-              {/* Breakdown Chart */}
-              <div className="space-y-2">
-                {([5, 4, 3, 2, 1] as const).map((stars) => {
-                  const pct = breakdown[stars];
-                  return (
-                    <div key={stars} className="flex items-center gap-2 text-xs text-white/85">
-                      <span className="w-8 shrink-0 hover:underline cursor-pointer">{stars} star</span>
-                      <div className="h-4 flex-1 rounded bg-black/40 overflow-hidden border border-white/5">
-                        <div
-                          className="h-full bg-gradient-to-r from-amber-500 to-amber-300 transition-all duration-500"
-                          style={{ width: `${pct}%` }}
-                        />
-                      </div>
-                      <span className="w-8 text-right shrink-0">{pct}%</span>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Write Review Form */}
-              <div className="border-t border-white/10 pt-5 space-y-3">
-                <div className="text-sm font-semibold text-white">
-                  {existingReview ? "Edit your review" : "Review this comic"}
-                </div>
-                {isAuthenticated ? (
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs text-muted">Rating:</span>
-                      <div className="flex gap-1">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <button
-                            key={star}
-                            type="button"
-                            onClick={() => setUserRating(star)}
-                            onMouseEnter={() => setUserHoverRating(star)}
-                            onMouseLeave={() => setUserHoverRating(0)}
-                            className="text-lg transition cursor-pointer"
-                            aria-label={`Rate ${star} stars`}
-                          >
-                            <span
-                              className={cn(
-                                star <= (userHoverRating || userRating)
-                                  ? "text-amber-400 font-bold"
-                                  : "text-muted/40"
-                              )}
-                            >
-                              ★
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <textarea
-                        value={userReviewText}
-                        onChange={(e) => setUserReviewText(e.target.value)}
-                        placeholder="What did you like or dislike? Write a review..."
-                        className="min-h-20 w-full resize-none rounded-xl border border-white/10 bg-black/25 p-3 text-xs text-white outline-none placeholder:text-muted focus:border-primary/45"
-                      />
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        className="w-full"
-                        onClick={submitSeriesReview}
-                      >
-                        {existingReview ? "Update Review" : "Submit Review"}
-                      </Button>
-                    </div>
+          {isSaved ? (
+            <div className="grid gap-8 md:grid-cols-[280px_1fr]">
+              {/* Left Column: Breakdown */}
+              <div className="space-y-5">
+                <div className="space-y-1">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-4xl font-extrabold text-white">{averageRating}</span>
+                    <span className="text-sm text-muted">out of 5</span>
                   </div>
-                ) : (
-                  <p className="text-xs text-muted leading-relaxed">
-                    You must be{" "}
-                    <Link href={`/login?redirectTo=/series/${id}`} className="text-white underline font-semibold">
-                      logged in
-                    </Link>{" "}
-                    to leave a customer rating and review.
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Right Column: Reviews List */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-2">Customer Reviews</h3>
-              {seriesReviews.length > 0 ? (
-                <div className="space-y-3 max-h-[480px] overflow-y-auto pr-2 divide-y divide-white/5">
-                  {seriesReviews.map((rev) => {
-                    const isOwnReview = rev.userEmail === userEmail;
-                    return (
-                      <div key={rev.id} className={cn("pt-3 first:pt-0 space-y-2", isOwnReview && "pb-2 bg-white/5 px-3 py-2 rounded-xl border border-white/5")}>
-                        <div className="flex items-center justify-between gap-3">
-                          <div className="flex items-center gap-2">
-                            <div className="h-7 w-7 rounded-full bg-gradient-to-tr from-primary to-highlight text-white text-[11px] font-bold flex items-center justify-center shadow">
-                              {rev.userName.slice(0, 2).toUpperCase()}
-                            </div>
-                            <div className="text-xs">
-                              <span className="font-semibold text-white">{rev.userName}</span>
-                              {isOwnReview && (
-                                <span className="ml-2 inline-block px-1.5 py-0.5 rounded bg-primary/20 text-primary text-[9px] font-bold">
-                                  Your Review
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                          <span className="text-[10px] text-muted">{new Date(rev.atIso).toLocaleDateString()}</span>
-                        </div>
-                        
-                        <div className="flex gap-0.5">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <span
-                              key={star}
-                              className={cn(
-                                "text-sm",
-                                star <= rev.rating ? "text-amber-400" : "text-muted/25"
-                              )}
-                            >
-                              ★
-                            </span>
-                          ))}
-                        </div>
-
-                        {rev.reviewText && (
-                          <p className="text-xs text-white/80 leading-relaxed pl-1">
-                            {rev.reviewText}
-                          </p>
+                  <div className="flex gap-0.5">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <span
+                        key={star}
+                        className={cn(
+                          "text-xl",
+                          star <= Math.round(Number(averageRating)) ? "text-amber-400" : "text-muted/25"
                         )}
+                      >
+                        ★
+                      </span>
+                    ))}
+                  </div>
+                  <div className="text-xs text-muted">
+                    {seriesReviews.length} total customer {seriesReviews.length === 1 ? 'rating' : 'ratings'}
+                  </div>
+                </div>
+
+                {/* Breakdown Chart */}
+                <div className="space-y-2">
+                  {([5, 4, 3, 2, 1] as const).map((stars) => {
+                    const pct = breakdown[stars];
+                    return (
+                      <div key={stars} className="flex items-center gap-2 text-xs text-white/85">
+                        <span className="w-8 shrink-0 hover:underline cursor-pointer">{stars} star</span>
+                        <div className="h-4 flex-1 rounded bg-black/40 overflow-hidden border border-white/5">
+                          <div
+                            className="h-full bg-gradient-to-r from-amber-500 to-amber-300 transition-all duration-500"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                        <span className="w-8 text-right shrink-0">{pct}%</span>
                       </div>
                     );
                   })}
                 </div>
-              ) : (
-                <div className="text-center py-10 rounded-2xl border border-dashed border-white/10 bg-black/10">
-                  <p className="text-sm text-muted font-display">No customer reviews yet. Be the first to review this comic!</p>
+
+                {/* Write Review Form */}
+                <div className="border-t border-white/10 pt-5 space-y-3">
+                  <div className="text-sm font-semibold text-white">
+                    {existingReview ? "Edit your review" : "Review this comic"}
+                  </div>
+                  {isAuthenticated ? (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs text-muted">Rating:</span>
+                        <div className="flex gap-1">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <button
+                              key={star}
+                              type="button"
+                              onClick={() => setUserRating(star)}
+                              onMouseEnter={() => setUserHoverRating(star)}
+                              onMouseLeave={() => setUserHoverRating(0)}
+                              className="text-lg transition cursor-pointer"
+                              aria-label={`Rate ${star} stars`}
+                            >
+                              <span
+                                className={cn(
+                                  star <= (userHoverRating || userRating)
+                                    ? "text-amber-400 font-bold"
+                                    : "text-muted/40"
+                                )}
+                              >
+                                ★
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <textarea
+                          value={userReviewText}
+                          onChange={(e) => setUserReviewText(e.target.value)}
+                          placeholder="What did you like or dislike? Write a review..."
+                          className="min-h-20 w-full resize-none rounded-xl border border-white/10 bg-black/25 p-3 text-xs text-white outline-none placeholder:text-muted focus:border-primary/45"
+                        />
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          className="w-full"
+                          onClick={submitSeriesReview}
+                        >
+                          {existingReview ? "Update Review" : "Submit Review"}
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted leading-relaxed">
+                      You must be{" "}
+                      <Link href={`/login?redirectTo=/series/${id}`} className="text-white underline font-semibold">
+                        logged in
+                      </Link>{" "}
+                      to leave a customer rating and review.
+                    </p>
+                  )}
                 </div>
-              )}
+              </div>
+
+              {/* Right Column: Reviews List */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-2">Customer Reviews</h3>
+                {seriesReviews.length > 0 ? (
+                  <div className="space-y-3 max-h-[480px] overflow-y-auto pr-2 divide-y divide-white/5">
+                    {seriesReviews.map((rev) => {
+                      const isOwnReview = rev.userEmail === userEmail;
+                      return (
+                        <div key={rev.id} className={cn("pt-3 first:pt-0 space-y-2", isOwnReview && "pb-2 bg-white/5 px-3 py-2 rounded-xl border border-white/5")}>
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-2">
+                              <div className="h-7 w-7 rounded-full bg-gradient-to-tr from-primary to-highlight text-white text-[11px] font-bold flex items-center justify-center shadow">
+                                {rev.userName.slice(0, 2).toUpperCase()}
+                              </div>
+                              <div className="text-xs">
+                                <span className="font-semibold text-white">{rev.userName}</span>
+                                {isOwnReview && (
+                                  <span className="ml-2 inline-block px-1.5 py-0.5 rounded bg-primary/20 text-primary text-[9px] font-bold">
+                                    Your Review
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <span className="text-[10px] text-muted">{new Date(rev.atIso).toLocaleDateString()}</span>
+                          </div>
+                          
+                          <div className="flex gap-0.5">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <span
+                                key={star}
+                                className={cn(
+                                  "text-sm",
+                                  star <= rev.rating ? "text-amber-400" : "text-muted/25"
+                                )}
+                              >
+                                ★
+                              </span>
+                            ))}
+                          </div>
+
+                          {rev.reviewText && (
+                            <p className="text-xs text-white/80 leading-relaxed pl-1">
+                              {rev.reviewText}
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center py-10 rounded-2xl border border-dashed border-white/10 bg-black/10">
+                    <p className="text-sm text-muted font-display">No customer reviews yet. Be the first to review this comic!</p>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="text-center py-12 rounded-3xl border-2 border-dashed border-white/10 bg-black/15 max-w-xl mx-auto space-y-4 px-6 my-2">
+              <div className="text-3xl select-none">🔒</div>
+              <div className="space-y-1">
+                <h3 className="text-lg font-bold text-white font-display">Customer Reviews are Gated</h3>
+                <p className="text-xs text-muted leading-relaxed">
+                  Please save this comic series to your library/playlist to read reviews, view ratings, and share your feedback.
+                </p>
+              </div>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handleToggleSave}
+                className="gap-1.5 font-bold shadow-lg shadow-primary/25 rounded-full"
+              >
+                <Bookmark className="h-4 w-4" /> Save to Playlist &amp; Unlock
+              </Button>
+            </div>
+          )}
         </div>
 
         <div className="sf-comic-panel sf-comic-surface rounded-3xl border border-white/10 bg-card p-5">
@@ -593,6 +643,14 @@ export default function SeriesDetailPage() {
           setUnlockTarget(null);
         }}
       />
+
+      {series && (
+        <SaveToPlaylistModal
+          open={playlistOpen}
+          series={series}
+          onClose={() => setPlaylistOpen(false)}
+        />
+      )}
     </div>
   );
 }

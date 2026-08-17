@@ -3,7 +3,7 @@
 import Link from "@/compat/next-link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, ChevronLeft, ChevronRight, Eye, EyeOff, Layers, MessageSquare, Send, Shield, Volume2, VolumeX, WandSparkles, X } from "lucide-react";
+import { ArrowLeft, Bookmark, ChevronLeft, ChevronRight, Eye, EyeOff, Layers, MessageSquare, Send, Shield, Volume2, VolumeX, WandSparkles, X } from "lucide-react";
 import { Button } from "@/components/Button";
 import { cn } from "@/components/cn";
 import { getChapterPages } from "@/lib/api";
@@ -21,6 +21,8 @@ import { useToastStore } from "@/store/toastStore";
 import { CanvasPage } from "./CanvasPage";
 import { ReactionPicker } from "./ReactionPicker";
 import { LoreMasterOverlay } from "@/features/loremaster/LoreMasterOverlay";
+import { useRouter } from "@/compat/next-navigation";
+import { SaveToPlaylistModal } from "@/components/SaveToPlaylistModal";
 
 export function ImmersiveReader({ chapterId }: { chapterId: string }) {
   const series = useMemo(() => {
@@ -54,6 +56,7 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
 
   const addReaction = useVaultStore((s) => s.addReaction);
   const addBookmark = useVaultStore((s) => s.addBookmark);
+  const bookmarks = useVaultStore((s) => s.bookmarks);
   const displayName = useAuthStore((s) => s.displayName);
   const userEmail = useAuthStore((s) => s.email);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -72,9 +75,16 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
     return reviews.find((r) => r.seriesId === series.id && r.userEmail === userEmail) ?? null;
   }, [reviews, series, userEmail]);
 
+  const router = useRouter();
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
+  const [playlistOpen, setPlaylistOpen] = useState(false);
+
+  const isSaved = useMemo(() => {
+    if (!series) return false;
+    return bookmarks.some((b) => b.seriesName === series.title);
+  }, [bookmarks, series]);
 
   useEffect(() => {
     if (existingReview) {
@@ -398,66 +408,94 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
               </div>
 
               {/* Review & Rating Form */}
-              <div className="mt-4 border-t border-white/10 pt-4 text-left max-w-md mx-auto space-y-3">
-                <div className="text-sm font-semibold text-white text-center sm:text-left">
-                  {existingReview ? "Edit your review of this series" : "Rate & review this series"}
-                </div>
-                {isAuthenticated ? (
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2 justify-center sm:justify-start">
-                      <span className="text-xs text-muted">Your Rating:</span>
-                      <div className="flex gap-1">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <button
-                            key={star}
-                            type="button"
-                            onClick={() => setRating(star)}
-                            onMouseEnter={() => setHoverRating(star)}
-                            onMouseLeave={() => setHoverRating(0)}
-                            className="text-xl transition cursor-pointer"
-                            aria-label={`Rate ${star} stars`}
-                          >
-                            <span
-                              className={cn(
-                                star <= (hoverRating || rating)
-                                  ? "text-amber-400 font-bold"
-                                  : "text-muted/40"
-                              )}
+              {isSaved ? (
+                <div className="mt-4 border-t border-white/10 pt-4 text-left max-w-md mx-auto space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm font-semibold text-white">
+                      {existingReview ? "Edit your review of this series" : "Rate & review this series"}
+                    </div>
+                    <span className="text-[10px] text-emerald-400 font-bold bg-emerald-400/10 px-2.5 py-0.5 rounded-full border border-emerald-400/20">
+                      ✓ Saved in Playlist
+                    </span>
+                  </div>
+                  {isAuthenticated ? (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 justify-center sm:justify-start">
+                        <span className="text-xs text-muted">Your Rating:</span>
+                        <div className="flex gap-1">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <button
+                              key={star}
+                              type="button"
+                              onClick={() => setRating(star)}
+                              onMouseEnter={() => setHoverRating(star)}
+                              onMouseLeave={() => setHoverRating(0)}
+                              className="text-xl transition cursor-pointer"
+                              aria-label={`Rate ${star} stars`}
                             >
-                              ★
-                            </span>
-                          </button>
-                        ))}
+                              <span
+                                className={cn(
+                                  star <= (hoverRating || rating)
+                                    ? "text-amber-400 font-bold"
+                                    : "text-muted/40"
+                                )}
+                              >
+                                ★
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-2">
+                        <textarea
+                          value={reviewText}
+                          onChange={(e) => setReviewText(e.target.value)}
+                          placeholder="Write your review here... (optional)"
+                          className="min-h-16 w-full resize-none rounded-xl border border-white/10 bg-black/25 p-2 text-xs text-white outline-none placeholder:text-muted focus:border-primary/45"
+                        />
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          className="self-end"
+                          onClick={handleSubmitReview}
+                        >
+                          {existingReview ? "Update Review" : "Submit Review"}
+                        </Button>
                       </div>
                     </div>
-
-                    <div className="flex flex-col gap-2">
-                      <textarea
-                        value={reviewText}
-                        onChange={(e) => setReviewText(e.target.value)}
-                        placeholder="Write your review here... (optional)"
-                        className="min-h-16 w-full resize-none rounded-xl border border-white/10 bg-black/25 p-2 text-xs text-white outline-none placeholder:text-muted focus:border-primary/45"
-                      />
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        className="self-end"
-                        onClick={handleSubmitReview}
-                      >
-                        {existingReview ? "Update Review" : "Submit Review"}
-                      </Button>
+                  ) : (
+                    <div className="text-xs text-muted text-center py-2">
+                      Please log in to write a review.
                     </div>
-                  </div>
-                ) : (
-                  <p className="text-xs text-muted text-center sm:text-left font-display">
-                    Please{" "}
-                    <Link href={`/login?redirectTo=/read/${chapterId}`} className="text-white underline font-semibold">
-                      log in
-                    </Link>{" "}
-                    to leave a rating &amp; review.
+                  )}
+                </div>
+              ) : (
+                <div className="mt-4 border-t border-white/10 pt-4 text-center max-w-md mx-auto space-y-3">
+                  <p className="text-xs text-muted leading-relaxed font-bold">
+                    Please save this comic to your library to enable ratings and customer reviews.
                   </p>
-                )}
-              </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      if (!isAuthenticated) {
+                        toast({
+                          tone: "danger",
+                          title: "Login Required",
+                          message: "Please log in to save stories to your library."
+                        });
+                        router.push("/login");
+                        return;
+                      }
+                      setPlaylistOpen(true);
+                    }}
+                    className="gap-1.5 border-primary/45 text-primary hover:bg-primary/10 transition"
+                  >
+                    <Bookmark className="h-3.5 w-3.5" /> Save Story to Playlist
+                  </Button>
+                </div>
+              )}
             </div>
           ) : null}
 
@@ -574,6 +612,14 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
           </motion.button>
         ) : null}
       </AnimatePresence>
+
+      {series && (
+        <SaveToPlaylistModal
+          open={playlistOpen}
+          series={series}
+          onClose={() => setPlaylistOpen(false)}
+        />
+      )}
     </div>
   );
 }

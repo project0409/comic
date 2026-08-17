@@ -404,13 +404,13 @@ export function OnboardingTour() {
             >
 
 
-              {/* Chibi Anime Guide Character */}
+              {/* Floating Guide Robot Mascot */}
               <div
                 className={`absolute pointer-events-none transition-all duration-300 ${
                   isNearLeftEdge
-                    ? "md:-right-20 md:left-auto md:scale-x-[-1]"
-                    : "md:-left-20 md:right-auto md:scale-x-[1]"
-                } md:top-1/2 md:-translate-y-1/2 md:bottom-auto md:w-36 md:h-36 -top-24 left-1/2 -translate-x-1/2 md:translate-x-0 w-32 h-32 z-20`}
+                    ? "md:-right-32 md:left-auto md:scale-x-[-1]"
+                    : "md:-left-32 md:right-auto md:scale-x-[1]"
+                } md:top-1/2 md:-translate-y-1/2 md:bottom-auto md:w-36 md:h-36 -top-28 left-1/2 -translate-x-1/2 md:translate-x-0 w-32 h-32 z-20`}
               >
                 <GuideMascot
                   pose={currentStep === 0 ? "waving" : "pointing"}
