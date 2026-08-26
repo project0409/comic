@@ -17,8 +17,8 @@ import { useOnboardingStore } from "@/store/onboardingStore";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
-  { href: "/discover", label: "Discover" },
   { href: "/series", label: "Series" },
+  { href: "/library", label: "Library" },
   { href: "/vault", label: "Vault" }
 ];
 const PREFERRED_GENRE_ORDER = ["Action", "Romance", "Horror", "Mystery", "Fantasy", "Sci-Fi"];
@@ -101,7 +101,7 @@ export function Navbar({
       { href: "/profile", label: "Profile", icon: User },
       { href: "/profile/edit", label: "Edit Profile", icon: Pencil },
       { href: "/settings", label: "Settings", icon: Settings },
-      { href: "/saved-stories", label: "Saved Stories", icon: Bookmark },
+      { href: "/library", label: "Library", icon: Bookmark },
       { href: "/wallet", label: "Wallet", icon: Wallet }
     ];
     if (role === "writer" || role === "admin") {
@@ -241,7 +241,7 @@ export function Navbar({
             ) : null}
           </div>
 
-          <div id="tour-genres" className="hidden items-center gap-2 md:flex" role="group" aria-label="Genre filters">
+          <div id="tour-genres" className="hidden items-center gap-2 md:flex overflow-x-auto whitespace-nowrap max-w-[280px] sm:max-w-[400px] md:max-w-[420px] lg:max-w-[650px] scrollbar-none py-1 flex-nowrap select-none" role="group" aria-label="Genre filters">
             {genres.map((g) => {
               const active = genre === g;
               return (

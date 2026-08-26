@@ -1,4 +1,4 @@
-import type { Chapter, ChapterPage, ReleaseCalendarItem, Series } from "./types";
+import type { Chapter, ChapterPage, ReleaseCalendarItem, Series, Author } from "./types";
 
 export const firstChapterBySeries: Record<string, string> = {
   s1: "c1",
@@ -23,7 +23,8 @@ export const releaseCalendar: ReleaseCalendarItem[] = [
     genre: "Sci-Fi",
     subgenre: "Cyberpunk",
     releaseDateLabel: "July 20, 2026",
-    status: "ComingSoon"
+    status: "ComingSoon",
+    writerName: "Sanjay V."
   },
   {
     id: "rc2",
@@ -31,7 +32,8 @@ export const releaseCalendar: ReleaseCalendarItem[] = [
     genre: "Steampunk",
     subgenre: "Action",
     releaseDateLabel: "July 25, 2026",
-    status: "ComingSoon"
+    status: "ComingSoon",
+    writerName: "Rupa D."
   },
   {
     id: "rc3",
@@ -39,7 +41,8 @@ export const releaseCalendar: ReleaseCalendarItem[] = [
     genre: "Sci-Fi",
     subgenre: "Cyberpunk",
     releaseDateLabel: "Pending Approval",
-    status: "InQueue"
+    status: "InQueue",
+    writerName: "Sanjay V."
   }
 ];
 
@@ -238,4 +241,63 @@ export function buildMockPages(chapterId: string): ChapterPage[] {
       ]
     } satisfies ChapterPage;
   });
+}
+
+export const mockAuthors: Author[] = [
+  {
+    id: "a1",
+    name: "Sanjay V.",
+    bio: "Sanjay V. is a veteran cyber-author from Neo-Delhi specializing in gritty street-level hacker fiction, neon worldbuilding, and AI integration systems.",
+    avatarUrl: "https://api.dicebear.com/7.x/bottts/svg?seed=Sanjay",
+    followerCount: 1250
+  },
+  {
+    id: "a2",
+    name: "Rupa D.",
+    bio: "Rupa D. crafts grand mechanical fantasy and dragon-drive steampunks. Champion of rune-smith folklore and antique mechanical designs.",
+    avatarUrl: "https://api.dicebear.com/7.x/bottts/svg?seed=Rupa",
+    followerCount: 3400
+  },
+  {
+    id: "a3",
+    name: "S. Rava",
+    bio: "S. Rava lives and breathes high-stakes action scenes, rooftop snipers, and high-altitude chases. Perfecting the fast-paced cinematic comic medium.",
+    avatarUrl: "https://api.dicebear.com/7.x/bottts/svg?seed=Rava",
+    followerCount: 890
+  },
+  {
+    id: "a4",
+    name: "N. Kade",
+    bio: "N. Kade is a dimension-hopping cartographer who writes speculative quantum fiction where pages and rooms actively rewrite themselves.",
+    avatarUrl: "https://api.dicebear.com/7.x/bottts/svg?seed=Kade",
+    followerCount: 2200
+  },
+  {
+    id: "a5",
+    name: "Mira K.",
+    bio: "Mira K. writes high-speed tech-romance where pilots trade encrypted logs and racing hearts. Combining romantic tension with sleek hovercraft races.",
+    avatarUrl: "https://api.dicebear.com/7.x/bottts/svg?seed=Mira",
+    followerCount: 1540
+  },
+  {
+    id: "a6",
+    name: "A. Varun",
+    bio: "A. Varun curates deep late-night cosmic horror signals. Explores missing frequencies, phantom dial-ins, and radio-wave nightmares.",
+    avatarUrl: "https://api.dicebear.com/7.x/bottts/svg?seed=Varun",
+    followerCount: 930
+  },
+  {
+    id: "a7",
+    name: "I. Sen",
+    bio: "I. Sen is an architecture-sleuth crafting mirror-room whodunits, glass labyrinth secrets, and clues hidden inside absolute reflections.",
+    avatarUrl: "https://api.dicebear.com/7.x/bottts/svg?seed=Sen",
+    followerCount: 1110
+  }
+];
+
+export function getAuthorId(writerName: string): string {
+  if (!writerName) return "a1";
+  const name = writerName.trim().toLowerCase();
+  const author = mockAuthors.find((a) => a.name.toLowerCase() === name);
+  return author ? author.id : "a1";
 }

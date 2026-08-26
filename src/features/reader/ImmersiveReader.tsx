@@ -57,6 +57,7 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
   const addReaction = useVaultStore((s) => s.addReaction);
   const addBookmark = useVaultStore((s) => s.addBookmark);
   const bookmarks = useVaultStore((s) => s.bookmarks);
+  const addHistory = useVaultStore((s) => s.addHistory);
   const displayName = useAuthStore((s) => s.displayName);
   const userEmail = useAuthStore((s) => s.email);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -85,6 +86,12 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
     if (!series) return false;
     return bookmarks.some((b) => b.seriesName === series.title);
   }, [bookmarks, series]);
+
+  useEffect(() => {
+    if (series && addHistory) {
+      addHistory(series.id, chapterId);
+    }
+  }, [series, chapterId, addHistory]);
 
   useEffect(() => {
     if (existingReview) {

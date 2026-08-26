@@ -6,7 +6,7 @@ import { Bookmark, Star } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import type { Series } from "@/lib/types";
-import { firstChapterBySeries } from "@/lib/mockData";
+import { firstChapterBySeries, getAuthorId } from "@/lib/mockData";
 import { canGuestRead } from "@/lib/guestReaderLimit";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
@@ -127,7 +127,13 @@ export function CatalogSeriesCard({ series }: { series: Series }) {
         <div className="flex min-w-0 flex-1 flex-col justify-between gap-3">
           <div>
             <div className="mb-1 flex flex-wrap items-center gap-2 text-xs text-muted">
-              <span className="font-semibold text-white">{series.writerName}</span>
+              <Link
+                href={`/author/${getAuthorId(series.writerName)}`}
+                className="font-semibold text-white hover:text-primary transition hover:underline"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {series.writerName}
+              </Link>
               <span>|</span>
               <span>{formatReads(series.readers)}</span>
             </div>

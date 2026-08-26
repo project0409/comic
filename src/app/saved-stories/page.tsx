@@ -95,7 +95,7 @@ export default function SavedStoriesPage() {
             <p className="text-sm text-muted mt-1">Comics and chapters saved to your library for quick access.</p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => router.push("/discover")}>
+            <Button variant="outline" size="sm" onClick={() => router.push("/")}>
               Explore More
             </Button>
             <Button variant="outline" size="sm" onClick={() => router.push("/vault")}>

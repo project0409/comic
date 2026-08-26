@@ -21,6 +21,7 @@ export type ReleaseCalendarItem = {
   subgenre: string;
   releaseDateLabel: string;
   status: "ComingSoon" | "InQueue";
+  writerName?: string;
 };
 
 export type Chapter = {
@@ -49,4 +50,12 @@ export type ChapterPage = {
   mood?: "Suspense" | "Action" | "Romantic";
   ambientColorHex: string;
   panelCoordinates: PagePanelCoord[];
+};
+
+export type Author = {
+  id: string;
+  name: string;
+  avatarUrl: string;
+  bio: string;
+  followerCount: number;
 };

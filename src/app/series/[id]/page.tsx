@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "@/compat/next-navigation";
 import Link from "@/compat/next-link";
 import { motion } from "framer-motion";
-import { ArrowLeft, Bookmark, MessageSquare, Send } from "lucide-react";
+import { ArrowLeft, Bookmark, ChevronRight, MessageSquare, Send } from "lucide-react";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import { Tabs } from "@/components/Tabs";
@@ -20,6 +20,8 @@ import { useToastStore } from "@/store/toastStore";
 import { useCommentStore } from "@/store/commentStore";
 import { useReviewStore } from "@/store/reviewStore";
 import { useVaultStore } from "@/store/vaultStore";
+import { getAuthorId, mockAuthors, seriesList } from "@/lib/mockData";
+import { useAuthorStore } from "@/store/authorStore";
 
 type TabKey = "chapters" | "about" | "community";
 
@@ -57,7 +59,7 @@ export default function SeriesDetailPage() {
       const numKey = Number(key) as 5 | 4 | 3 | 2 | 1;
       acc[numKey] = total > 0 ? Math.round((counts[numKey] / total) * 100) : 0;
       return acc;
-    }, {} as Record<5 | 4 | 3 | 2 | 1, number>);
+    }, { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 } as Record<5 | 4 | 3 | 2 | 1, number>);
   }, [seriesReviews]);
 
   const existingReview = useMemo(() => {
@@ -109,6 +111,24 @@ export default function SeriesDetailPage() {
   const bookmarks = useVaultStore((s) => s.bookmarks);
   const isSaved = series ? bookmarks.some((b) => b.seriesName === series.title) : false;
   const [playlistOpen, setPlaylistOpen] = useState(false);
+
+  const followedIds = useAuthorStore((s) => s.followedAuthorIds);
+  const toggleFollow = useAuthorStore((s) => s.toggleFollow);
+
+  const author = useMemo(() => {
+    if (!series) return null;
+    return mockAuthors.find((a) => a.name.toLowerCase() === series.writerName.toLowerCase()) ?? null;
+  }, [series]);
+
+  const isFollowing = useMemo(() => {
+    if (!author) return false;
+    return followedIds.includes(author.id);
+  }, [followedIds, author]);
+
+  const authorComicsCount = useMemo(() => {
+    if (!series) return 0;
+    return seriesList.filter((s) => s.writerName.toLowerCase() === series.writerName.toLowerCase()).length;
+  }, [series]);
 
   const handleToggleSave = () => {
     if (!isAuthenticated) {
@@ -195,7 +215,7 @@ export default function SeriesDetailPage() {
         {/* Dedicated "Exit Comic" Navigation button */}
         <div className="relative mx-auto max-w-5xl px-4 pt-4 z-20">
           <Link
-            href="/discover"
+            href="/"
             className="sf-clickable inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-semibold text-white/90 hover:bg-white/10 hover:text-white transition shadow-sm"
             title="Exit Comic: Back to Comic Library"
           >
@@ -222,7 +242,15 @@ export default function SeriesDetailPage() {
             <h1 className="font-display text-4xl font-bold tracking-widest text-white drop-shadow-[0_0_18px_rgba(255,51,102,0.18)] md:text-5xl">
               {series.title}
             </h1>
-            <div className="text-sm text-white/80">by <span className="font-semibold text-white">{series.writerName}</span></div>
+            <div className="text-sm text-white/80">
+              by{" "}
+              <Link
+                href={`/author/${getAuthorId(series.writerName)}`}
+                className="font-semibold text-primary hover:underline transition"
+              >
+                {series.writerName}
+              </Link>
+            </div>
             <div className="flex flex-wrap items-center gap-2">
               <Badge tone="muted">{series.genre}</Badge>
               <Badge tone="primary">{series.readers.toLocaleString()} readers</Badge>
@@ -250,6 +278,70 @@ export default function SeriesDetailPage() {
                 <span>{isSaved ? "Saved" : "Save to Playlist"}</span>
               </Button>
             </div>
+
+            {/* Creator Badge Widget Card */}
+            {author && (
+              <div className="overflow-hidden rounded-2xl border-2 border-primary bg-white p-4 text-slate-900 shadow-xl max-w-xl my-2">
+                <div className="flex flex-row items-center justify-between gap-4 flex-wrap sm:flex-nowrap">
+                  {/* Left Column: Avatar + Name info */}
+                  <Link
+                    href={`/author/${author.id}`}
+                    className="flex items-center gap-3.5 group min-w-0"
+                  >
+                    <div className="h-14 w-14 shrink-0 rounded-full overflow-hidden border border-slate-200 bg-slate-100 flex items-center justify-center p-1 shadow-inner">
+                      <img
+                        src={author.avatarUrl}
+                        alt={author.name}
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+                    <div className="min-w-0">
+                      <span className="block text-[10px] font-black uppercase tracking-wider text-slate-400">
+                        Story &amp; Art by
+                      </span>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <span className="font-display font-black text-slate-900 tracking-wide text-base truncate group-hover:text-primary transition-colors">
+                          {author.name}
+                        </span>
+                        {/* Purple Verified Checkmark */}
+                        <svg className="h-4.5 w-4.5 shrink-0 text-[#7C3AED]" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                        </svg>
+                      </div>
+                    </div>
+                  </Link>
+
+                  {/* Right Column: Follow Button + Comics Count link */}
+                  <div className="flex items-center gap-4 shrink-0 w-full justify-between sm:w-auto sm:justify-end">
+                    <Button
+                      variant={isFollowing ? "outline" : "primary"}
+                      size="sm"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleFollow(author.id);
+                      }}
+                      className={cn(
+                        "h-8 text-xs px-3.5 font-bold rounded-xl shadow-none",
+                        isFollowing
+                          ? "border-purple-600 text-purple-600 bg-purple-50 hover:bg-purple-100/50"
+                          : "bg-purple-100 hover:bg-purple-200/80 text-purple-700 border-none"
+                      )}
+                    >
+                      {isFollowing ? "Following" : "+ Follow"}
+                    </Button>
+
+                    <Link
+                      href={`/author/${author.id}`}
+                      className="text-xs font-black text-slate-500 hover:text-primary transition flex items-center gap-1"
+                    >
+                      <span>{authorComicsCount} {authorComicsCount === 1 ? "Comic" : "Comics"}</span>
+                      <ChevronRight className="h-4 w-4 stroke-[2.5px] text-slate-400" />
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="pt-2">
               <Tabs<TabKey>
