@@ -7,7 +7,7 @@ import { useOnboardingStore } from "@/store/onboardingStore";
 import { usePathname, useRouter } from "@/compat/next-navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { GuideMascot } from "./GuideMascot";
-import { Play, RotateCcw, X, MessageSquare, Send, Sparkles, ChevronRight } from "lucide-react";
+import { Play, X, MessageSquare, Send, Sparkles, ChevronRight } from "lucide-react";
 import { seriesList } from "@/lib/mockData";
 import { cn } from "@/components/cn";
 import { Button } from "./Button";
@@ -198,13 +198,7 @@ export function FloatingGuideAssistant() {
                 Take a website tour
               </button>
 
-              <button
-                onClick={handleStartTour}
-                className="sf-clickable flex items-center gap-2.5 px-3 py-2 text-xs rounded-xl text-left text-muted hover:bg-white/5 hover:text-white transition-colors"
-              >
-                <RotateCcw className="h-3.5 w-3.5 text-primary" />
-                Restart the guide
-              </button>
+
 
               <button
                 onClick={() => setMenuOpen(false)}

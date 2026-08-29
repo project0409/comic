@@ -52,7 +52,7 @@ export function CarouselRow({ title, items }: { title: string; items: Series[] }
 
       <motion.div
         ref={scrollRef}
-        className="flex gap-4 overflow-x-auto pb-3 pt-1 scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex gap-4 overflow-x-auto pb-6 pt-6 -mt-5 -mb-3 scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         initial={{ opacity: 0, y: 6 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}

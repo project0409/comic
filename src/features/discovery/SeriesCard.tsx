@@ -44,9 +44,9 @@ export function SeriesCard({ series, statusBadge = "New" }: { series: Series; st
       initial={{ opacity: 0, y: 12 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-40px" }}
-      whileHover={{ y: -6 }}
+      whileHover={{ y: -6, zIndex: 10 }}
       transition={{ type: "spring", stiffness: 260, damping: 18 }}
-      className="shrink-0 w-full sm:w-auto"
+      className="shrink-0 w-full sm:w-auto relative"
     >
       <Link
         href={`/series/${series.id}`}
