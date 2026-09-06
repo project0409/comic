@@ -22,7 +22,7 @@ export default function WriterDashboardPage() {
     () => [
       { label: "Total reads", value: "48,204" },
       { label: "Active series", value: "3" },
-      { label: "Coins earned", value: "1,824" },
+      { label: "Reader Reviews", value: "1,824" },
       { label: "Pending approvals", value: "2" }
     ],
     []
@@ -148,8 +148,8 @@ export default function WriterDashboardPage() {
               <input className="mt-1 w-full rounded-2xl border border-white/10 bg-black/25 px-4 py-3 text-sm outline-none" defaultValue="Neon Vows" />
             </label>
             <label className="block text-xs text-muted">
-              Early access price (coins)
-              <input className="mt-1 w-full rounded-2xl border border-white/10 bg-black/25 px-4 py-3 text-sm outline-none" defaultValue="5" />
+              Access type
+              <input className="mt-1 w-full rounded-2xl border border-white/10 bg-black/25 px-4 py-3 text-sm outline-none text-muted" defaultValue="Free Release (Standard)" readOnly />
             </label>
 
             <Button

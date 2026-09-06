@@ -1,19 +1,19 @@
 "use client";
 
-import { Coins, Star, BookOpen, Users } from "lucide-react";
+import { Sparkles, Star, BookOpen, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import { platformStats } from "@/lib/mockData";
 import { cn } from "@/components/cn";
 
-export function StatsBar({ coinBalance }: { coinBalance: number }) {
+export function StatsBar() {
   const stats = [
     {
-      icon: Coins,
-      label: "Available Balance",
-      value: `${coinBalance}`,
-      suffix: "Coins",
+      icon: Sparkles,
+      label: "Comic Catalog",
+      value: "100%",
+      suffix: "Free Access",
       accent: "text-purple-400 bg-purple-500/10 border-purple-500/20",
-      growth: "↑ 12.5%"
+      growth: "No Paywalls"
     },
     {
       icon: Star,

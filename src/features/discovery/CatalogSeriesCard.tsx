@@ -6,10 +6,11 @@ import { Bookmark, Star } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import type { Series } from "@/lib/types";
-import { firstChapterBySeries, getAuthorId } from "@/lib/mockData";
+import { firstChapterBySeries, getAuthorId, isTopAuthor } from "@/lib/mockData";
 import { canGuestRead } from "@/lib/guestReaderLimit";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
+import { InstagramAuthorStar } from "@/components/InstagramAuthorStar";
 import { useVaultStore } from "@/store/vaultStore";
 import { useToastStore } from "@/store/toastStore";
 import { useAuthStore } from "@/store/authStore";
@@ -129,10 +130,13 @@ export function CatalogSeriesCard({ series }: { series: Series }) {
             <div className="mb-1 flex flex-wrap items-center gap-2 text-xs text-muted">
               <Link
                 href={`/author/${getAuthorId(series.writerName)}`}
-                className="font-semibold text-white hover:text-primary transition hover:underline"
+                className="font-semibold text-white hover:text-primary transition hover:underline inline-flex items-center gap-1.5"
                 onClick={(e) => e.stopPropagation()}
               >
-                {series.writerName}
+                <span>{series.writerName}</span>
+                {isTopAuthor(series.writerName) && (
+                  <InstagramAuthorStar size={13} />
+                )}
               </Link>
               <span>|</span>
               <span>{formatReads(series.readers)}</span>

@@ -96,12 +96,11 @@ export function SeriesCard({ series, statusBadge = "New" }: { series: Series; st
               </div>
               <div className="text-xs text-muted">{series.chapterCount} chapters</div>
             </div>
-            {series.isLocked ? <Lock className="mt-0.5 h-4 w-4 shrink-0 text-gold" /> : null}
           </div>
 
           <div className="flex flex-wrap items-center gap-1.5">
             <Badge tone="muted">{series.genre}</Badge>
-            {series.earlyAccessPriceCoins ? <Badge tone="gold">{series.earlyAccessPriceCoins} Coins</Badge> : null}
+            <Badge tone="gold">Free to Read</Badge>
           </div>
         </div>
       </Link>

@@ -28,7 +28,7 @@ export function UnlockModal({
     if (!open) setState("idle");
   }, [open]);
 
-  const cost = useMemo(() => chapter?.coinPrice ?? 5, [chapter?.coinPrice]);
+  const cost = useMemo(() => (chapter as any)?.coinPrice ?? 0, [(chapter as any)?.coinPrice]);
 
   async function confirmUnlock() {
     if (!chapter) return;

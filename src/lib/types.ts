@@ -9,7 +9,6 @@ export type Series = {
   description: string;
   searchKeywords?: string[];
   isLocked: boolean;
-  earlyAccessPriceCoins?: number;
   coverUrl: string; // ok to use <img>/bg-image outside reader
   ambientColorHex: string;
 };
@@ -30,8 +29,7 @@ export type Chapter = {
   number: number;
   title: string;
   releaseDateIso: string;
-  status: "Free" | "Coins" | "ComingSoon";
-  coinPrice?: number;
+  status: "Free" | "ComingSoon";
   isLocked: boolean;
 };
 
@@ -58,4 +56,5 @@ export type Author = {
   avatarUrl: string;
   bio: string;
   followerCount: number;
+  isTopAuthor?: boolean;
 };

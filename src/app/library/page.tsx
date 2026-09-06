@@ -315,14 +315,14 @@ export default function LibraryPage() {
                             <Button
                               variant="primary"
                               size="sm"
-                              onClick={() => router.push(`/read/${item.chapterId}`)}
+                              onClick={() => router.push(`/read/${item.chapterId}?from=/library`)}
                             >
                               Resume
                             </Button>
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => router.push(`/series/${item.seriesId}`)}
+                              onClick={() => router.push(`/series/${item.seriesId}?from=/library`)}
                             >
                               Details
                             </Button>
@@ -435,7 +435,7 @@ export default function LibraryPage() {
                                 <Button
                                   variant="primary"
                                   size="sm"
-                                  onClick={() => router.push(`/read/${bookmark.chapterId}`)}
+                                  onClick={() => router.push(`/read/${bookmark.chapterId}?from=/library`)}
                                 >
                                   Read
                                 </Button>
@@ -521,7 +521,7 @@ export default function LibraryPage() {
                                   <Button
                                     variant="primary"
                                     size="sm"
-                                    onClick={() => router.push(`/read/${bookmark.chapterId}`)}
+                                    onClick={() => router.push(`/read/${bookmark.chapterId}?from=/library`)}
                                   >
                                     Read
                                   </Button>

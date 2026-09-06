@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Bookmark, Coins, LogOut, Pencil, Search, Settings, User, Wallet } from "lucide-react";
+import { Bell, Bookmark, LogOut, Pencil, Search, Settings, User } from "lucide-react";
 import Link from "@/compat/next-link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "@/compat/next-navigation";
@@ -10,7 +10,6 @@ import { Button } from "@/components/Button";
 import { ThemeModeToggle } from "@/components/ThemeModeToggle";
 import { chaptersBySeries, seriesList } from "@/lib/mockData";
 import type { Series } from "@/lib/types";
-import { useWalletStore } from "@/store/walletStore";
 import { useToastStore } from "@/store/toastStore";
 import { useAuthStore } from "@/store/authStore";
 
@@ -35,7 +34,6 @@ export function Navbar({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const coinBalance = useWalletStore((s) => s.coinBalance);
   const toast = useToastStore((s) => s.push);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const role = useAuthStore((s) => s.role);
@@ -100,12 +98,11 @@ export function Navbar({
       { href: "/profile", label: "Profile", icon: User },
       { href: "/profile/edit", label: "Edit Profile", icon: Pencil },
       { href: "/settings", label: "Settings", icon: Settings },
-      { href: "/library", label: "Library", icon: Bookmark },
-      { href: "/wallet", label: "Wallet", icon: Wallet }
+      { href: "/library", label: "Library", icon: Bookmark }
     ];
     if (role === "writer" || role === "admin") {
       items.push({ href: "/dashboard/writer", label: "Writer Dashboard", icon: Pencil });
-      items.push({ href: "/dashboard/analytics", label: "Analytics", icon: Coins });
+      items.push({ href: "/dashboard/analytics", label: "Analytics", icon: Settings });
     }
     if (role === "admin") {
       items.push({ href: "/dashboard/admin", label: "Admin Gate", icon: Settings });
@@ -280,10 +277,6 @@ export function Navbar({
                   Dashboard
                 </Button>
               ) : null}
-              <Badge tone="gold" className="gap-2">
-                <Coins className="h-3.5 w-3.5" />
-                <span className="tabular-nums">{coinBalance}</span>
-              </Badge>
               <button
                 className="sf-clickable grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/5 hover:border-highlight/30 hover:bg-white/8"
                 aria-label="Open notifications"
@@ -351,23 +344,6 @@ export function Navbar({
               <Button variant="primary" size="sm" onClick={() => router.push("/login")}>
                 Login
               </Button>
-              <button
-                onClick={() => {
-                  toast({
-                    tone: "danger",
-                    title: "Login Required",
-                    message: "Please log in to access your wallet and coins."
-                  });
-                  router.push("/login");
-                }}
-                className="sf-clickable hidden gap-2 sm:flex items-center"
-                title="Wallet Coins (Login required)"
-              >
-                <Badge tone="gold" className="gap-2 cursor-pointer hover:scale-105 transition-transform">
-                  <Coins className="h-3.5 w-3.5" />
-                  <span className="tabular-nums">{coinBalance}</span>
-                </Badge>
-              </button>
               <button
                 className="sf-clickable hidden h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/5 hover:border-highlight/30 hover:bg-white/8 sm:grid"
                 aria-label="Open notifications"

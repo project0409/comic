@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "@/compat/next-link";
-import { Coins, TrendingUp, Play, ArrowRight } from "lucide-react";
+import { TrendingUp, Play, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import type { Series } from "@/lib/types";
 
-export function Hero({ trendingSeries, coinBalance }: { trendingSeries?: Series; coinBalance: number }) {
+export function Hero({ trendingSeries }: { trendingSeries?: Series }) {
   return (
     <section className="sf-comic-panel sf-comic-surface relative overflow-hidden rounded-3xl border border-white/8 bg-surface">
       {/* Grid Pattern & Radial glow (Point 2 & 10) */}
@@ -68,7 +68,7 @@ export function Hero({ trendingSeries, coinBalance }: { trendingSeries?: Series;
             transition={{ duration: 0.5, delay: 0.16 }}
             className="mt-7 flex flex-wrap items-center gap-3"
           >
-            <Link href="/read/c1">
+            <Link href="/read/c1?from=/">
               <Button variant="primary" size="lg" className="gap-2">
                 <Play className="h-4 w-4 fill-white" />
                 Read Demo Comic
@@ -117,14 +117,17 @@ export function Hero({ trendingSeries, coinBalance }: { trendingSeries?: Series;
             ) : null}
           </div>
 
-          <div className="sf-comic-panel rounded-2xl border border-gold/25 bg-gold/10 p-4">
-            <div className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gold">
-              <Coins className="h-4 w-4" />
-              Available Balance
+          <Link
+            href="/library"
+            className="sf-comic-panel block rounded-2xl border border-primary/30 bg-primary/10 p-4 transition hover:border-primary/60 hover:bg-primary/15"
+          >
+            <div className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-primary">
+              <TrendingUp className="h-4 w-4" />
+              My Reading Library
             </div>
-            <div className="font-display text-3xl tracking-wide text-white">{coinBalance}</div>
-            <div className="text-xs text-muted">Coins</div>
-          </div>
+            <div className="font-display text-xl tracking-wide text-white">Continue Reading</div>
+            <div className="text-xs text-muted mt-0.5">Resume your reading history &amp; playlists &rarr;</div>
+          </Link>
         </motion.aside>
       </div>
     </section>

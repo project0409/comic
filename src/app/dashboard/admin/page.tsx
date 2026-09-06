@@ -30,7 +30,7 @@ type UserRow = {
   status: "Active" | "Suspended";
   joinedAt: string;
   lastLogin: string;
-  coins: number;
+  points: number;
 };
 
 export default function AdminPublishingGatePage() {
@@ -71,7 +71,7 @@ export default function AdminPublishingGatePage() {
       status: "Active",
       joinedAt: "2026-05-02",
       lastLogin: "2026-06-24",
-      coins: 240
+      points: 240
     },
     {
       id: "u2",
@@ -82,7 +82,7 @@ export default function AdminPublishingGatePage() {
       status: "Active",
       joinedAt: "2026-04-18",
       lastLogin: "2026-06-23",
-      coins: 1824
+      points: 1824
     },
     {
       id: "u3",
@@ -93,7 +93,7 @@ export default function AdminPublishingGatePage() {
       status: "Active",
       joinedAt: "2026-06-01",
       lastLogin: "2026-06-20",
-      coins: 35
+      points: 35
     },
     {
       id: "u4",
@@ -104,7 +104,7 @@ export default function AdminPublishingGatePage() {
       status: "Active",
       joinedAt: "2026-03-11",
       lastLogin: "2026-06-25",
-      coins: 9999
+      points: 9999
     }
   ]);
 
@@ -141,9 +141,9 @@ export default function AdminPublishingGatePage() {
 
   const credentialTitle = credentialView === "readers" ? "Reader Credentials" : credentialView === "writers" ? "Writer Credentials" : credentialView === "subscriptions" ? "Subscription Members" : "Website Users & Credentials";
   const credentialDescription = credentialView === "readers"
-    ? "All reader usernames, email IDs, subscription status, coins, and access controls."
+    ? "All reader usernames, email IDs, subscription status, points, and access controls."
     : credentialView === "writers"
-      ? "All writer usernames, creator subscriptions, coins, upload access, and account status."
+      ? "All writer usernames, creator subscriptions, points, upload access, and account status."
       : credentialView === "subscriptions"
         ? "All paid subscription users with their usernames, roles, subscription plans, and account status."
         : "View usernames, roles, subscription members, and access status.";
@@ -187,7 +187,7 @@ export default function AdminPublishingGatePage() {
         status: "Active",
         joinedAt: new Date().toISOString().slice(0, 10),
         lastLogin: "Not yet",
-        coins: 0
+        points: 0
       },
       ...current
     ]);
@@ -353,7 +353,7 @@ export default function AdminPublishingGatePage() {
             <div>Role</div>
             <div>Subscription</div>
             <div>Status</div>
-            <div>Coins</div>
+            <div>Points</div>
             <div className="text-right">Admin Actions</div>
           </div>
 
@@ -396,8 +396,8 @@ export default function AdminPublishingGatePage() {
               <Badge tone={user.status === "Active" ? "primary" : "danger"}>{user.status}</Badge>
               <input
                 type="number"
-                value={user.coins}
-                onChange={(e) => updateUser(user.id, "coins", Number(e.target.value))}
+                value={user.points}
+                onChange={(e) => updateUser(user.id, "points", Number(e.target.value))}
                 className="mr-3 w-20 rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-right outline-none focus:border-primary/45"
               />
               <div className="flex justify-end gap-2">

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, BookOpen, Sparkles, Shield, Coins, Layout, Check, ShieldAlert, Zap } from "lucide-react";
+import { ArrowRight, BookOpen, Sparkles, Shield, Star, Layout, Check, ShieldAlert, Zap } from "lucide-react";
 import Link from "@/compat/next-link";
 import { Navbar } from "../discovery/Navbar";
 import { useAuthStore } from "@/store/authStore";
@@ -191,11 +191,11 @@ export function LandingPage() {
             {/* Feature 3 */}
             <div className="sf-comic-panel sf-comic-surface border border-white/8 rounded-3xl p-6 bg-card space-y-4 hover:border-yellow-500/25 transition-all duration-300 group">
               <div className="h-10 w-10 rounded-xl bg-yellow-500/10 flex items-center justify-center border border-yellow-500/20">
-                <Coins className="h-5 w-5 text-yellow-500" />
+                <Star className="h-5 w-5 text-yellow-500" />
               </div>
-              <h3 className="text-lg font-bold font-display group-hover:text-yellow-500 transition-colors">Direct Creator Economy</h3>
+              <h3 className="text-lg font-bold font-display group-hover:text-yellow-500 transition-colors">Chapter Reviews & Discussions</h3>
               <p className="text-xs text-muted leading-relaxed">
-                Monetize your chapters with a robust wallet and digital coins. Fans buy coins to unlock premium chapters, ensuring independent creators are directly rewarded.
+                Rate and review individual chapters, join the community discussions under every issue, and share your reactions with comic creators directly.
               </p>
             </div>
           </div>

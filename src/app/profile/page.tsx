@@ -1,20 +1,19 @@
 "use client";
 
 import Link from "@/compat/next-link";
-import { BarChart3, Bookmark, Coins, LayoutDashboard, Pencil, Settings, ShieldCheck, Upload, User, Star } from "lucide-react";
+import { BarChart3, Bookmark, BookOpen, LayoutDashboard, Pencil, Settings, ShieldCheck, Upload, User, Star } from "lucide-react";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import { RequireAuth } from "@/components/RequireAuth";
 import { useAuthStore } from "@/store/authStore";
 import { useVaultStore } from "@/store/vaultStore";
-import { useWalletStore } from "@/store/walletStore";
 
 export default function ProfilePage() {
   const role = useAuthStore((s) => s.role);
   const displayName = useAuthStore((s) => s.displayName);
   const email = useAuthStore((s) => s.email);
   const provider = useAuthStore((s) => s.provider);
-  const coinBalance = useWalletStore((s) => s.coinBalance);
+  const historyCount = useVaultStore((s) => s.history.length);
   const savedCount = useVaultStore((s) => s.bookmarks.length);
   const roleName = role ?? "reader";
   const permissions =
@@ -35,7 +34,7 @@ export default function ProfilePage() {
         : [
             "Read available comic chapters",
             "Save panels and stories",
-            "Use wallet and unlock coin chapters",
+            "Read free chapters & track history",
             "Manage profile, settings, and vault"
           ];
 
@@ -60,10 +59,10 @@ export default function ProfilePage() {
         <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
           <div className="rounded-3xl border border-white/10 bg-card p-5">
             <div className="flex items-center gap-2 text-sm text-muted">
-              <Coins className="h-4 w-4 text-gold" />
-              Coin Balance
+              <BookOpen className="h-4 w-4 text-primary" />
+              Comics Read
             </div>
-            <div className="mt-3 text-3xl font-semibold tabular-nums">{coinBalance}</div>
+            <div className="mt-3 text-3xl font-semibold tabular-nums">{historyCount}</div>
           </div>
 
           <div className="relative overflow-hidden rounded-3xl border border-transparent bg-gradient-to-br from-violet-600 via-indigo-700 to-pink-500 p-5 shadow-[0_8px_32px_rgba(124,58,237,0.22)] transition hover:scale-[1.02] hover:shadow-[0_12px_42px_rgba(124,58,237,0.3)] duration-300">
@@ -92,8 +91,11 @@ export default function ProfilePage() {
         </div>
 
         <div className="flex flex-wrap gap-3">
+          <Link href="/library">
+            <Button variant="primary"><BookOpen className="h-4 w-4" /> My Library</Button>
+          </Link>
           <Link href="/profile/edit">
-            <Button variant="primary"><Pencil className="h-4 w-4" /> Edit Profile</Button>
+            <Button variant="outline"><Pencil className="h-4 w-4" /> Edit Profile</Button>
           </Link>
           <Link href="/settings">
             <Button variant="outline"><Settings className="h-4 w-4" /> Settings</Button>
@@ -130,7 +132,7 @@ export default function ProfilePage() {
                 <>
                   <Link href="/series"><Button size="sm" variant="primary">Browse Comics</Button></Link>
                   <Link href="/vault"><Button size="sm" variant="outline">Open Vault</Button></Link>
-                  <Link href="/wallet"><Button size="sm" variant="outline">Wallet</Button></Link>
+                  <Link href="/library"><Button size="sm" variant="outline">Library</Button></Link>
                 </>
               ) : null}
               {roleName === "writer" ? (

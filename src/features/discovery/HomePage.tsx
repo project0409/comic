@@ -16,12 +16,10 @@ import { chaptersBySeries, releaseCalendar } from "@/lib/mockData";
 import { PWAInstallBanner } from "@/components/PWAInstallBanner";
 import { consumeAuthFlash } from "@/lib/authFlash";
 import { useToastStore } from "@/store/toastStore";
-import { useWalletStore } from "@/store/walletStore";
 
 export function HomePage() {
   const searchParams = useSearchParams();
   const toast = useToastStore((s) => s.push);
-  const coinBalance = useWalletStore((s) => s.coinBalance);
   const [all, setAll] = useState<Series[]>([]);
   const [q, setQ] = useState("");
   const [genre, setGenre] = useState<string | undefined>(undefined);
@@ -98,9 +96,9 @@ export function HomePage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.42, ease: "easeOut" }}
       >
-        <Hero trendingSeries={trendingSeries} coinBalance={coinBalance} />
+        <Hero trendingSeries={trendingSeries} />
 
-        <StatsBar coinBalance={coinBalance} />
+        <StatsBar />
 
         {trending.length > 0 ? <CarouselRow title="Trending Series" items={trending.slice(0, 6)} /> : null}
 

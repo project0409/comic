@@ -36,7 +36,7 @@ export default function NotificationsPage() {
     {
       id: "n1",
       title: "Welcome to FYP Comics",
-      message: "🎉 Welcome to the future of immersive comic reading! Grab your free coins and start exploring.",
+      message: "🎉 Welcome to the future of immersive comic reading! Explore all free chapters and series now.",
       timestamp: "2 mins ago",
       unread: true,
       icon: Sparkles,
@@ -91,13 +91,13 @@ export default function NotificationsPage() {
     {
       id: "n6",
       title: "Daily Reward Available",
-      message: "🎁 Don't lose your streak! Claim your daily check-in reward and secure 10 bonus coins.",
+      message: "🎁 Don't lose your streak! Claim your daily check-in reward to boost your reader points.",
       timestamp: "3 days ago",
       unread: false,
       icon: Gift,
       color: "text-emerald-400",
       bgColor: "bg-emerald-400/10 border-emerald-400/20",
-      href: "/wallet"
+      href: "/profile"
     }
   ]);
 

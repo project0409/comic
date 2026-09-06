@@ -7,8 +7,6 @@ import { useAuthStore } from "@/store/authStore";
 import { useToastStore } from "@/store/toastStore";
 import { Button } from "@/components/Button";
 import { recordGuestRead } from "@/lib/guestReaderLimit";
-import { chaptersBySeries } from "@/lib/mockData";
-import { useWalletStore } from "@/store/walletStore";
 
 export default function ReadPage() {
   const { chapterId } = useParams<{ chapterId: string }>();
@@ -20,25 +18,6 @@ export default function ReadPage() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      let targetCh: any = null;
-      for (const chs of Object.values(chaptersBySeries)) {
-        const found = chs.find((c) => c.id === chapterId);
-        if (found) {
-          targetCh = found;
-          break;
-        }
-      }
-
-      if (targetCh && targetCh.status === "Coins" && !useWalletStore.getState().unlockedChapterIds.includes(chapterId)) {
-        toast({
-          tone: "danger",
-          title: "Chapter Locked",
-          message: "Please unlock this chapter from the series details page first."
-        });
-        router.replace(`/series/${targetCh.seriesId}`);
-        return;
-      }
-
       setGuestAllowed(true);
       return;
     }
@@ -51,7 +30,7 @@ export default function ReadPage() {
       toast({
         tone: "default",
         title: `Guest Preview (${res.count}/${res.max})`,
-        message: `Enjoying your free preview comic. Sign up anytime to claim 50 Free Welcome Coins!`
+        message: "Enjoying your free preview comic. Sign up anytime to track reading history and rate chapters!"
       });
     } else {
       toast({
@@ -81,7 +60,7 @@ export default function ReadPage() {
               Free Preview Limit Reached (2/2)
             </h2>
             <p className="text-sm text-muted leading-relaxed">
-              You&apos;ve enjoyed your 2 free guest comics! Sign up today to receive <span className="text-gold font-semibold">50 Free Welcome Coins</span> and unlock unlimited reading across all comics and series.
+              You&apos;ve enjoyed your 2 free guest comics! Sign up today for free to unlock unlimited reading across all comics, rate chapters, and join the community discussions.
             </p>
           </div>
 
@@ -92,7 +71,7 @@ export default function ReadPage() {
               onClick={() => router.push(`/register?redirectTo=/read/${chapterId}`)}
               className="gap-2 shadow-lg shadow-primary/30 font-bold"
             >
-              Sign Up &amp; Get 50 Coins
+              Sign Up for Free
             </Button>
             <Button
               variant="outline"

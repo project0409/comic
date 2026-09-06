@@ -6,6 +6,8 @@ import Link from "@/compat/next-link";
 import { motion } from "framer-motion";
 import { ArrowLeft, Clock, Heart, Users, BookOpen, Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/Button";
+import { cn } from "@/components/cn";
+import { InstagramAuthorStar } from "@/components/InstagramAuthorStar";
 import { CatalogSeriesCard } from "@/features/discovery/CatalogSeriesCard";
 import { mockAuthors, seriesList, releaseCalendar } from "@/lib/mockData";
 import { useAuthorStore } from "@/store/authorStore";
@@ -82,25 +84,46 @@ export default function AuthorProfilePage() {
           className="sf-comic-panel sf-comic-surface rounded-3xl border border-white/10 bg-card p-6 md:p-8"
         >
           <div className="flex flex-col gap-6 md:flex-row md:items-center">
-            {/* Avatar image */}
-            <div className="h-24 w-24 md:h-28 md:w-28 shrink-0 rounded-2xl overflow-hidden border-2 border-primary/30 shadow-xl bg-black/40 flex items-center justify-center p-2">
-              <img
-                src={author.avatarUrl}
-                alt={author.name}
-                className="w-full h-full object-contain"
-              />
+            {/* Avatar image with Instagram gradient story ring for top authors */}
+            <div
+              className={cn(
+                "shrink-0 rounded-3xl overflow-hidden flex items-center justify-center shadow-xl transition-transform hover:scale-105",
+                author.isTopAuthor
+                  ? "p-[3.5px] bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888]"
+                  : "border-2 border-primary/30 bg-black/40 p-2"
+              )}
+            >
+              <div className="h-24 w-24 md:h-28 md:w-28 rounded-[20px] bg-black/70 flex items-center justify-center p-2">
+                <img
+                  src={author.avatarUrl}
+                  alt={author.name}
+                  className="w-full h-full object-contain"
+                />
+              </div>
             </div>
 
             {/* Author info */}
             <div className="flex-1 space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                  <h1 className="font-display text-3xl font-bold tracking-widest text-white">
-                    {author.name}
-                  </h1>
-                  <span className="text-xs font-semibold uppercase tracking-wider text-primary">
-                    Verified Creator
-                  </span>
+                  <div className="flex items-center gap-2.5 flex-wrap">
+                    <h1 className="font-display text-3xl font-bold tracking-widest text-white">
+                      {author.name}
+                    </h1>
+                    {author.isTopAuthor && (
+                      <InstagramAuthorStar size={24} title="Top Author · Verified Star" />
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 mt-1 flex-wrap">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-primary">
+                      Verified Creator
+                    </span>
+                    {author.isTopAuthor && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-500/15 via-rose-500/15 to-purple-500/15 border border-amber-500/30 px-2.5 py-0.5 text-[11px] font-bold text-amber-300">
+                        Top Author
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-3">

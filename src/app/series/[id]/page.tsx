@@ -1,27 +1,26 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useParams, useRouter } from "@/compat/next-navigation";
+import { useParams, useRouter, useSearchParams } from "@/compat/next-navigation";
 import Link from "@/compat/next-link";
-import { motion } from "framer-motion";
-import { ArrowLeft, Bookmark, ChevronRight, MessageSquare, Send } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft, Bookmark, ChevronRight, MessageSquare, Send, Star, X } from "lucide-react";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import { Tabs } from "@/components/Tabs";
 import { cn } from "@/components/cn";
 import type { Chapter, Series } from "@/lib/types";
-import { UnlockModal } from "@/features/economy/UnlockModal";
 import { SaveToPlaylistModal } from "@/components/SaveToPlaylistModal";
 import { canGuestRead } from "@/lib/guestReaderLimit";
 import { useUiStore } from "@/store/uiStore";
-import { useWalletStore } from "@/store/walletStore";
 import { useAuthStore } from "@/store/authStore";
 import { useToastStore } from "@/store/toastStore";
 import { useCommentStore } from "@/store/commentStore";
 import { useReviewStore } from "@/store/reviewStore";
 import { useVaultStore } from "@/store/vaultStore";
-import { getAuthorId, mockAuthors, seriesList } from "@/lib/mockData";
+import { getAuthorId, isTopAuthor, mockAuthors, seriesList } from "@/lib/mockData";
 import { useAuthorStore } from "@/store/authorStore";
+import { InstagramAuthorStar } from "@/components/InstagramAuthorStar";
 
 type TabKey = "chapters" | "about" | "community";
 
@@ -101,13 +100,19 @@ export default function SeriesDetailPage() {
     });
   }
 
+  const searchParams = useSearchParams();
+  const fromParam = searchParams?.get("from");
+
   const [series, setSeries] = useState<Series | null>(null);
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [tab, setTab] = useState<TabKey>("chapters");
-  const [unlockTarget, setUnlockTarget] = useState<Chapter | null>(null);
+  const [selectedChapterForFeedback, setSelectedChapterForFeedback] = useState<Chapter | null>(null);
+  const [chRating, setChRating] = useState(0);
+  const [chHoverRating, setChHoverRating] = useState(0);
+  const [chReviewText, setChReviewText] = useState("");
+  const [chCommentText, setChCommentText] = useState("");
   const [comicCommentText, setComicCommentText] = useState("");
   const setAmbient = useUiStore((s) => s.setAmbientColor);
-  const unlockedChapterIds = useWalletStore((s) => s.unlockedChapterIds);
   const bookmarks = useVaultStore((s) => s.bookmarks);
   const isSaved = series ? bookmarks.some((b) => b.seriesName === series.title) : false;
   const [playlistOpen, setPlaylistOpen] = useState(false);
@@ -158,17 +163,65 @@ export default function SeriesDetailPage() {
   }, [id, setAmbient]);
 
   const handleReadChapter = (chapterId: string) => {
+    const returnQuery = fromParam === "/library" ? "?from=/library" : "?from=/";
     if (!isAuthenticated && !canGuestRead(chapterId)) {
       toast({
         tone: "danger",
         title: "Free Preview Limit Reached (2/2)",
         message: "You've read your 2 free preview comics! Please log in or create an account to continue reading."
       });
-      router.push(`/login?redirectTo=/read/${chapterId}`);
+      router.push(`/login?redirectTo=/read/${chapterId}${returnQuery}`);
     } else {
-      router.push(`/read/${chapterId}`);
+      router.push(`/read/${chapterId}${returnQuery}`);
     }
   };
+
+  function submitChapterFeedback() {
+    if (!selectedChapterForFeedback || !userEmail) {
+      if (!isAuthenticated) {
+        toast({ tone: "danger", title: "Login Required", message: "Please log in to rate and review chapters." });
+        router.push("/login");
+      }
+      return;
+    }
+    if (chRating === 0) {
+      toast({ tone: "danger", title: "Rating required", message: "Please select 1 to 5 stars." });
+      return;
+    }
+    addOrUpdateReview({
+      seriesId: id,
+      chapterId: selectedChapterForFeedback.id,
+      userEmail,
+      userName: displayName || userEmail.split("@")[0] || "Reader",
+      rating: chRating,
+      reviewText: chReviewText.trim()
+    });
+    toast({
+      tone: "success",
+      title: "Chapter Review Submitted! ⭐",
+      message: `Your rating for Chapter ${selectedChapterForFeedback.number} has been saved.`
+    });
+  }
+
+  function submitChapterModalComment() {
+    if (!selectedChapterForFeedback || !series) return;
+    const body = chCommentText.trim();
+    if (!body) return;
+    addComment({
+      targetType: "Chapter",
+      seriesId: series.id,
+      seriesName: series.title,
+      chapterId: selectedChapterForFeedback.id,
+      readerName: displayName || "Reader",
+      body
+    });
+    setChCommentText("");
+    toast({
+      tone: "success",
+      title: "Comment Posted! 💬",
+      message: `Your comment was posted to Chapter ${selectedChapterForFeedback.number}.`
+    });
+  }
 
   const heroStyle = useMemo(() => {
     return {
@@ -215,12 +268,12 @@ export default function SeriesDetailPage() {
         {/* Dedicated "Exit Comic" Navigation button */}
         <div className="relative mx-auto max-w-5xl px-4 pt-4 z-20">
           <Link
-            href="/"
+            href={fromParam === "/library" ? "/library" : "/"}
             className="sf-clickable inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-semibold text-white/90 hover:bg-white/10 hover:text-white transition shadow-sm"
-            title="Exit Comic: Back to Comic Library"
+            title={fromParam === "/library" ? "Exit Comic: Back to Library" : "Exit Comic: Back to Home"}
           >
             <ArrowLeft className="h-4 w-4 text-primary" />
-            <span>Exit Comic (Back to Library)</span>
+            <span>Exit Comic</span>
           </Link>
         </div>
 
@@ -246,15 +299,17 @@ export default function SeriesDetailPage() {
               by{" "}
               <Link
                 href={`/author/${getAuthorId(series.writerName)}`}
-                className="font-semibold text-primary hover:underline transition"
+                className="font-semibold text-primary hover:underline transition inline-flex items-center gap-1.5"
               >
-                {series.writerName}
+                <span>{series.writerName}</span>
+                {isTopAuthor(series.writerName) && (
+                  <InstagramAuthorStar size={15} />
+                )}
               </Link>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <Badge tone="muted">{series.genre}</Badge>
               <Badge tone="primary">{series.readers.toLocaleString()} readers</Badge>
-              {series.earlyAccessPriceCoins ? <Badge tone="gold">Early Access</Badge> : null}
               {seriesReviews.length > 0 ? (
                 <div className="flex items-center gap-1.5 text-xs bg-black/35 px-3 py-1.5 rounded-full border border-white/10 select-none">
                   <span className="text-amber-400 font-bold">★ {averageRating}</span>
@@ -288,25 +343,41 @@ export default function SeriesDetailPage() {
                     href={`/author/${author.id}`}
                     className="flex items-center gap-3.5 group min-w-0"
                   >
-                    <div className="h-14 w-14 shrink-0 rounded-full overflow-hidden border border-slate-200 bg-slate-100 flex items-center justify-center p-1 shadow-inner">
-                      <img
-                        src={author.avatarUrl}
-                        alt={author.name}
-                        className="w-full h-full object-contain"
-                      />
+                    <div className={cn(
+                      "shrink-0 rounded-full flex items-center justify-center shadow-md transition-transform group-hover:scale-105",
+                      author.isTopAuthor
+                        ? "p-[2.5px] bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888]"
+                        : "border border-slate-200 bg-slate-100 p-1 shadow-inner"
+                    )}>
+                      <div className="h-13 w-13 rounded-full overflow-hidden bg-white flex items-center justify-center p-1">
+                        <img
+                          src={author.avatarUrl}
+                          alt={author.name}
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
                     </div>
                     <div className="min-w-0">
                       <span className="block text-[10px] font-black uppercase tracking-wider text-slate-400">
                         Story &amp; Art by
                       </span>
-                      <div className="flex items-center gap-1.5 mt-0.5">
+                      <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                         <span className="font-display font-black text-slate-900 tracking-wide text-base truncate group-hover:text-primary transition-colors">
                           {author.name}
                         </span>
-                        {/* Purple Verified Checkmark */}
-                        <svg className="h-4.5 w-4.5 shrink-0 text-[#7C3AED]" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                        </svg>
+                        {author.isTopAuthor ? (
+                          <>
+                            <InstagramAuthorStar size={18} />
+                            <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-500/10 via-rose-500/10 to-purple-500/10 border border-amber-500/25 px-2 py-0.5 text-[10px] font-black text-rose-600 tracking-wider">
+                              Top Author
+                            </span>
+                          </>
+                        ) : (
+                          /* Purple Verified Checkmark */
+                          <svg className="h-4.5 w-4.5 shrink-0 text-[#7C3AED]" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                          </svg>
+                        )}
                       </div>
                     </div>
                   </Link>
@@ -399,72 +470,62 @@ export default function SeriesDetailPage() {
                 );
               }
 
-              const isUnlocked = !c.isLocked || unlockedChapterIds.includes(c.id);
-              const badgeTone = isUnlocked ? (c.status === "Free" ? "primary" : "gold") : (c.status === "Free" ? "primary" : c.status === "Coins" ? "gold" : "muted");
-              const badgeText = isUnlocked && c.status === "Coins" ? "Unlocked" : c.status === "Coins" ? `${c.coinPrice ?? 5} Coins` : c.status;
+              const chReviews = reviews.filter((r) => r.seriesId === id && r.chapterId === c.id);
+              const chAvgRating = chReviews.length > 0
+                ? (chReviews.reduce((sum, r) => sum + r.rating, 0) / chReviews.length).toFixed(1)
+                : null;
+              const chComments = comments.filter((cm) => cm.chapterId === c.id);
 
               return (
                 <motion.div
                   key={c.id}
-                  className="sf-comic-card flex flex-col gap-3 rounded-2xl border border-white/10 bg-card p-4 md:flex-row md:items-center md:justify-between"
+                  className="sf-comic-card flex flex-col gap-3 rounded-2xl border border-white/10 bg-card p-4 md:flex-row md:items-center md:justify-between transition hover:border-white/20"
                   initial={{ opacity: 0, y: 10 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.3 }}
                 >
-                  <div>
+                  <div className="space-y-1.5">
                     <div className="font-semibold text-white text-base">
                       Chapter {c.number}: {c.title}
                     </div>
-                    <div className="mt-1 text-xs text-muted">
-                      {new Date(c.releaseDateIso).toLocaleDateString()} ·{" "}
-                      <Badge tone={badgeTone as any}>{badgeText}</Badge>
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-muted">
+                      <span>{new Date(c.releaseDateIso).toLocaleDateString()}</span>
+                      <span className="text-white/20">·</span>
+                      <Badge tone="primary">Free</Badge>
+                      <span className="text-white/20">·</span>
+                      {chAvgRating ? (
+                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded-full border border-amber-400/20">
+                          <Star className="h-3 w-3 fill-amber-400" />
+                          {chAvgRating} ({chReviews.length})
+                        </span>
+                      ) : (
+                        <span className="text-[11px] text-muted">★ No ratings yet</span>
+                      )}
+                      <span className="text-white/20">·</span>
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20">
+                        <MessageSquare className="h-3 w-3" />
+                        {chComments.length} {chComments.length === 1 ? "comment" : "comments"}
+                      </span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {!isUnlocked ? (
-                      <Button
-                        variant="gold"
-                        onClick={() => {
-                          if (!isAuthenticated) {
-                            toast({
-                              tone: "danger",
-                              title: "Login Required",
-                              message: "Please log in to unlock chapters with coins."
-                            });
-                            router.push("/login");
-                            return;
-                          }
-
-                          // Sequential unlock check
-                          const currentChapterIndex = chapters.findIndex((ch) => ch.id === c.id);
-                          if (currentChapterIndex > 0) {
-                            const previousChapters = chapters.slice(0, currentChapterIndex);
-                            const lockedPrev = previousChapters.find(
-                              (ch) => ch.status === "Coins" && !unlockedChapterIds.includes(ch.id)
-                            );
-                            if (lockedPrev) {
-                              toast({
-                                tone: "danger",
-                                title: "Sequential Unlock Required",
-                                message: `You must unlock Chapter ${lockedPrev.number} first before unlocking Chapter ${c.number}.`
-                              });
-                              return;
-                            }
-                          }
-
-                          setUnlockTarget(c);
-                        }}
-                      >
-                        Unlock
-                      </Button>
-                    ) : (
-                      <Button variant="primary" onClick={() => handleReadChapter(c.id)}>
-                        Read Now
-                      </Button>
-                    )}
-                    <Button variant="ghost" onClick={() => setTab("about")}>
-                      Details
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1.5 border-white/15 hover:border-primary/40 text-xs"
+                      onClick={() => {
+                        setSelectedChapterForFeedback(c);
+                        const myReview = chReviews.find((r) => r.userEmail === userEmail);
+                        setChRating(myReview ? myReview.rating : 0);
+                        setChReviewText(myReview ? myReview.reviewText : "");
+                        setChCommentText("");
+                      }}
+                    >
+                      <Star className="h-3.5 w-3.5 text-amber-400" /> Reviews &amp; Comments
+                    </Button>
+                    <Button variant="primary" size="sm" onClick={() => handleReadChapter(c.id)}>
+                      Read Now
                     </Button>
                   </div>
                 </motion.div>
@@ -722,19 +783,149 @@ export default function SeriesDetailPage() {
         </div>
       </motion.main>
 
-      <UnlockModal
-        open={!!unlockTarget}
-        chapter={unlockTarget}
-        onClose={() => setUnlockTarget(null)}
-        onUnlocked={(unlockedId) => {
-          if (unlockedId) {
-            setChapters((prev) =>
-              prev.map((c) => (c.id === unlockedId ? { ...c, isLocked: false } : c))
-            );
-          }
-          setUnlockTarget(null);
-        }}
-      />
+      {/* Chapter Feedback (Rating & Comments) Modal */}
+      <AnimatePresence>
+        {selectedChapterForFeedback && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              className="relative w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-3xl border border-white/15 bg-card p-6 shadow-2xl text-white space-y-5"
+            >
+              {/* Header */}
+              <div className="flex items-start justify-between gap-3 border-b border-white/10 pb-4">
+                <div>
+                  <div className="text-xs font-bold uppercase tracking-wider text-primary">
+                    Chapter Feedback &amp; Community
+                  </div>
+                  <h3 className="text-xl font-display font-bold text-white mt-1">
+                    Chapter {selectedChapterForFeedback.number}: {selectedChapterForFeedback.title}
+                  </h3>
+                </div>
+                <button
+                  onClick={() => setSelectedChapterForFeedback(null)}
+                  className="p-1.5 rounded-full hover:bg-white/10 text-muted hover:text-white transition"
+                  aria-label="Close modal"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="flex items-center justify-between gap-3 bg-white/5 p-3 rounded-2xl border border-white/10">
+                <div className="text-xs text-muted">
+                  Ready to read this chapter?
+                </div>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => {
+                    const chId = selectedChapterForFeedback.id;
+                    setSelectedChapterForFeedback(null);
+                    handleReadChapter(chId);
+                  }}
+                >
+                  Read Chapter Now
+                </Button>
+              </div>
+
+              {/* Rate & Review This Chapter Section */}
+              <div className="rounded-2xl border border-white/10 bg-black/25 p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-semibold text-white">Rate &amp; Review Chapter {selectedChapterForFeedback.number}</span>
+                  <span className="text-xs text-amber-400 font-bold">
+                    {chRating > 0 ? `★ ${chRating} / 5` : "Select rating"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 justify-center py-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setChRating(star)}
+                      onMouseEnter={() => setChHoverRating(star)}
+                      onMouseLeave={() => setChHoverRating(0)}
+                      className="text-2xl transition cursor-pointer"
+                      aria-label={`Rate ${star} stars`}
+                    >
+                      <span className={cn(star <= (chHoverRating || chRating) ? "text-amber-400 font-bold" : "text-muted/40")}>
+                        ★
+                      </span>
+                    </button>
+                  ))}
+                </div>
+                <textarea
+                  value={chReviewText}
+                  onChange={(e) => setChReviewText(e.target.value)}
+                  placeholder={`What did you think of Chapter ${selectedChapterForFeedback.number}?`}
+                  className="w-full h-18 resize-none rounded-xl border border-white/10 bg-black/40 p-2.5 text-xs text-white outline-none focus:border-primary/50 placeholder:text-muted"
+                />
+                <Button variant="primary" size="sm" onClick={submitChapterFeedback} className="w-full">
+                  Submit Chapter Review
+                </Button>
+              </div>
+
+              {/* Chapter Reviews List */}
+              <div className="space-y-2.5">
+                <div className="text-xs font-bold uppercase tracking-wider text-muted">
+                  Chapter Reviews ({reviews.filter((r) => r.seriesId === id && r.chapterId === selectedChapterForFeedback.id).length})
+                </div>
+                {reviews.filter((r) => r.seriesId === id && r.chapterId === selectedChapterForFeedback.id).length === 0 ? (
+                  <p className="text-xs text-muted/60 italic py-1">No reviews for this chapter yet. Be the first!</p>
+                ) : (
+                  reviews
+                    .filter((r) => r.seriesId === id && r.chapterId === selectedChapterForFeedback.id)
+                    .map((r) => (
+                      <div key={r.id} className="rounded-xl border border-white/5 bg-white/5 p-3 space-y-1 text-xs">
+                        <div className="flex items-center justify-between text-muted">
+                          <span className="font-semibold text-white">{r.userName}</span>
+                          <span className="text-amber-400 font-bold">★ {r.rating}</span>
+                        </div>
+                        <p className="text-white/80">{r.reviewText}</p>
+                      </div>
+                    ))
+                )}
+              </div>
+
+              {/* Chapter Comments Section */}
+              <div className="space-y-3 border-t border-white/10 pt-4">
+                <div className="text-xs font-bold uppercase tracking-wider text-muted">
+                  Chapter Comments ({comments.filter((cm) => cm.chapterId === selectedChapterForFeedback.id).length})
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={chCommentText}
+                    onChange={(e) => setChCommentText(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && submitChapterModalComment()}
+                    placeholder="Leave a comment on this chapter..."
+                    className="flex-1 h-9 px-3 rounded-xl border border-white/10 bg-black/30 text-xs text-white outline-none focus:border-primary/45 placeholder:text-muted"
+                  />
+                  <Button variant="outline" size="sm" onClick={submitChapterModalComment} disabled={!chCommentText.trim()}>
+                    <Send className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+                {comments.filter((cm) => cm.chapterId === selectedChapterForFeedback.id).length === 0 ? (
+                  <p className="text-xs text-muted/60 italic py-1">No comments on this chapter yet.</p>
+                ) : (
+                  comments
+                    .filter((cm) => cm.chapterId === selectedChapterForFeedback.id)
+                    .map((cm) => (
+                      <div key={cm.id} className="rounded-xl border border-white/5 bg-white/5 p-2.5 text-xs space-y-1">
+                        <div className="flex items-center justify-between text-[10px] text-muted">
+                          <span className="font-bold text-white/90">{cm.readerName}</span>
+                          <span>{new Date(cm.atIso).toLocaleDateString()}</span>
+                        </div>
+                        <p className="text-white/80">{cm.body}</p>
+                      </div>
+                    ))
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {series && (
         <SaveToPlaylistModal

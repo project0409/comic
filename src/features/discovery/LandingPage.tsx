@@ -132,7 +132,7 @@ export function LandingPage() {
             {
               icon: Users,
               title: "Earn Loyalty Points",
-              desc: "Unlock premium rewards, support your favorite creators, and trade coins simply by reading daily.",
+              desc: "Unlock premium badges, support your favorite creators, and level up your reader rank simply by reading daily.",
               color: "text-gold",
               bg: "bg-gold/5 border-gold/10",
             },

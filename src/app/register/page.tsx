@@ -64,7 +64,7 @@ export default function RegisterPage() {
     toast({
       tone: "success",
       title: "Account Created! 🎉",
-      message: "You received 50 Free Welcome Coins! Please log in to start reading."
+      message: "Your account is ready! Please log in to start reading."
     });
     router.replace("/login");
   }

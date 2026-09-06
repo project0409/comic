@@ -59,7 +59,6 @@ export const seriesList: Series[] = [
       "In the neon-drenched sprawl of Neo-Zenith, a rogue neural hacker discovers a secret database that could dismantle the city's corporate overlords. The AI Lore Master watches from the dark net...",
     searchKeywords: ["neural hacker", "Neo-Zenith", "corporate overlords", "dark net", "AI Lore Master", "secret database", "neon city"],
     isLocked: false,
-    earlyAccessPriceCoins: 5,
     coverUrl: "/placeholders/cover-1.svg",
     ambientColorHex: "#7C3AED"
   },
@@ -75,7 +74,6 @@ export const seriesList: Series[] = [
       "Ancient iron swords clash with biological dragon-drives in an imperial steampunk world. Can the last runic smith forge the core before the capital burns?",
     searchKeywords: ["dragon", "runic smith", "capital burns", "dragon-drives", "iron swords", "forge core", "imperial steampunk"],
     isLocked: false,
-    earlyAccessPriceCoins: 5,
     coverUrl: "/placeholders/cover-2.svg",
     ambientColorHex: "#F59E0B"
   },
@@ -91,7 +89,6 @@ export const seriesList: Series[] = [
       "A blade-for-hire navigates the underbelly of a megacity where every alley hides a syndicate and every rooftop holds a sniper.",
     searchKeywords: ["blade-for-hire", "megacity", "syndicate", "rooftop sniper", "night alley", "contract fight", "chase scene"],
     isLocked: false,
-    earlyAccessPriceCoins: 5,
     coverUrl: "/placeholders/cover-3.svg",
     ambientColorHex: "#EF4444"
   },
@@ -107,7 +104,6 @@ export const seriesList: Series[] = [
       "Cartographers chart a dimension that rewrites itself nightly. Every line drawn becomes a door — and every door opens both ways.",
     searchKeywords: ["cartographers", "living map", "dimension doors", "rewrites nightly", "folded room", "impossible map"],
     isLocked: true,
-    earlyAccessPriceCoins: 5,
     coverUrl: "/placeholders/cover-3.svg",
     ambientColorHex: "#00E5FF"
   },
@@ -123,7 +119,6 @@ export const seriesList: Series[] = [
       "Two rival pilots trade encrypted love notes across a citywide race where every finish line changes their future.",
     searchKeywords: ["rival pilots", "encrypted love notes", "city race", "finish line", "romantic chase", "rose circuit"],
     isLocked: false,
-    earlyAccessPriceCoins: 5,
     coverUrl: "/placeholders/cover-1.svg",
     ambientColorHex: "#FF4F7B"
   },
@@ -139,7 +134,6 @@ export const seriesList: Series[] = [
       "A late-night radio host receives calls from vanished listeners, each one describing a nightmare that is about to happen.",
     searchKeywords: ["radio host", "vanished listeners", "nightmare call", "dead air", "midnight broadcast", "haunted signal"],
     isLocked: false,
-    earlyAccessPriceCoins: 5,
     coverUrl: "/placeholders/cover-2.svg",
     ambientColorHex: "#7F1D1D"
   },
@@ -155,7 +149,6 @@ export const seriesList: Series[] = [
       "A detective follows clues through mirrored rooms where every suspect has a perfect reflection and one impossible lie.",
     searchKeywords: ["detective", "mirrored rooms", "suspects", "perfect reflection", "impossible lie", "glass alibi"],
     isLocked: false,
-    earlyAccessPriceCoins: 5,
     coverUrl: "/placeholders/cover-3.svg",
     ambientColorHex: "#00A8C8"
   }
@@ -165,13 +158,13 @@ const initialChaptersBySeries: Record<string, Chapter[]> = {
   s1: [
     { id: "c1", seriesId: "s1", number: 1, title: "Forge Spark", releaseDateIso: "2026-05-01", status: "Free", isLocked: false },
     { id: "c2", seriesId: "s1", number: 2, title: "Neon Oath", releaseDateIso: "2026-05-06", status: "Free", isLocked: false },
-    { id: "c3", seriesId: "s1", number: 3, title: "Ghost Circuit", releaseDateIso: "2026-05-12", status: "Coins", coinPrice: 5, isLocked: true },
-    { id: "c4", seriesId: "s1", number: 4, title: "Neon Vows", releaseDateIso: "2026-05-18", status: "Coins", coinPrice: 5, isLocked: true },
-    { id: "c5", seriesId: "s1", number: 5, title: "Coming Soon", releaseDateIso: "2026-06-01", status: "ComingSoon", isLocked: true }
+    { id: "c3", seriesId: "s1", number: 3, title: "Ghost Circuit", releaseDateIso: "2026-05-12", status: "Free", isLocked: false },
+    { id: "c4", seriesId: "s1", number: 4, title: "Neon Vows", releaseDateIso: "2026-05-18", status: "Free", isLocked: false },
+    { id: "c5", seriesId: "s1", number: 5, title: "Coming Soon", releaseDateIso: "2026-06-01", status: "ComingSoon", isLocked: false }
   ],
   s2: [
     { id: "c12", seriesId: "s2", number: 1, title: "Gilded Letters", releaseDateIso: "2026-05-12", status: "Free", isLocked: false },
-    { id: "c13", seriesId: "s2", number: 2, title: "Ash Kisses", releaseDateIso: "2026-05-22", status: "Coins", coinPrice: 5, isLocked: true }
+    { id: "c13", seriesId: "s2", number: 2, title: "Ash Kisses", releaseDateIso: "2026-05-22", status: "Free", isLocked: false }
   ]
 };
 
@@ -186,7 +179,6 @@ seriesList.forEach((series) => {
 
   const list: Chapter[] = [];
   for (let i = 1; i <= series.chapterCount; i++) {
-    const isFree = i <= 2;
     const dayOffset = i * 5;
     const releaseDate = new Date("2026-05-01");
     releaseDate.setDate(releaseDate.getDate() + dayOffset);
@@ -198,9 +190,8 @@ seriesList.forEach((series) => {
       number: i,
       title: `${series.title.split(":")[0]} Chapter ${i}`,
       releaseDateIso: dateStr,
-      status: isFree ? "Free" : "Coins",
-      coinPrice: isFree ? undefined : 5,
-      isLocked: !isFree
+      status: "Free",
+      isLocked: false
     });
   }
   chaptersBySeries[series.id] = list;
@@ -249,49 +240,56 @@ export const mockAuthors: Author[] = [
     name: "Sanjay V.",
     bio: "Sanjay V. is a veteran cyber-author from Neo-Delhi specializing in gritty street-level hacker fiction, neon worldbuilding, and AI integration systems.",
     avatarUrl: "https://api.dicebear.com/7.x/bottts/svg?seed=Sanjay",
-    followerCount: 1250
+    followerCount: 1250,
+    isTopAuthor: true
   },
   {
     id: "a2",
     name: "Rupa D.",
     bio: "Rupa D. crafts grand mechanical fantasy and dragon-drive steampunks. Champion of rune-smith folklore and antique mechanical designs.",
     avatarUrl: "https://api.dicebear.com/7.x/bottts/svg?seed=Rupa",
-    followerCount: 3400
+    followerCount: 3400,
+    isTopAuthor: true
   },
   {
     id: "a3",
     name: "S. Rava",
     bio: "S. Rava lives and breathes high-stakes action scenes, rooftop snipers, and high-altitude chases. Perfecting the fast-paced cinematic comic medium.",
     avatarUrl: "https://api.dicebear.com/7.x/bottts/svg?seed=Rava",
-    followerCount: 890
+    followerCount: 890,
+    isTopAuthor: false
   },
   {
     id: "a4",
     name: "N. Kade",
     bio: "N. Kade is a dimension-hopping cartographer who writes speculative quantum fiction where pages and rooms actively rewrite themselves.",
     avatarUrl: "https://api.dicebear.com/7.x/bottts/svg?seed=Kade",
-    followerCount: 2200
+    followerCount: 2200,
+    isTopAuthor: true
   },
   {
     id: "a5",
     name: "Mira K.",
     bio: "Mira K. writes high-speed tech-romance where pilots trade encrypted logs and racing hearts. Combining romantic tension with sleek hovercraft races.",
     avatarUrl: "https://api.dicebear.com/7.x/bottts/svg?seed=Mira",
-    followerCount: 1540
+    followerCount: 1540,
+    isTopAuthor: true
   },
   {
     id: "a6",
     name: "A. Varun",
     bio: "A. Varun curates deep late-night cosmic horror signals. Explores missing frequencies, phantom dial-ins, and radio-wave nightmares.",
     avatarUrl: "https://api.dicebear.com/7.x/bottts/svg?seed=Varun",
-    followerCount: 930
+    followerCount: 930,
+    isTopAuthor: false
   },
   {
     id: "a7",
     name: "I. Sen",
     bio: "I. Sen is an architecture-sleuth crafting mirror-room whodunits, glass labyrinth secrets, and clues hidden inside absolute reflections.",
     avatarUrl: "https://api.dicebear.com/7.x/bottts/svg?seed=Sen",
-    followerCount: 1110
+    followerCount: 1110,
+    isTopAuthor: false
   }
 ];
 
@@ -300,4 +298,13 @@ export function getAuthorId(writerName: string): string {
   const name = writerName.trim().toLowerCase();
   const author = mockAuthors.find((a) => a.name.toLowerCase() === name);
   return author ? author.id : "a1";
+}
+
+export function isTopAuthor(writerNameOrId?: string): boolean {
+  if (!writerNameOrId) return false;
+  const target = writerNameOrId.trim().toLowerCase();
+  const author = mockAuthors.find(
+    (a) => a.id.toLowerCase() === target || a.name.toLowerCase() === target
+  );
+  return author?.isTopAuthor ?? false;
 }

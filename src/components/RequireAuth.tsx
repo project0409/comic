@@ -38,7 +38,7 @@ export function RequireAuth({
           <div className="text-4xl select-none">🔒</div>
           <h2 className="font-display text-2xl font-bold tracking-wider text-white">Login Required</h2>
           <p className="text-sm text-muted">
-            You must be logged in to access your saved stories, wallet coins, vault, and profile features.
+            You must be logged in to access your saved stories, reading history, vault, and profile features.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
             <Button variant="primary" onClick={() => router.push(redirectTo)}>

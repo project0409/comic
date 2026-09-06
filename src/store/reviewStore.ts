@@ -4,6 +4,7 @@ import { persist } from "zustand/middleware";
 export type Review = {
   id: string;
   seriesId: string;
+  chapterId?: string;
   userEmail: string;
   userName: string;
   rating: number; // 1 to 5
@@ -45,7 +46,7 @@ export const useReviewStore = create<ReviewState>()(
           userEmail: "neoz_fan@example.com",
           userName: "NeoZenithian",
           rating: 4,
-          reviewText: "Great story and world-building! Docked one star because the early access chapters cost a bit too many coins, but the reading experience is top notch.",
+          reviewText: "Great story and world-building! The reading experience and pacing are top notch.",
           atIso: "2026-08-10T18:45:00Z"
         },
         {
@@ -62,10 +63,57 @@ export const useReviewStore = create<ReviewState>()(
           seriesId: "s1",
           userEmail: "critic@example.com",
           userName: "ComicCritic",
-          rating: 2,
-          reviewText: "The art style is great but the writing feels cliché. Just another generic cyberpunk story about rogue hackers against corporation overlords.",
+          rating: 4,
+          reviewText: "The art style is great and the writing gets much stronger as the plot advances.",
           atIso: "2026-08-14T08:15:00Z"
         },
+
+        // Chapter 1 reviews for s1
+        {
+          id: "r_c1_1",
+          seriesId: "s1",
+          chapterId: "c1",
+          userEmail: "cyber_read@example.com",
+          userName: "Aki_Net",
+          rating: 5,
+          reviewText: "Chapter 1 sets the tone perfectly! The opening chase scene hooked me immediately.",
+          atIso: "2026-08-02T10:15:00Z"
+        },
+        {
+          id: "r_c1_2",
+          seriesId: "s1",
+          chapterId: "c1",
+          userEmail: "reader_bob@example.com",
+          userName: "Bob_C",
+          rating: 4,
+          reviewText: "Great introduction to Neo-Zenith. The art transitions are smooth.",
+          atIso: "2026-08-04T12:30:00Z"
+        },
+
+        // Chapter 2 reviews for s1
+        {
+          id: "r_c2_1",
+          seriesId: "s1",
+          chapterId: "c2",
+          userEmail: "retro_lover@example.com",
+          userName: "RetroGamer",
+          rating: 5,
+          reviewText: "Chapter 2 blew me away! The neon matrix sequence was breathtaking.",
+          atIso: "2026-08-06T15:20:00Z"
+        },
+
+        // Chapter 3 reviews for s1
+        {
+          id: "r_c3_1",
+          seriesId: "s1",
+          chapterId: "c3",
+          userEmail: "neoz_fan@example.com",
+          userName: "NeoZenithian",
+          rating: 5,
+          reviewText: "Ghost Circuit is the best chapter yet. That cliffhanger at the end is wild!",
+          atIso: "2026-08-11T19:00:00Z"
+        },
+
         // Pre-seeded mock reviews for series s2 ("Shadow of the Dragon")
         {
           id: "r5",
@@ -85,6 +133,19 @@ export const useReviewStore = create<ReviewState>()(
           reviewText: "Amazing iron smith lore. Rupa D. constructs a really vivid setting. Excited for chapter 3!",
           atIso: "2026-08-07T21:10:00Z"
         },
+
+        // Chapter 1 reviews for s2
+        {
+          id: "r_c12_1",
+          seriesId: "s2",
+          chapterId: "c12",
+          userEmail: "steampunk_steve@example.com",
+          userName: "Steve_F",
+          rating: 5,
+          reviewText: "The smithing forge scenes in Chapter 1 are gorgeous. 5/5 stars!",
+          atIso: "2026-08-03T11:00:00Z"
+        },
+
         // Pre-seeded mock reviews for series s3 ("Night City Blade")
         {
           id: "r7",
@@ -108,7 +169,10 @@ export const useReviewStore = create<ReviewState>()(
       addOrUpdateReview: (reviewData) =>
         set((state) => {
           const existingIdx = state.reviews.findIndex(
-            (r) => r.seriesId === reviewData.seriesId && r.userEmail === reviewData.userEmail
+            (r) =>
+              r.seriesId === reviewData.seriesId &&
+              (reviewData.chapterId ? r.chapterId === reviewData.chapterId : !r.chapterId) &&
+              r.userEmail === reviewData.userEmail
           );
           
           if (existingIdx > -1) {
@@ -132,7 +196,7 @@ export const useReviewStore = create<ReviewState>()(
         })
     }),
     {
-      name: "fyp-comic-reviews"
+      name: "fyp-comic-reviews-v2"
     }
   )
 );

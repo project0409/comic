@@ -60,14 +60,14 @@ export default function LoginPage() {
     if (bonusAwarded) {
       toast({
         tone: "success",
-        title: "Welcome Bonus 🎉",
-        message: "50 Free Coins added to your wallet for signing up!"
+        title: "Welcome! 🎉",
+        message: "Your reading profile is active. Start exploring all free chapters!"
       });
     } else {
       toast({
         tone: "success",
         title: `${role === "reader" ? "Reader" : "Writer"} Login`,
-        message: "Welcome back! Your wallet balance and reading progress are active."
+        message: "Welcome back! Your reading library and progress are ready."
       });
     }
     setAuthFlash({ type: "login_success", displayName: email.trim().split("@")[0] });
