@@ -11,6 +11,7 @@ import { Play, X, MessageSquare, Send, Sparkles, ChevronRight } from "lucide-rea
 import { seriesList } from "@/lib/mockData";
 import { cn } from "@/components/cn";
 import { Button } from "./Button";
+import { getCurrentPageTour } from "@/lib/tours";
 
 interface ChatMessage {
   id: string;
@@ -21,13 +22,16 @@ interface ChatMessage {
 
 export function FloatingGuideAssistant() {
   const { isAuthenticated } = useAuthStore();
-  const { isTourActive, set } = useOnboardingStore();
+  const { isTourActive, startTour } = useOnboardingStore();
   const pathname = usePathname();
   const router = useRouter();
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
+
+  // Detect whether current page has an eligible tour
+  const currentTour = useMemo(() => getCurrentPageTour(pathname), [pathname]);
 
   // Chat Agent State
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
@@ -64,32 +68,16 @@ export function FloatingGuideAssistant() {
     }
   }, [chatMessages, agentTyping, chatOpen]);
 
-  // If user is not logged in, or if the onboarding tour is currently running, hide the persistent assistant
-  if (!isAuthenticated || isTourActive) {
+  // If user is not logged in, or if the onboarding tour is currently running,
+  // or if the current page is NOT one of the 4 supported tour pages (Home, Comic Details, Chapter/Reader, Profile),
+  // hide the persistent assistant completely.
+  if (!isAuthenticated || isTourActive || !currentTour) {
     return null;
   }
 
   const handleStartTour = () => {
     setMenuOpen(false);
-    const path = pathname || "/";
-    if (path !== "/") {
-      router.push("/");
-      setTimeout(() => {
-        set({
-          isTourActive: true,
-          currentStep: 0,
-          showWelcomeModal: false,
-          showCompletionModal: false
-        });
-      }, 600);
-    } else {
-      set({
-        isTourActive: true,
-        currentStep: 0,
-        showWelcomeModal: false,
-        showCompletionModal: false
-      });
-    }
+    startTour(currentTour.type);
   };
 
   const triggerAgentReply = (userQuery: string) => {

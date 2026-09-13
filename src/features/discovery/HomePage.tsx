@@ -11,15 +11,20 @@ import { StatsBar } from "./StatsBar";
 import { ReleaseCalendar } from "./ReleaseCalendar";
 import { SeriesCatalog } from "./SeriesCatalog";
 import { CarouselRow } from "./CarouselRow";
+import { RecommendationsSection } from "./RecommendationsSection";
+import { TopAuthorsRow } from "./TopAuthorsRow";
 import type { Series } from "@/lib/types";
 import { chaptersBySeries, releaseCalendar } from "@/lib/mockData";
+import { getTrendingComics, getTopAuthors } from "@/lib/trending";
 import { PWAInstallBanner } from "@/components/PWAInstallBanner";
 import { consumeAuthFlash } from "@/lib/authFlash";
 import { useToastStore } from "@/store/toastStore";
+import { useVaultStore } from "@/store/vaultStore";
 
 export function HomePage() {
   const searchParams = useSearchParams();
   const toast = useToastStore((s) => s.push);
+  const bookmarks = useVaultStore((s) => s.bookmarks);
   const [all, setAll] = useState<Series[]>([]);
   const [q, setQ] = useState("");
   const [genre, setGenre] = useState<string | undefined>(undefined);
@@ -75,8 +80,17 @@ export function HomePage() {
     });
   }, [all, q, genre]);
 
-  const trendingSeries = filtered[0] ?? all[0];
-  const trending = filtered.slice(0, 8);
+  // Deterministic Trending Comics ranked by readers, rating, and bookmarks
+  const trendingList = useMemo(() => {
+    return getTrendingComics(all, bookmarks);
+  }, [all, bookmarks]);
+
+  // Deterministic Top Authors ranked by top author status, reader reach, followers, and comics published
+  const topAuthors = useMemo(() => {
+    return getTopAuthors(undefined, all);
+  }, [all]);
+
+  const trendingSeries = trendingList[0] ?? all[0];
 
   return (
     <div className="min-h-dvh relative">
@@ -100,10 +114,23 @@ export function HomePage() {
 
         <StatsBar />
 
-        {trending.length > 0 ? <CarouselRow title="Trending Series" items={trending.slice(0, 6)} /> : null}
+        {/* 1. Trending Comics */}
+        {trendingList.length > 0 ? (
+          <CarouselRow title="Trending Comics" items={trendingList.slice(0, 6)} />
+        ) : null}
 
+        {/* 2. Continue Reading & Recommendations (Personalized or Fallback) */}
+        <RecommendationsSection allSeries={all} />
+
+        {/* 3. Top Authors */}
+        {topAuthors.length > 0 ? (
+          <TopAuthorsRow authors={topAuthors} />
+        ) : null}
+
+        {/* 4. Release Calendar */}
         <ReleaseCalendar items={releaseCalendar} />
 
+        {/* 5. Series Catalog */}
         <SeriesCatalog series={filtered} activeGenre={genre} />
       </motion.main>
 

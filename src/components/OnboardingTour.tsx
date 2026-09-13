@@ -1,77 +1,29 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { useOnboardingStore } from "@/store/onboardingStore";
 import { useAuthStore } from "@/store/authStore";
+import { PAGE_TOURS } from "@/lib/tours";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, HelpCircle, X, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/Button";
 import { GuideMascot } from "./GuideMascot";
 
-// Define the steps of the onboarding website tour
-const TOUR_STEPS = [
-  {
-    target: "#tour-navbar",
-    title: "Navigation Bar",
-    content: "Explore the platform using these navigation links. Jump back to the Home feed, discover new titles, view all series, or open your Vault.",
-  },
-  {
-    target: "#tour-search-bar",
-    title: "Search Bar",
-    content: "Looking for something specific? Search for your favorite comic series, writers, or tags instantly.",
-  },
-  {
-    target: "#tour-genres",
-    title: "Categories & Genres",
-    content: "Filter comics by genre! Click on Action, Fantasy, Sci-Fi, Romance, or Horror to find exactly what you like.",
-  },
-  {
-    target: ".sf-comic-card",
-    title: "Comic Cards",
-    content: "Explore our rich catalog. Each card shows the series title, chapter count, and custom genre badges.",
-  },
-  {
-    target: ".sf-comic-card",
-    title: "How to Open a Comic",
-    content: "Click on any comic card to view details, chapters, read reviews, and start reading your favorite episodes.",
-  },
-  {
-    target: ".sf-comic-card",
-    title: "Immersive Reader Controls",
-    content: "Inside the reader, you can switch between vertical scroll or panel-by-panel modes, adjust zoom, and toggle ambient music.",
-  },
-  {
-    target: "#tour-reader-hub",
-    title: "Bookmarks & Saved Stories",
-    content: "Keep track of your reading progress! Access your bookmarks and favorite series inside the Reader Hub.",
-  },
-  {
-    target: "#tour-profile-menu",
-    title: "Profile Section",
-    content: "Manage your user profile. Open this menu to view details, check your email, or check out dashboard tools if you are a creator.",
-  },
-  {
-    target: "#tour-profile-menu",
-    title: "Settings Section",
-    content: "Inside the profile dropdown, you'll find the Settings option to edit credentials, change names, and manage account preferences.",
-  },
-  {
-    target: "#tour-theme-toggle",
-    title: "Theme Switcher",
-    content: "Prefer a dark UI or comfortable reading at night? Switch between Dark, Light, or System themes instantly.",
-  }
-];
-
 export function OnboardingTour() {
-  const { isTourActive, currentStep, showWelcomeModal, showCompletionModal, set } = useOnboardingStore();
+  const pathname = usePathname();
+  const { isTourActive, currentStep, activeTourType, showWelcomeModal, showCompletionModal, set } = useOnboardingStore();
   const { isAuthenticated, email } = useAuthStore();
   
   const [domReady, setDomReady] = useState(false);
   const [rect, setRect] = useState<DOMRect | null>(null);
 
-  // 1. Verify that all target elements are ready in DOM before starting
+  const currentTour = PAGE_TOURS[activeTourType] || PAGE_TOURS.home;
+  const steps = currentTour.steps;
+
+  // 1. Verify that Home target elements are ready in DOM before auto-triggering first-time onboarding
   useEffect(() => {
-    if (!isAuthenticated || !email) {
+    if (!isAuthenticated || !email || (pathname !== "/" && pathname !== "/home")) {
       setDomReady(false);
       return;
     }
@@ -86,7 +38,6 @@ export function OnboardingTour() {
         "#tour-profile-menu",
         "#tour-theme-toggle"
       ];
-      // All elements must exist in the DOM
       return required.every((sel) => document.querySelector(sel) !== null);
     };
 
@@ -102,7 +53,6 @@ export function OnboardingTour() {
       }
     }, 100);
 
-    // Timeout after 10 seconds to avoid unnecessary polling if elements aren't mounted
     const timeout = setTimeout(() => {
       clearInterval(interval);
     }, 10000);
@@ -111,11 +61,12 @@ export function OnboardingTour() {
       clearInterval(interval);
       clearTimeout(timeout);
     };
-  }, [isAuthenticated, email]);
+  }, [isAuthenticated, email, pathname]);
 
-  // 2. Dual-key storage check to launch welcome modal automatically
+  // 2. Dual-key storage check to launch welcome modal automatically ONLY for first-time registration on Home
   useEffect(() => {
     if (!isAuthenticated || !email || !domReady) return;
+    if (pathname !== "/" && pathname !== "/home") return;
 
     const emailKey = email.toLowerCase().trim();
     const triggerVal = localStorage.getItem(`fyp-onboarding-trigger-${emailKey}`);
@@ -123,18 +74,18 @@ export function OnboardingTour() {
 
     // Start tour only if trigger is true and completed is not true
     if (triggerVal === "true" && completedVal !== "true") {
-      set({ showWelcomeModal: true });
+      set({ showWelcomeModal: true, activeTourType: "home" });
     }
-  }, [isAuthenticated, email, domReady, set]);
+  }, [isAuthenticated, email, domReady, pathname, set]);
 
-  // 3. Keep tracking bounding box and smooth scroll when active step changes
+  // 3. Keep tracking bounding box and smooth scroll when active step or tour changes
   useEffect(() => {
     if (!isTourActive) {
       setRect(null);
       return;
     }
 
-    const selector = TOUR_STEPS[currentStep]?.target;
+    const selector = steps[currentStep]?.target;
     if (!selector) {
       setRect(null);
       return;
@@ -151,9 +102,7 @@ export function OnboardingTour() {
       const el = document.querySelector(selector);
       if (el) {
         el.scrollIntoView({ behavior: "smooth", block: "center" });
-        // Initial bounding rect capture
         updateRect();
-        // Recalculate after scroll finishes to capture correct position
         const timer = setTimeout(updateRect, 500);
         return timer;
       }
@@ -161,7 +110,6 @@ export function OnboardingTour() {
 
     const timer = scrollAndFetch();
 
-    // Listen to window events to keep highlight coordinates updated in real time
     window.addEventListener("resize", updateRect);
     window.addEventListener("scroll", updateRect);
 
@@ -170,7 +118,7 @@ export function OnboardingTour() {
       window.removeEventListener("resize", updateRect);
       window.removeEventListener("scroll", updateRect);
     };
-  }, [isTourActive, currentStep]);
+  }, [isTourActive, currentStep, steps]);
 
   if (!isAuthenticated || !email) return null;
 
@@ -181,28 +129,33 @@ export function OnboardingTour() {
     set({
       showWelcomeModal: false,
       isTourActive: true,
-      currentStep: 0
+      currentStep: 0,
+      activeTourType: "home",
     });
   };
 
   const handleSkipTour = () => {
-    localStorage.setItem(`fyp-onboarding-completed-${emailKey}`, "true");
+    if (activeTourType === "home") {
+      localStorage.setItem(`fyp-onboarding-completed-${emailKey}`, "true");
+    }
     set({
       showWelcomeModal: false,
       isTourActive: false,
       currentStep: 0,
-      showCompletionModal: false
+      showCompletionModal: false,
     });
   };
 
   const handleNextStep = () => {
-    if (currentStep < TOUR_STEPS.length - 1) {
+    if (currentStep < steps.length - 1) {
       set({ currentStep: currentStep + 1 });
     } else {
-      localStorage.setItem(`fyp-onboarding-completed-${emailKey}`, "true");
+      if (activeTourType === "home") {
+        localStorage.setItem(`fyp-onboarding-completed-${emailKey}`, "true");
+      }
       set({
         isTourActive: false,
-        showCompletionModal: true
+        showCompletionModal: true,
       });
     }
   };
@@ -344,7 +297,7 @@ export function OnboardingTour() {
                   You&apos;re All Set! 🎉
                 </h2>
                 <p className="text-sm text-muted leading-relaxed">
-                  You&apos;re all set! Enjoy exploring the platform.
+                  You have completed the {currentTour.title}! Enjoy exploring the platform.
                 </p>
               </div>
               <Button
@@ -404,7 +357,7 @@ export function OnboardingTour() {
             >
 
 
-              {/* Floating Guide Robot Mascot */}
+              {/* Floating Guide Robot Mascot (positioned beside the card without covering text) */}
               <div
                 className={`absolute pointer-events-none transition-all duration-300 ${
                   isNearLeftEdge
@@ -420,6 +373,13 @@ export function OnboardingTour() {
 
               {/* Torn Paper Card Container with double-drawn SVG borders */}
               <div className="relative p-6 pt-8 pb-6 flex flex-col gap-4 text-[#1c1917]">
+                {/* Subtle scotch tape decoration on top-left of the torn paper card */}
+                <div
+                  className="absolute -top-2.5 left-6 w-11 h-4 bg-amber-100/50 backdrop-blur-[0.5px] border border-amber-300/30 -rotate-6 shadow-sm z-20 pointer-events-none rounded-[1px]"
+                  style={{
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+                  }}
+                />
                 
                 {/* Responsive hand-drawn sketchy card border & background */}
                 <div className="absolute inset-0 z-0 w-full h-full pointer-events-none select-none">
@@ -463,7 +423,7 @@ export function OnboardingTour() {
                   {/* Header */}
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-black tracking-wider uppercase text-[#1c1917]/70">
-                      STEP {currentStep + 1} OF {TOUR_STEPS.length}
+                      STEP {currentStep + 1} OF {steps.length}
                     </span>
                     <button
                       onClick={handleSkipTour}
@@ -478,10 +438,10 @@ export function OnboardingTour() {
                   {/* Body */}
                   <div className="space-y-1">
                     <h3 className="font-display text-xl font-black tracking-wide text-[#1c1917]">
-                      {TOUR_STEPS[currentStep]?.title}
+                      {steps[currentStep]?.title}
                     </h3>
                     <p className="text-xs text-[#1c1917]/85 leading-relaxed font-bold">
-                      {TOUR_STEPS[currentStep]?.content}
+                      {steps[currentStep]?.content}
                     </p>
                   </div>
 
@@ -510,7 +470,7 @@ export function OnboardingTour() {
                         onClick={handleNextStep}
                         className="h-8 text-xs gap-1 bg-[#ff7b9a] hover:bg-[#ff5a79] text-white border-2 border-[#1c1917] font-black rounded-full px-4 pointer-events-auto shadow-none"
                       >
-                        {currentStep === TOUR_STEPS.length - 1 ? (
+                        {currentStep === steps.length - 1 ? (
                           "Finish"
                         ) : (
                           <>

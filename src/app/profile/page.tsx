@@ -41,7 +41,7 @@ export default function ProfilePage() {
   return (
     <RequireAuth>
       <div className="mx-auto max-w-5xl space-y-6 px-4 py-10">
-        <div className="rounded-3xl border border-white/10 bg-card p-6">
+        <div id="tour-profile-info" className="rounded-3xl border border-white/10 bg-card p-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-4">
               <div className="grid h-16 w-16 place-items-center rounded-2xl bg-primary/20 text-primary">
@@ -56,7 +56,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
+        <div id="tour-profile-stats" className="grid gap-4 grid-cols-2 md:grid-cols-4">
           <div className="rounded-3xl border border-white/10 bg-card p-5">
             <div className="flex items-center gap-2 text-sm text-muted">
               <BookOpen className="h-4 w-4 text-primary" />
@@ -90,7 +90,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-3">
+        <div id="tour-profile-actions" className="flex flex-wrap gap-3">
           <Link href="/library">
             <Button variant="primary"><BookOpen className="h-4 w-4" /> My Library</Button>
           </Link>
@@ -120,7 +120,7 @@ export default function ProfilePage() {
           ) : null}
         </div>
 
-        <div className="grid gap-4 md:grid-cols-[0.95fr_1.05fr]">
+        <div id="tour-profile-features" className="grid gap-4 md:grid-cols-[0.95fr_1.05fr]">
           <div className="sf-comic-card rounded-3xl border border-white/10 bg-card p-5">
             <div className="flex items-center gap-2 text-sm text-muted">
               <LayoutDashboard className="h-4 w-4 text-highlight" />

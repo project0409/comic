@@ -283,7 +283,7 @@ export default function SeriesDetailPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.42, ease: "easeOut" }}
         >
-          <div className="aspect-[3/4] w-[220px] overflow-hidden rounded-2xl border border-white/10 shadow-2xl shadow-primary/10">
+          <div id="tour-comic-cover" className="aspect-[3/4] w-[220px] overflow-hidden rounded-2xl border border-white/10 shadow-2xl shadow-primary/10">
             <img
               src={series.coverUrl}
               alt={`${series.title} cover`}
@@ -291,7 +291,7 @@ export default function SeriesDetailPage() {
             />
           </div>
 
-          <div className="space-y-3">
+          <div id="tour-comic-info" className="space-y-3">
             <h1 className="font-display text-4xl font-bold tracking-widest text-white drop-shadow-[0_0_18px_rgba(255,51,102,0.18)] md:text-5xl">
               {series.title}
             </h1>
@@ -321,6 +321,7 @@ export default function SeriesDetailPage() {
                 </div>
               )}
               <Button
+                id="tour-comic-save"
                 variant="outline"
                 size="sm"
                 onClick={handleToggleSave}
@@ -414,7 +415,7 @@ export default function SeriesDetailPage() {
               </div>
             )}
 
-            <div className="pt-2">
+            <div id="tour-comic-chapters" className="pt-2">
               <Tabs<TabKey>
                 value={tab}
                 onChange={setTab}
@@ -437,7 +438,7 @@ export default function SeriesDetailPage() {
       >
         {tab === "chapters" ? (
           <div id="chapters" className="scroll-mt-28 space-y-3">
-            {chapters.map((c) => {
+            {chapters.map((c, idx) => {
               if (c.status === "ComingSoon") {
                 return (
                   <motion.div
@@ -524,7 +525,12 @@ export default function SeriesDetailPage() {
                     >
                       <Star className="h-3.5 w-3.5 text-amber-400" /> Reviews &amp; Comments
                     </Button>
-                    <Button variant="primary" size="sm" onClick={() => handleReadChapter(c.id)}>
+                    <Button
+                      id={idx === 0 ? "tour-comic-read" : undefined}
+                      variant="primary"
+                      size="sm"
+                      onClick={() => handleReadChapter(c.id)}
+                    >
                       Read Now
                     </Button>
                   </div>

@@ -329,6 +329,7 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
               {/* Single dedicated "Exit Chapter" button pointing back to Library or Series */}
               <div className="min-w-0 flex items-center gap-3">
                 <Link
+                  id="tour-reader-exit"
                   href={exitUrl}
                   className="group flex items-center gap-1.5 rounded-xl border border-white/15 bg-white/5 px-3 py-1.5 text-xs text-white hover:border-primary/50 hover:bg-white/10 transition shadow-sm"
                   title={fromParam === "/library" ? "Exit Comic: Back to Library" : "Exit Comic: Back to Home"}
@@ -350,7 +351,7 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
               </div>
 
               {/* Reader Controls */}
-              <div className="flex items-center gap-2">
+              <div id="tour-reader-controls" className="flex items-center gap-2">
                 <Button variant="outline" size="sm" onClick={toggleReadingMode} title="Toggle reading mode">
                   {readingMode === "flip" ? "3D Flip" : "Scroll"}
                 </Button>
@@ -398,7 +399,7 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
             </div>
 
             {!distractionFreeMode ? (
-              <div className="flex items-center gap-2">
+              <div id="tour-reader-page-nav" className="flex items-center gap-2">
                 <Button variant="ghost" size="sm" onClick={prev} disabled={currentPage <= 1}>
                   <ChevronLeft className="h-4 w-4" /> Prev
                 </Button>
@@ -421,6 +422,7 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
           </div>
 
           <div
+            id="tour-reader-canvas"
             className={cn(
               "relative overflow-hidden rounded-2xl border border-white/10 bg-black/30 shadow-[inset_0_0_42px_rgba(0,0,0,0.32)]",
               "h-[70vh] md:h-[74vh]"

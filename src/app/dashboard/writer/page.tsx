@@ -29,12 +29,21 @@ export default function WriterDashboardPage() {
   );
 
   const [chapterRows, setChapterRows] = useState<
-    Array<{ name: string; pages: number; date: string; status: UploadStatus; published: boolean }>
+    Array<{ name: string; pages: number; date: string; status: UploadStatus; published: boolean; description?: string }>
   >([
-    { name: "Night City Blade — Ch. 4", pages: 42, date: "2026-05-18", status: "Pending Approval", published: false },
-    { name: "Rose & Ruin — Ch. 12", pages: 38, date: "2026-05-12", status: "Published", published: true },
-    { name: "The Hollow Map — Ch. 2", pages: 26, date: "2026-05-07", status: "Rejected", published: false }
+    { name: "Night City Blade — Ch. 4", pages: 42, date: "2026-05-18", status: "Pending Approval", published: false, description: "A blade-for-hire navigates the neon underbelly of a megacity where every alley hides a syndicate." },
+    { name: "Rose & Ruin — Ch. 12", pages: 38, date: "2026-05-12", status: "Published", published: true, description: "Two rival pilots trade encrypted love notes across a citywide high-speed hover race." },
+    { name: "The Hollow Map — Ch. 2", pages: 26, date: "2026-05-07", status: "Rejected", published: false, description: "Cartographers chart a quantum dimension that rewrites its geometry nightly." }
   ]);
+
+  const [selectedSeries, setSelectedSeries] = useState("Night City Blade");
+  const [isNewSeries, setIsNewSeries] = useState(false);
+  const [newSeriesTitle, setNewSeriesTitle] = useState("");
+  const [newSeriesGenre, setNewSeriesGenre] = useState("Sci-Fi");
+  const [chapterNumber, setChapterNumber] = useState("4");
+  const [releaseDate, setReleaseDate] = useState("");
+  const [chapterTitle, setChapterTitle] = useState("Neon Vows");
+  const [description, setDescription] = useState("");
 
   function onPickFiles(list: FileList | null) {
     if (!list) return;
@@ -86,7 +95,7 @@ export default function WriterDashboardPage() {
 
       <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="rounded-3xl border border-white/10 bg-card p-6">
-          <div className="font-display text-2xl tracking-widest">Upload New Chapter</div>
+          <div className="font-display text-2xl tracking-widest">Upload New Comic / Chapter</div>
 
           <label className="mt-4 block">
             <div className="grid place-items-center rounded-3xl border border-dashed border-white/15 bg-black/20 px-6 py-10 text-center">
@@ -123,30 +132,101 @@ export default function WriterDashboardPage() {
         </div>
 
         <div className="rounded-3xl border border-white/10 bg-card p-6">
-          <div className="font-display text-2xl tracking-widest">Chapter metadata</div>
+          <div className="font-display text-2xl tracking-widest">Comic & Chapter Metadata</div>
           <div className="mt-4 space-y-3">
             <label className="block text-xs text-muted">
               Series selector
-              <select className="mt-1 w-full rounded-2xl border border-white/10 bg-black/25 px-4 py-3 text-sm outline-none">
-                <option>Night City Blade</option>
-                <option>Rose & Ruin</option>
-                <option>The Hollow Map</option>
+              <select
+                value={isNewSeries ? "__new__" : selectedSeries}
+                onChange={(e) => {
+                  if (e.target.value === "__new__") {
+                    setIsNewSeries(true);
+                  } else {
+                    setIsNewSeries(false);
+                    setSelectedSeries(e.target.value);
+                  }
+                }}
+                className="mt-1 w-full rounded-2xl border border-white/10 bg-black/25 px-4 py-3 text-sm outline-none"
+              >
+                <option value="Night City Blade">Night City Blade</option>
+                <option value="Rose & Ruin">Rose & Ruin</option>
+                <option value="The Hollow Map">The Hollow Map</option>
+                <option value="Cyberpunk Odyssey: Neo-Zenith">Cyberpunk Odyssey: Neo-Zenith</option>
+                <option value="Shadow of the Dragon">Shadow of the Dragon</option>
+                <option value="__new__">+ Create New Comic Series</option>
               </select>
             </label>
+
+            {isNewSeries && (
+              <div className="grid grid-cols-2 gap-3 p-3 rounded-2xl bg-white/[0.03] border border-white/10">
+                <label className="block text-xs text-muted">
+                  New Comic Title
+                  <input
+                    className="mt-1 w-full rounded-xl border border-white/10 bg-black/35 px-3 py-2 text-sm outline-none text-white placeholder:text-muted/50"
+                    placeholder="e.g. Iron Vow"
+                    value={newSeriesTitle}
+                    onChange={(e) => setNewSeriesTitle(e.target.value)}
+                  />
+                </label>
+                <label className="block text-xs text-muted">
+                  Genre
+                  <select
+                    className="mt-1 w-full rounded-xl border border-white/10 bg-black/35 px-3 py-2 text-sm outline-none text-white"
+                    value={newSeriesGenre}
+                    onChange={(e) => setNewSeriesGenre(e.target.value)}
+                  >
+                    <option value="Sci-Fi">Sci-Fi</option>
+                    <option value="Fantasy">Fantasy</option>
+                    <option value="Action">Action</option>
+                    <option value="Romance">Romance</option>
+                    <option value="Horror">Horror</option>
+                    <option value="Mystery">Mystery</option>
+                  </select>
+                </label>
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-3">
               <label className="block text-xs text-muted">
                 Chapter #
-                <input className="mt-1 w-full rounded-2xl border border-white/10 bg-black/25 px-4 py-3 text-sm outline-none" defaultValue="4" />
+                <input
+                  className="mt-1 w-full rounded-2xl border border-white/10 bg-black/25 px-4 py-3 text-sm outline-none text-white"
+                  value={chapterNumber}
+                  onChange={(e) => setChapterNumber(e.target.value)}
+                />
               </label>
               <label className="block text-xs text-muted">
                 Release date
-                <input className="mt-1 w-full rounded-2xl border border-white/10 bg-black/25 px-4 py-3 text-sm outline-none" type="date" />
+                <input
+                  className="mt-1 w-full rounded-2xl border border-white/10 bg-black/25 px-4 py-3 text-sm outline-none text-white"
+                  type="date"
+                  value={releaseDate}
+                  onChange={(e) => setReleaseDate(e.target.value)}
+                />
               </label>
             </div>
+
             <label className="block text-xs text-muted">
-              Title
-              <input className="mt-1 w-full rounded-2xl border border-white/10 bg-black/25 px-4 py-3 text-sm outline-none" defaultValue="Neon Vows" />
+              Chapter Title
+              <input
+                className="mt-1 w-full rounded-2xl border border-white/10 bg-black/25 px-4 py-3 text-sm outline-none text-white"
+                value={chapterTitle}
+                onChange={(e) => setChapterTitle(e.target.value)}
+              />
             </label>
+
+            {/* Comic / Chapter Description Box */}
+            <label className="block text-xs text-muted">
+              Comic / Chapter Description
+              <textarea
+                className="mt-1 w-full rounded-2xl border border-white/10 bg-black/25 px-4 py-3 text-sm text-white placeholder:text-muted/50 outline-none focus:border-primary/50 transition-colors resize-none"
+                rows={3}
+                placeholder="Write a brief synopsis or description about this comic / chapter release..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </label>
+
             <label className="block text-xs text-muted">
               Access type
               <input className="mt-1 w-full rounded-2xl border border-white/10 bg-black/25 px-4 py-3 text-sm outline-none text-muted" defaultValue="Free Release (Standard)" readOnly />
@@ -157,11 +237,26 @@ export default function WriterDashboardPage() {
               variant="primary"
               disabled={files.length === 0 || files.some((f) => f.stage !== "Done")}
               onClick={() => {
-                toast({ tone: "success", title: "Upload submitted", message: "Chapter submitted for review (demo)." });
+                const seriesName = isNewSeries ? newSeriesTitle.trim() || "Untitled Comic" : selectedSeries;
+                const newRow = {
+                  name: `${seriesName} — Ch. ${chapterNumber}${chapterTitle ? `: ${chapterTitle}` : ""}`,
+                  pages: files.length || 24,
+                  date: releaseDate || new Date().toISOString().split("T")[0],
+                  status: "Pending Approval" as UploadStatus,
+                  published: false,
+                  description: description.trim() || undefined
+                };
+                setChapterRows((prev) => [newRow, ...prev]);
+                toast({
+                  tone: "success",
+                  title: "Upload submitted",
+                  message: `"${seriesName}" submitted with description for review (demo).`
+                });
                 setFiles([]);
+                setDescription("");
               }}
             >
-              Submit (disabled until all files processed)
+              Submit Upload (disabled until all files processed)
             </Button>
 
             <div className="text-xs text-muted">
@@ -175,14 +270,21 @@ export default function WriterDashboardPage() {
         <div className="font-display text-2xl tracking-widest">Chapter Status List</div>
         <div className="mt-4 overflow-hidden rounded-2xl border border-white/10">
           <div className="grid grid-cols-4 bg-white/5 px-4 py-2 text-xs text-muted">
-            <div>Chapter</div>
+            <div>Comic / Chapter</div>
             <div>Pages</div>
             <div>Upload date</div>
             <div>Status</div>
           </div>
           {chapterRows.map((r) => (
             <div key={r.name} className="grid grid-cols-4 border-t border-white/8 px-4 py-3 text-sm">
-              <div className="font-semibold">{r.name}</div>
+              <div className="min-w-0 pr-2">
+                <div className="font-semibold truncate">{r.name}</div>
+                {r.description && (
+                  <div className="text-xs text-muted/80 line-clamp-1 mt-0.5 italic">
+                    &ldquo;{r.description}&rdquo;
+                  </div>
+                )}
+              </div>
               <div className="text-muted">{r.pages}</div>
               <div className="text-muted">{r.date}</div>
               <div>
