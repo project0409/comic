@@ -14,7 +14,7 @@ export type VaultBookmark = {
 
 export type VaultReaction = {
   id: string;
-  emoji: "🔥" | "😭" | "🤯" | "💀" | "👏";
+  emoji: "🔥" | "❤️" | "😭" | "🤯" | "💀" | "👏" | "⚡" | "✨";
   seriesName: string;
   chapterId: string;
   pageIndex: number;
@@ -55,6 +55,7 @@ type VaultState = {
   updateBookmarkNote: (id: string, note: string) => void;
   addReaction: (r: Omit<VaultReaction, "id" | "atIso">) => void;
   removeBookmarkBySeries: (seriesName: string) => void;
+  deleteBookmark: (id: string) => void;
   createCollection: (name: string) => string | undefined;
   renameCollection: (collectionId: string, name: string) => void;
   deleteCollection: (collectionId: string) => void;
@@ -106,6 +107,14 @@ export const useVaultStore = create<VaultState>()(
             bookmarkIds: collection.bookmarkIds.filter((id) =>
               s.bookmarks.some((bookmark) => bookmark.id === id && bookmark.seriesName !== seriesName)
             )
+          }))
+        })),
+      deleteBookmark: (id) =>
+        set((s) => ({
+          bookmarks: s.bookmarks.filter((b) => b.id !== id),
+          collections: s.collections.map((collection) => ({
+            ...collection,
+            bookmarkIds: collection.bookmarkIds.filter((bId) => bId !== id)
           }))
         })),
       createCollection: (name) => {

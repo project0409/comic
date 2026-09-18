@@ -1,4 +1,5 @@
 import type { Chapter, ChapterPage, ReleaseCalendarItem, Series, Author } from "./types";
+import { getComicChapter } from "./comicChapters";
 
 export const firstChapterBySeries: Record<string, string> = {
   s1: "c1",
@@ -198,6 +199,24 @@ seriesList.forEach((series) => {
 });
 
 export function buildMockPages(chapterId: string): ChapterPage[] {
+  const chapter = getComicChapter(chapterId);
+  if (chapter && chapter.pages && chapter.pages.length > 0) {
+    return chapter.pages.map((p, i) => ({
+      id: `${chapterId}_p${i + 1}`,
+      index: i + 1,
+      imageUrl: p.imageUrl,
+      audioUrl: undefined,
+      mood: (p.mood === "Action" || p.mood === "Romantic" || p.mood === "Suspense") ? p.mood : "Suspense",
+      ambientColorHex: p.ambientColorHex ?? "#7C3AED",
+      panelCoordinates: [
+        { x: 0.06, y: 0.08, w: 0.44, h: 0.34 },
+        { x: 0.54, y: 0.08, w: 0.40, h: 0.24 },
+        { x: 0.54, y: 0.36, w: 0.40, h: 0.36 },
+        { x: 0.06, y: 0.50, w: 0.44, h: 0.25 }
+      ]
+    }));
+  }
+
   const palettes = {
     c1: ["#7C3AED", "#2A145D", "#F59E0B"],
     c2: ["#7C3AED", "#111111", "#F59E0B"],

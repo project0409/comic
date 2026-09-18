@@ -1,12 +1,16 @@
 "use client";
 
+import { useMemo } from "react";
 import Link from "@/compat/next-link";
-import { BarChart3, Bookmark, BookOpen, LayoutDashboard, Pencil, Settings, ShieldCheck, Upload, User, Star } from "lucide-react";
+import { BarChart3, Bookmark, BookOpen, LayoutDashboard, Pencil, Settings, ShieldCheck, Upload, User, Star, Users } from "lucide-react";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
+import { cn } from "@/components/cn";
 import { RequireAuth } from "@/components/RequireAuth";
 import { useAuthStore } from "@/store/authStore";
 import { useVaultStore } from "@/store/vaultStore";
+import { useAuthorStore } from "@/store/authorStore";
+import { mockAuthors } from "@/lib/mockData";
 
 export default function ProfilePage() {
   const role = useAuthStore((s) => s.role);
@@ -15,7 +19,15 @@ export default function ProfilePage() {
   const provider = useAuthStore((s) => s.provider);
   const historyCount = useVaultStore((s) => s.history.length);
   const savedCount = useVaultStore((s) => s.bookmarks.length);
+  const followingCount = useAuthorStore((s) => s.followedAuthorIds.length);
   const roleName = role ?? "reader";
+
+  const writerFollowerCount = useMemo(() => {
+    const matched = mockAuthors.find(
+      (a) => a.name.toLowerCase() === (displayName || "").toLowerCase()
+    );
+    return matched ? matched.followerCount : 1250;
+  }, [displayName]);
   const permissions =
     roleName === "admin"
       ? [
@@ -56,13 +68,21 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        <div id="tour-profile-stats" className="grid gap-4 grid-cols-2 md:grid-cols-4">
+        <div
+          id="tour-profile-stats"
+          className={cn(
+            "grid gap-4 grid-cols-2",
+            roleName === "writer" ? "sm:grid-cols-3 lg:grid-cols-5" : "md:grid-cols-4"
+          )}
+        >
           <div className="rounded-3xl border border-white/10 bg-card p-5">
             <div className="flex items-center gap-2 text-sm text-muted">
               <BookOpen className="h-4 w-4 text-primary" />
-              Comics Read
+              {roleName === "writer" ? "Comics Published" : "Comics Read"}
             </div>
-            <div className="mt-3 text-3xl font-semibold tabular-nums">{historyCount}</div>
+            <div className="mt-3 text-3xl font-semibold tabular-nums">
+              {roleName === "writer" ? "3" : historyCount}
+            </div>
           </div>
 
           <div className="relative overflow-hidden rounded-3xl border border-transparent bg-gradient-to-br from-violet-600 via-indigo-700 to-pink-500 p-5 shadow-[0_8px_32px_rgba(124,58,237,0.22)] transition hover:scale-[1.02] hover:shadow-[0_12px_42px_rgba(124,58,237,0.3)] duration-300">
@@ -71,10 +91,32 @@ export default function ProfilePage() {
             
             <div className="relative flex items-center gap-2 text-sm text-white/90">
               <Star className="h-4 w-4 fill-white text-white" />
-              Points
+              {roleName === "writer" ? "Creator Points" : "Points"}
             </div>
             <div className="relative mt-3 text-3xl font-bold tabular-nums text-white">12,560</div>
             <div className="relative mt-1 text-[11px] font-semibold text-white/80">+250 earned today</div>
+          </div>
+
+          {/* Followers Stat Card for Writer Profile */}
+          {roleName === "writer" && (
+            <div className="rounded-3xl border border-primary/30 bg-card p-5 shadow-lg shadow-primary/5">
+              <div className="flex items-center gap-2 text-sm text-primary font-semibold">
+                <Users className="h-4 w-4 text-primary" />
+                Followers
+              </div>
+              <div className="mt-3 text-3xl font-bold tabular-nums text-white">
+                {writerFollowerCount.toLocaleString()}
+              </div>
+              <div className="mt-1 text-[11px] text-muted">+18 this week</div>
+            </div>
+          )}
+
+          <div className="rounded-3xl border border-white/10 bg-card p-5">
+            <div className="flex items-center gap-2 text-sm text-muted">
+              <Users className="h-4 w-4 text-primary" />
+              Following
+            </div>
+            <div className="mt-3 text-3xl font-semibold tabular-nums">{followingCount}</div>
           </div>
 
           <div className="rounded-3xl border border-white/10 bg-card p-5">
@@ -83,10 +125,6 @@ export default function ProfilePage() {
               Saved Stories
             </div>
             <div className="mt-3 text-3xl font-semibold tabular-nums">{savedCount}</div>
-          </div>
-          <div className="rounded-3xl border border-white/10 bg-card p-5">
-            <div className="text-sm text-muted">Account Type</div>
-            <div className="mt-3 text-3xl font-semibold capitalize">{role ?? "reader"}</div>
           </div>
         </div>
 

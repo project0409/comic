@@ -19,6 +19,9 @@ import { useCommentStore } from "@/store/commentStore";
 import { useReviewStore } from "@/store/reviewStore";
 import { useToastStore } from "@/store/toastStore";
 import { CanvasPage } from "./CanvasPage";
+import { ComicReader } from "./components/ComicReader";
+import { ChapterSelector } from "./components/ChapterSelector";
+import { COMIC_CHAPTERS } from "@/lib/comicChapters";
 import { ReactionPicker } from "./ReactionPicker";
 import { LoreMasterOverlay } from "@/features/loremaster/LoreMasterOverlay";
 import { useRouter, useSearchParams } from "@/compat/next-navigation";
@@ -107,6 +110,8 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
 
   const exitUrl = useMemo(() => {
     if (fromParam === "/library") return "/library";
+    if (fromParam === "/vault") return "/vault";
+    if (fromParam === "/saved-stories") return "/saved-stories";
     if (fromParam === "/" || fromParam === "home") return "/";
     if (series) return `/series/${series.id}${fromParam ? `?from=${encodeURIComponent(fromParam)}` : "?from=/"}`;
     return "/";
@@ -315,7 +320,16 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
   }
 
   return (
-    <div className="relative min-h-dvh bg-bg" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+    <div
+      className={cn(
+        "relative bg-bg transition-colors",
+        readingMode === "flip" && !guidedViewActive
+          ? "h-screen min-h-screen w-full max-w-full overflow-hidden flex flex-col justify-between"
+          : "min-h-dvh"
+      )}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
       {/* Top bar */}
       <AnimatePresence>
         {!distractionFreeMode ? (
@@ -323,36 +337,58 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
             initial={{ y: -14, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -14, opacity: 0 }}
-            className="sticky top-0 z-40 border-b border-white/10 bg-bg/85 backdrop-blur-xl"
+            className="w-full shrink-0 z-40 border-b border-white/10 bg-[#060812]/95 backdrop-blur-2xl shadow-xl"
           >
-            <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
-              {/* Single dedicated "Exit Chapter" button pointing back to Library or Series */}
-              <div className="min-w-0 flex items-center gap-3">
-                <Link
+            <div className="mx-auto flex w-full max-w-[1700px] items-center justify-between gap-3 px-3 sm:px-6 py-2">
+              {/* Desktop App Left: Exit + Divider + Chapter Selector + Comic Title */}
+              <div className="min-w-0 flex items-center gap-2.5 sm:gap-3">
+                <button
                   id="tour-reader-exit"
-                  href={exitUrl}
-                  className="group flex items-center gap-1.5 rounded-xl border border-white/15 bg-white/5 px-3 py-1.5 text-xs text-white hover:border-primary/50 hover:bg-white/10 transition shadow-sm"
-                  title={fromParam === "/library" ? "Exit Comic: Back to Library" : "Exit Comic: Back to Home"}
+                  type="button"
+                  onClick={() => router.replace(exitUrl)}
+                  className="group flex items-center gap-1.5 rounded-xl border border-white/15 bg-white/5 px-2.5 sm:px-3 py-1.5 text-xs text-white hover:border-primary/50 hover:bg-white/10 transition shadow-sm cursor-pointer shrink-0"
+                  title={
+                    fromParam === "/library"
+                      ? "Exit Comic: Back to Library"
+                      : fromParam === "/vault"
+                        ? "Exit Comic: Back to Vault"
+                        : fromParam === "/saved-stories"
+                          ? "Exit Comic: Back to Saved Stories"
+                          : "Exit Comic: Back to Home"
+                  }
                 >
                   <ArrowLeft className="h-4 w-4 text-primary transition group-hover:-translate-x-0.5" />
-                  <span className="font-semibold text-white">
+                  <span className="font-semibold text-white hidden sm:inline">
                     Exit Comic
                   </span>
-                </Link>
+                </button>
 
-                <div className="min-w-0">
-                  <div className="truncate text-sm font-semibold text-white">
-                    {series ? series.title : `Chapter ${chapterId}`} · Page {currentPage} / {totalPages}
+                <div className="h-5 w-px bg-white/15 hidden sm:block" />
+
+                {/* Chapter Selector Dropdown in Desktop Toolbar */}
+                {readingMode === "flip" && (
+                  <ChapterSelector
+                    currentChapterId={chapterId}
+                    chapters={COMIC_CHAPTERS}
+                    onSelectChapter={(newChId) => {
+                      router.replace(`/read/${newChId}${fromParam ? `?from=${encodeURIComponent(fromParam)}` : ""}`);
+                    }}
+                  />
+                )}
+
+                <div className="min-w-0 hidden md:block">
+                  <div className="truncate text-xs font-bold text-white tracking-wide">
+                    {series ? series.title : "Cyberpunk Odyssey: Neo-Zenith"}
                   </div>
-                  <div className="text-xs text-muted truncate">
-                    Chapter {currentChapter?.number ?? chapterId} · Immersive Reader
+                  <div className="text-[11px] text-muted truncate">
+                    {currentChapter ? `Chapter ${currentChapter.number} — ${currentChapter.title}` : `Chapter ${chapterId}`}
                   </div>
                 </div>
               </div>
 
-              {/* Reader Controls */}
-              <div id="tour-reader-controls" className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={toggleReadingMode} title="Toggle reading mode">
+              {/* Desktop App Right: Mode Toggles, Audio, Lore Master AI, Exit */}
+              <div id="tour-reader-controls" className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                <Button variant="outline" size="sm" onClick={toggleReadingMode} className="h-8 px-2.5 text-xs font-semibold" title="Toggle reading mode">
                   {readingMode === "flip" ? "3D Flip" : "Scroll"}
                 </Button>
 
@@ -361,86 +397,127 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
                   size="sm"
                   onClick={() => setGuidedViewActive(!guidedViewActive)}
                   title="Guided view (panel zoom)"
+                  className="h-8 px-2 text-xs"
                 >
                   {guidedViewActive ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </Button>
 
-                <Button variant="outline" size="sm" onClick={toggleMuted} title="Mute">
-                  {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-                </Button>
-
-                <Button variant="outline" size="sm" onClick={() => setLoreMasterOpen(true)} title="Lore Master AI">
-                  <WandSparkles className="h-4 w-4" />
-                </Button>
-
-                <Link href={exitUrl}>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="gap-1 text-muted hover:text-white border border-white/10"
-                    title={fromParam === "/library" ? "Exit to Library" : "Close Reader"}
+                {/* Desktop Inline Audio Volume */}
+                <div className="hidden lg:flex items-center gap-1.5 px-2 py-1 rounded-xl border border-white/10 bg-white/5 h-8">
+                  <button
+                    type="button"
+                    onClick={toggleMuted}
+                    className="text-muted hover:text-white transition cursor-pointer"
+                    title={isMuted ? "Unmute Audio" : "Mute Audio"}
                   >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </Link>
+                    {isMuted ? <VolumeX className="h-3.5 w-3.5 text-rose-400" /> : <Volume2 className="h-3.5 w-3.5 text-primary" />}
+                  </button>
+                  <input
+                    aria-label="Audio Volume"
+                    type="range"
+                    min={0}
+                    max={1}
+                    step={0.01}
+                    value={volume}
+                    onChange={(e) => setVolume(Number(e.target.value))}
+                    className="w-16 h-1 accent-primary cursor-pointer"
+                  />
+                </div>
+
+                {/* Mobile / Tablet Audio Button */}
+                <Button variant="outline" size="sm" onClick={toggleMuted} title="Ambient Audio" className="h-8 px-2 text-xs lg:hidden">
+                  {isMuted ? <VolumeX className="h-4 w-4 text-muted" /> : <Volume2 className="h-4 w-4 text-primary" />}
+                </Button>
+
+                <Button variant="outline" size="sm" onClick={() => setLoreMasterOpen(true)} title="Lore Master AI" className="h-8 px-2 text-xs">
+                  <WandSparkles className="h-4 w-4 text-highlight" />
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => router.replace(exitUrl)}
+                  className="h-8 px-2 text-muted hover:text-white border border-white/10"
+                  title={
+                    fromParam === "/library"
+                      ? "Exit to Library"
+                      : fromParam === "/vault"
+                        ? "Exit to Vault"
+                        : fromParam === "/saved-stories"
+                          ? "Exit to Saved Stories"
+                          : "Close Reader"
+                  }
+                >
+                  <X className="h-4 w-4" />
+                </Button>
               </div>
             </div>
           </motion.div>
         ) : null}
       </AnimatePresence>
 
-      {/* Reader canvas area */}
-      <div className="mx-auto max-w-6xl px-3 py-4">
-        <div className="sf-comic-panel rounded-3xl border border-white/10 bg-surface/90 p-3 md:p-4">
-          <div className="flex items-center justify-between gap-3 pb-3">
-            <div className="flex items-center gap-2 text-xs text-muted">
-              <Shield className="h-4 w-4" />
-              Canvas render · Right-click disabled · No direct &lt;img&gt; tags
+      {/* Reader Area: Desktop Immersive 3D Flip or Scroll View */}
+      {readingMode === "flip" && !guidedViewActive ? (
+        <div className="w-full flex-1 flex flex-col min-h-0 overflow-hidden">
+          <ComicReader
+            initialChapterId={chapterId}
+            seriesTitle={series?.title}
+            onChapterChange={(newChId) => {
+              router.replace(`/read/${newChId}${fromParam ? `?from=${encodeURIComponent(fromParam)}` : ""}`);
+            }}
+            onAmbientColorChange={(hex) => setAmbient(hex)}
+          />
+        </div>
+      ) : (
+        <div className="mx-auto w-full max-w-[1360px] px-2 sm:px-4 lg:px-6 py-2 sm:py-3">
+          <div className="sf-comic-panel rounded-2xl md:rounded-3xl border border-white/10 bg-[#070913]/90 shadow-2xl backdrop-blur-xl p-3 md:p-4">
+            <div className="flex items-center justify-between gap-3 pb-3">
+              <div className="flex items-center gap-2 text-xs text-muted">
+                <Shield className="h-4 w-4" />
+                Canvas render · Right-click disabled · No direct &lt;img&gt; tags
+              </div>
+
+              {!distractionFreeMode ? (
+                <div id="tour-reader-page-nav" className="flex items-center gap-2">
+                  <Button variant="ghost" size="sm" onClick={prev} disabled={currentPage <= 1}>
+                    <ChevronLeft className="h-4 w-4" /> Prev
+                  </Button>
+                  {currentPage >= totalPages && nextChapter && nextChapter.status !== "ComingSoon" ? (
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      className="gap-1 bg-gradient-to-r from-primary to-highlight text-white text-xs font-bold"
+                      onClick={() => router.push(`/read/${nextChapter.id}${fromParam ? `?from=${encodeURIComponent(fromParam)}` : ""}`)}
+                    >
+                      Next Chapter <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  ) : (
+                    <Button variant="ghost" size="sm" onClick={next} disabled={currentPage >= totalPages}>
+                      Next <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              ) : null}
             </div>
 
-            {!distractionFreeMode ? (
-              <div id="tour-reader-page-nav" className="flex items-center gap-2">
-                <Button variant="ghost" size="sm" onClick={prev} disabled={currentPage <= 1}>
-                  <ChevronLeft className="h-4 w-4" /> Prev
-                </Button>
-                {currentPage >= totalPages && nextChapter && nextChapter.status !== "ComingSoon" ? (
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    className="gap-1 bg-gradient-to-r from-primary to-highlight text-white text-xs font-bold"
-                    onClick={() => router.push(`/read/${nextChapter.id}${fromParam ? `?from=${encodeURIComponent(fromParam)}` : ""}`)}
-                  >
-                    Next Chapter <ChevronRight className="h-4 w-4" />
-                  </Button>
-                ) : (
-                  <Button variant="ghost" size="sm" onClick={next} disabled={currentPage >= totalPages}>
-                    Next <ChevronRight className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            ) : null}
-          </div>
+            <div
+              id="tour-reader-canvas"
+              className={cn(
+                "relative overflow-hidden rounded-2xl border border-white/10 bg-black/30 shadow-[inset_0_0_42px_rgba(0,0,0,0.32)]",
+                "h-[70vh] md:h-[74vh]"
+              )}
+              onPointerDown={onPointerDown}
+              onPointerUp={onPointerUp}
+              onPointerCancel={onPointerUp}
+            >
+              {loading ? <LoadingOverlay /> : null}
 
-          <div
-            id="tour-reader-canvas"
-            className={cn(
-              "relative overflow-hidden rounded-2xl border border-white/10 bg-black/30 shadow-[inset_0_0_42px_rgba(0,0,0,0.32)]",
-              "h-[70vh] md:h-[74vh]"
-            )}
-            onPointerDown={onPointerDown}
-            onPointerUp={onPointerUp}
-            onPointerCancel={onPointerUp}
-          >
-            {loading ? <LoadingOverlay /> : null}
-
-            {guidedViewActive ? (
-              <GuidedViewReader chapterId={chapterId} pages={pages} />
-            ) : readingMode === "scroll" ? (
-              <ScrollReader pages={pages} />
-            ) : (
-              <FlipReader pages={pages} />
-            )}
-          </div>
+              {guidedViewActive ? (
+                <GuidedViewReader chapterId={chapterId} pages={pages} />
+              ) : (
+                <ScrollReader pages={pages} />
+              )}
+            </div>
 
           {/* End of Chapter completion box */}
           {currentPage >= totalPages ? (
@@ -482,12 +559,18 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
                   variant="outline"
                   size="sm"
                   className="gap-1.5 border-primary/40 text-primary hover:bg-primary/10"
-                  onClick={() => router.push(exitUrl)}
+                  onClick={() => router.replace(exitUrl)}
                 >
                   <ArrowLeft className="h-3.5 w-3.5" />
-                  {fromParam === "/library" ? "Back to Library" : "Back to Comic"}
+                  {fromParam === "/library"
+                    ? "Back to Library"
+                    : fromParam === "/vault"
+                      ? "Back to Vault"
+                      : fromParam === "/saved-stories"
+                        ? "Back to Saved Stories"
+                        : "Back to Comic"}
                 </Button>
-                {fromParam !== "/library" && (
+                {fromParam !== "/library" && fromParam !== "/vault" && fromParam !== "/saved-stories" && (
                   <Button
                     variant="ghost"
                     size="sm"
@@ -633,10 +716,11 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
           </div>
         </div>
       </div>
+    )}
 
-      {/* Bottom progress bar */}
+      {/* Bottom progress bar (only in scroll mode; flip mode has docked reader footer) */}
       <AnimatePresence>
-        {!distractionFreeMode ? (
+        {!distractionFreeMode && readingMode !== "flip" ? (
           <motion.div
             className="fixed bottom-0 left-0 right-0 z-40"
             initial={{ y: 14, opacity: 0 }}
@@ -656,31 +740,33 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
         ) : null}
       </AnimatePresence>
 
-      {/* Persistent mute + volume panel pinned bottom-left (always visible) */}
-      <div className="fixed bottom-4 left-4 z-[55]">
-        <div className="rounded-2xl border border-white/10 bg-black/65 p-3 shadow-[0_0_24px_rgba(0,229,255,0.1)] backdrop-blur-xl">
-          <div className="flex items-center gap-2">
-            <button
-              className="sf-clickable grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white/5 hover:border-highlight/35 hover:bg-white/10"
-              onClick={toggleMuted}
-              aria-label="Toggle mute"
-            >
-              {isMuted ? <VolumeX className="h-4 w-4 text-muted" /> : <Volume2 className="h-4 w-4 text-white" />}
-            </button>
-            <input
-              aria-label="Volume"
-              type="range"
-              min={0}
-              max={1}
-              step={0.01}
-              value={volume}
-              onChange={(e) => setVolume(Number(e.target.value))}
-              className="w-28"
-            />
+      {/* Persistent mute + volume panel pinned bottom-left (only for scroll mode) */}
+      {readingMode !== "flip" && (
+        <div className="fixed bottom-4 left-4 z-[55]">
+          <div className="rounded-2xl border border-white/10 bg-black/65 p-3 shadow-[0_0_24px_rgba(0,229,255,0.1)] backdrop-blur-xl">
+            <div className="flex items-center gap-2">
+              <button
+                className="sf-clickable grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white/5 hover:border-highlight/35 hover:bg-white/10"
+                onClick={toggleMuted}
+                aria-label="Toggle mute"
+              >
+                {isMuted ? <VolumeX className="h-4 w-4 text-muted" /> : <Volume2 className="h-4 w-4 text-white" />}
+              </button>
+              <input
+                aria-label="Volume"
+                type="range"
+                min={0}
+                max={1}
+                step={0.01}
+                value={volume}
+                onChange={(e) => setVolume(Number(e.target.value))}
+                className="w-28"
+              />
+            </div>
+            <div className="mt-1 text-[11px] text-muted">{page?.mood ? `${page.mood} 🎵` : "Ambient audio"}</div>
           </div>
-          <div className="mt-1 text-[11px] text-muted">{page?.mood ? `${page.mood} 🎵` : "Ambient audio"}</div>
         </div>
-      </div>
+      )}
 
       <ReactionPicker
         open={pickerOpen}

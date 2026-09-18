@@ -415,16 +415,22 @@ export default function LibraryPage() {
                             key={bookmark.id}
                             className="sf-comic-card sf-comic-surface flex overflow-hidden rounded-2xl border border-white/10 bg-card transition-all hover:border-primary/40 p-3 items-center gap-4"
                           >
-                            <div className="aspect-[3/4] w-14 shrink-0 rounded-lg overflow-hidden border border-white/5 bg-black/20">
+                            <div
+                              className="aspect-[3/4] w-14 shrink-0 rounded-lg overflow-hidden border border-white/5 bg-black/20 cursor-pointer group/cover"
+                              onClick={() => router.push(`/read/${bookmark.chapterId}?from=/library`)}
+                            >
                               <img
                                 src={bookmark.thumbUrl ?? "/placeholders/panel-1.svg"}
                                 alt={bookmark.seriesName}
-                                className="w-full h-full object-cover"
+                                className="w-full h-full object-cover group-hover/cover:scale-105 transition-transform"
                               />
                             </div>
                             <div className="min-w-0 flex-1 space-y-2">
-                              <div>
-                                <h3 className="font-bold text-white text-sm truncate leading-snug">
+                              <div
+                                className="cursor-pointer group/title"
+                                onClick={() => router.push(`/read/${bookmark.chapterId}?from=/library`)}
+                              >
+                                <h3 className="font-bold text-white text-sm truncate leading-snug group-hover/title:text-primary transition">
                                   {bookmark.seriesName}
                                 </h3>
                                 <p className="text-[11px] text-muted">
@@ -501,16 +507,22 @@ export default function LibraryPage() {
                               key={bookmark.id}
                               className="sf-comic-card sf-comic-surface flex overflow-hidden rounded-2xl border border-white/10 bg-card/40 transition hover:border-primary/30 p-3 items-center gap-4"
                             >
-                              <div className="aspect-[3/4] w-14 shrink-0 rounded-lg overflow-hidden border border-white/5 bg-black/20">
+                              <div
+                                className="aspect-[3/4] w-14 shrink-0 rounded-lg overflow-hidden border border-white/5 bg-black/20 cursor-pointer group/cover"
+                                onClick={() => router.push(`/read/${bookmark.chapterId}?from=/library`)}
+                              >
                                 <img
                                   src={bookmark.thumbUrl ?? "/placeholders/panel-1.svg"}
                                   alt={bookmark.seriesName}
-                                  className="w-full h-full object-cover"
+                                  className="w-full h-full object-cover group-hover/cover:scale-105 transition-transform"
                                 />
                               </div>
                               <div className="min-w-0 flex-1 space-y-2">
-                                <div>
-                                  <h3 className="font-bold text-white text-sm truncate leading-snug">
+                                <div
+                                  className="cursor-pointer group/title"
+                                  onClick={() => router.push(`/read/${bookmark.chapterId}?from=/library`)}
+                                >
+                                  <h3 className="font-bold text-white text-sm truncate leading-snug group-hover/title:text-primary transition">
                                     {bookmark.seriesName}
                                   </h3>
                                   <p className="text-[11px] text-muted">

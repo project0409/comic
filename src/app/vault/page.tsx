@@ -1,8 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Check, MoreVertical, Pencil, Plus, Trash2, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "@/compat/next-navigation";
+import { ArrowLeft, BookOpen, Check, MoreVertical, Pencil, Play, Plus, Trash2, X } from "lucide-react";
 import { Tabs } from "@/components/Tabs";
+import { Button } from "@/components/Button";
 import { useVaultStore } from "@/store/vaultStore";
 import { cn } from "@/components/cn";
 import { RequireAuth } from "@/components/RequireAuth";
@@ -10,6 +12,7 @@ import { RequireAuth } from "@/components/RequireAuth";
 type TabKey = "bookmarks" | "collections" | "reactions" | "highlights";
 
 export default function VaultPage() {
+  const router = useRouter();
   const [tab, setTab] = useState<TabKey>("bookmarks");
   const [collectionName, setCollectionName] = useState("");
   const [isCreatingCollection, setIsCreatingCollection] = useState(false);
@@ -24,6 +27,7 @@ export default function VaultPage() {
   const reactions = useVaultStore((s) => s.reactions);
   const highlights = useVaultStore((s) => s.highlights);
   const updateNote = useVaultStore((s) => s.updateBookmarkNote);
+  const deleteBookmark = useVaultStore((s) => s.deleteBookmark);
   const createCollection = useVaultStore((s) => s.createCollection);
   const renameCollection = useVaultStore((s) => s.renameCollection);
   const deleteCollection = useVaultStore((s) => s.deleteCollection);
@@ -107,13 +111,27 @@ export default function VaultPage() {
     setIsAddingComics(false);
   }
 
+  useEffect(() => {
+    // When navigating back from Vault, ensure reader routes are bypassed and user returns to Home
+    const handlePopState = () => {
+      router.replace("/");
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [router]);
+
   return (
     <RequireAuth>
     <div className="mx-auto max-w-6xl space-y-6 px-4 py-10">
-      <div className="flex items-end justify-between gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between border-b border-white/5 pb-5">
         <div>
           <div className="font-display text-4xl tracking-widest">Vault</div>
           <div className="text-sm text-muted">Scrapbook · Bookmarks · Reactions</div>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => router.push("/")} className="gap-1.5">
+            <ArrowLeft className="h-4 w-4" /> Back to Home
+          </Button>
         </div>
       </div>
 
@@ -129,30 +147,68 @@ export default function VaultPage() {
             bookmarks.map((b) => (
               <div
                 key={b.id}
-                className="sf-comic-card break-inside-avoid overflow-hidden rounded-3xl border border-white/10 bg-card"
+                className="sf-comic-card break-inside-avoid overflow-hidden rounded-3xl border border-white/10 bg-card group transition hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5"
               >
-                <div className="relative aspect-[16/10] overflow-hidden">
+                <div
+                  className="relative aspect-[16/10] overflow-hidden cursor-pointer group/cover"
+                  onClick={() => router.push(`/read/${b.chapterId}?from=/vault`)}
+                  title={`Read ${b.seriesName} (Chapter ${b.chapterId})`}
+                >
                   <img
                     src={b.thumbUrl ?? "/placeholders/panel-1.svg"}
                     alt={`${b.seriesName} saved panel`}
-                    className="sf-comic-image h-full w-full object-cover"
+                    className="sf-comic-image h-full w-full object-cover transition-transform duration-300 group-hover/cover:scale-105"
                     loading="lazy"
                   />
                   <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,51,102,0.24),rgba(0,229,255,0.08),rgba(255,193,7,0.08))]" />
-                </div>
-                <div className="space-y-2 p-4">
-                  <div className="text-sm font-semibold">{b.seriesName}</div>
-                  <div className="text-xs text-muted">
-                    Chapter {b.chapterId} · Page {b.pageIndex}
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/cover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary text-white text-xs font-semibold shadow-lg">
+                      <Play className="h-3.5 w-3.5 fill-white" /> Read Chapter
+                    </span>
                   </div>
+                </div>
+                <div className="space-y-3 p-4">
+                  <div
+                    className="cursor-pointer group/title"
+                    onClick={() => router.push(`/read/${b.chapterId}?from=/vault`)}
+                  >
+                    <div className="text-sm font-semibold group-hover/title:text-primary transition line-clamp-1">
+                      {b.seriesName}
+                    </div>
+                    <div className="text-xs text-muted">
+                      Chapter {b.chapterId} · Page {b.pageIndex}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      className="flex-1 text-xs gap-1.5 py-1.5 h-8"
+                      onClick={() => router.push(`/read/${b.chapterId}?from=/vault`)}
+                    >
+                      <BookOpen className="h-3.5 w-3.5" /> Read Comic
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-xs h-8 px-2.5 text-rose-500 hover:text-rose-600 hover:bg-rose-500/10"
+                      onClick={() => deleteBookmark(b.id)}
+                      title="Delete Bookmark"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+
                   <textarea
                     className={cn(
                       "w-full resize-none rounded-2xl border border-white/10 bg-black/20 p-3 text-sm outline-none",
                       "placeholder:text-muted"
                     )}
-                    rows={3}
+                    rows={2}
                     placeholder="Personal note…"
                     value={b.note ?? ""}
+                    onClick={(e) => e.stopPropagation()}
                     onChange={(e) => updateNote(b.id, e.target.value)}
                   />
                 </div>
@@ -404,18 +460,31 @@ export default function VaultPage() {
                   </div>
                 ) : (
                   activeCollectionBookmarks.map((bookmark) => (
-                    <div key={bookmark.id} className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-black/20 p-3">
-                      <div className="min-w-0">
-                        <div className="truncate text-sm font-semibold">{bookmark.seriesName}</div>
+                    <div key={bookmark.id} className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-black/20 p-3 hover:border-primary/40 transition">
+                      <div
+                        className="min-w-0 cursor-pointer group flex-1"
+                        onClick={() => router.push(`/read/${bookmark.chapterId}?from=/vault`)}
+                      >
+                        <div className="truncate text-sm font-semibold group-hover:text-primary transition">{bookmark.seriesName}</div>
                         <div className="text-xs text-muted">Chapter {bookmark.chapterId} / Page {bookmark.pageIndex}</div>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => removeBookmarkFromCollection(activeCollection.id, bookmark.id)}
-                        className="rounded-xl border border-white/10 px-3 py-1 text-xs text-muted hover:border-danger/40 hover:text-white"
-                      >
-                        Remove
-                      </button>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          className="text-xs h-7 px-3 gap-1"
+                          onClick={() => router.push(`/read/${bookmark.chapterId}?from=/vault`)}
+                        >
+                          <Play className="h-3 w-3 fill-white" /> Read
+                        </Button>
+                        <button
+                          type="button"
+                          onClick={() => removeBookmarkFromCollection(activeCollection.id, bookmark.id)}
+                          className="rounded-xl border border-white/10 px-3 py-1 text-xs text-muted hover:border-danger/40 hover:text-white"
+                        >
+                          Remove
+                        </button>
+                      </div>
                     </div>
                   ))
                 )}
@@ -429,20 +498,48 @@ export default function VaultPage() {
         <div className="space-y-3">
           {reactions.length === 0 ? (
             <div className="sf-comic-panel sf-comic-surface rounded-3xl border border-white/10 bg-card p-6 text-sm text-muted">
-              No reactions yet. Long-press inside the reader to drop emojis.
+              No reactions yet. Click directly on any comic panel in the reader to drop emoji reactions!
             </div>
           ) : (
             reactions.map((r) => (
-              <div key={r.id} className="sf-comic-card rounded-3xl border border-white/10 bg-card p-4">
-                <div className="flex items-center justify-between">
-                  <div className="text-lg">{r.emoji}</div>
-                  <div className="text-xs text-muted">{new Date(r.atIso).toLocaleString()}</div>
+              <div
+                key={r.id}
+                onClick={() => router.push(`/read/${r.chapterId}?from=/vault`)}
+                className="sf-comic-card group rounded-3xl border border-white/10 bg-card p-4 transition-all hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                title={`Open ${r.seriesName} (Chapter ${r.chapterId})`}
+              >
+                <div className="flex items-start gap-3">
+                  <div className="text-2xl h-11 w-11 rounded-2xl bg-black/40 border border-white/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform shadow-inner">
+                    {r.emoji}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold group-hover:text-primary transition truncate">
+                      {r.seriesName}
+                    </div>
+                    <div className="text-xs text-muted mt-0.5">
+                      Chapter {r.chapterId} · Page {r.pageIndex} · {new Date(r.atIso).toLocaleDateString()}
+                    </div>
+                    {r.comment ? (
+                      <div className="mt-2 text-xs text-white/80 bg-black/30 px-3 py-1.5 rounded-xl border border-white/10 inline-block max-w-md">
+                        &ldquo;{r.comment}&rdquo;
+                      </div>
+                    ) : null}
+                  </div>
                 </div>
-                <div className="mt-1 text-sm font-semibold">{r.seriesName}</div>
-                <div className="text-xs text-muted">
-                  Chapter {r.chapterId} · Page {r.pageIndex} · x:{Math.round(r.x)} y:{Math.round(r.y)}
+
+                <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    className="text-xs h-8 px-3 gap-1.5 shadow-md"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      router.push(`/read/${r.chapterId}?from=/vault`);
+                    }}
+                  >
+                    <BookOpen className="h-3.5 w-3.5" /> Read
+                  </Button>
                 </div>
-                {r.comment ? <div className="mt-2 text-sm text-white/75">{r.comment}</div> : null}
               </div>
             ))
           )}

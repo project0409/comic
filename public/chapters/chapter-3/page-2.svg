@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1600" viewBox="0 0 1200 1600">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="0.8" y2="1">
+      <stop offset="0%" stop-color="#080d1a"/>
+      <stop offset="100%" stop-color="#0b1d2e"/>
+    </linearGradient>
+    <linearGradient id="grad1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#00E5FF" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#10B981" stop-opacity="0.1"/>
+    </linearGradient>
+    <linearGradient id="grad2" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#10B981" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#00E5FF" stop-opacity="0.15"/>
+    </linearGradient>
+    <filter id="blurGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="40"/>
+    </filter>
+  </defs>
+
+  <!-- Page Background with subtle paper tone -->
+  <rect width="1200" height="1600" fill="url(#bgGrad)"/>
+  
+  <!-- Outer Comic Page Frame / Gutter -->
+  <rect x="25" y="25" width="1150" height="1550" rx="24" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="3"/>
+  <rect x="40" y="40" width="1120" height="1520" rx="16" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1.5"/>
+
+  <!-- Comic Header Header Bar -->
+  <g transform="translate(60, 60)">
+    <text x="0" y="40" font-family="'Impact', 'Segoe UI Black', sans-serif" font-size="34" fill="#00E5FF" letter-spacing="3">CHAPTER 3 — THE MYSTERY</text>
+    <text x="1080" y="40" text-anchor="end" font-family="'Segoe UI Black', sans-serif" font-size="24" fill="#10B981">PAGE 2 / 4</text>
+    <line x1="0" y1="60" x2="1080" y2="60" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+  </g>
+
+  
+      <!-- Panel 1 -->
+      <g transform="translate(60, 160)">
+        <rect width="1080" height="600" rx="16" fill="#0b1d2e" stroke="#00E5FF" stroke-width="4" stroke-opacity="0.6"/>
+        <rect width="1080" height="600" rx="16" fill="url(#grad1)" opacity="0.35"/>
+        <!-- Comic art elements -->
+        <circle cx="900" cy="200" r="140" fill="#10B981" opacity="0.15" filter="url(#blurGlow)"/>
+        <path d="M 60 450 L 350 200 L 700 450 L 1020 280" stroke="#10B981" stroke-width="6" fill="none" opacity="0.4"/>
+        <line x1="0" y1="300" x2="1080" y2="300" stroke="#00E5FF" stroke-width="1" stroke-dasharray="10 15" opacity="0.3"/>
+        <!-- Narration bubble -->
+        <rect x="30" y="30" width="460" height="80" rx="12" fill="#0b0e17" stroke="#00E5FF" stroke-width="2"/>
+        <text x="50" y="65" font-family="'Impact', 'Segoe UI Black', sans-serif" font-size="24" fill="#00E5FF" letter-spacing="2">HOLOGRAPHIC EYE</text>
+        <text x="50" y="92" font-family="system-ui, sans-serif" font-size="16" fill="#F3F4F6" opacity="0.85">A crystalline iris dilates into golden rings of data.</text>
+      </g>
+      <!-- Panel 2 -->
+      <g transform="translate(60, 800)">
+        <rect width="1080" height="660" rx="16" fill="#0b1d2e" stroke="#10B981" stroke-width="4" stroke-opacity="0.6"/>
+        <rect width="1080" height="660" rx="16" fill="url(#grad2)" opacity="0.3"/>
+        <!-- Comic art elements -->
+        <polygon points="200,600 540,100 880,600" fill="#00E5FF" opacity="0.12"/>
+        <circle cx="540" cy="330" r="180" fill="none" stroke="#10B981" stroke-width="3" stroke-dasharray="8 8" opacity="0.5"/>
+        <!-- Dialogue Balloon -->
+        <rect x="520" y="460" width="500" height="120" rx="20" fill="#ffffff" stroke="#111827" stroke-width="4"/>
+        <polygon points="580,580 550,630 630,580" fill="#ffffff" stroke="#111827" stroke-width="3"/>
+        <text x="550" y="505" font-family="'Segoe UI Black', sans-serif" font-size="22" fill="#111827">THE REVELATION</text>
+        <text x="550" y="540" font-family="system-ui, sans-serif" font-size="18" fill="#374151" font-weight="600">"You bear the genome of the architects. Why return now?"</text>
+      </g>
+    
+
+  <!-- Page Footer -->
+  <g transform="translate(60, 1530)">
+    <line x1="0" y1="0" x2="1080" y2="0" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+    <text x="0" y="30" font-family="system-ui, sans-serif" font-size="14" fill="rgba(255,255,255,0.5)" letter-spacing="1">FYP IMMERSIVE READER • 3D PHYSICAL BOOK EDITION</text>
+    <text x="1080" y="30" text-anchor="end" font-family="system-ui, sans-serif" font-size="14" fill="#00E5FF" font-weight="bold">CHAPTER 3 · PAGE 2</text>
+  </g>
+</svg>

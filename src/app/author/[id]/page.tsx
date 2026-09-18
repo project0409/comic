@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { useParams, useRouter } from "@/compat/next-navigation";
 import Link from "@/compat/next-link";
 import { motion } from "framer-motion";
-import { ArrowLeft, Clock, Heart, Users, BookOpen, Calendar as CalendarIcon } from "lucide-react";
+import { ArrowLeft, Clock, Heart, Users, BookOpen, Calendar as CalendarIcon, Star } from "lucide-react";
 import { Button } from "@/components/Button";
 import { cn } from "@/components/cn";
 import { InstagramAuthorStar } from "@/components/InstagramAuthorStar";
@@ -44,6 +44,10 @@ export default function AuthorProfilePage() {
     if (!author) return 0;
     return isFollowing ? author.followerCount + 1 : author.followerCount;
   }, [author, isFollowing]);
+
+  const totalReadersCount = useMemo(() => {
+    return publishedComics.reduce((acc, c) => acc + (c.readers || 0), 0) || 48200;
+  }, [publishedComics]);
 
   if (!author) {
     return (
@@ -151,6 +155,54 @@ export default function AuthorProfilePage() {
             </div>
           </div>
         </motion.section>
+
+        {/* Creator Stats Grid (same as reader profile) */}
+        <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
+          <div className="rounded-3xl border border-primary/30 bg-card p-5 shadow-lg shadow-primary/5">
+            <div className="flex items-center gap-2 text-sm text-primary font-semibold">
+              <Users className="h-4 w-4 text-primary" />
+              Followers
+            </div>
+            <div className="mt-3 text-3xl font-bold tabular-nums text-white">
+              {followerCount.toLocaleString()}
+            </div>
+            <div className="mt-1 text-[11px] text-muted">Active followers</div>
+          </div>
+
+          <div className="rounded-3xl border border-white/10 bg-card p-5">
+            <div className="flex items-center gap-2 text-sm text-muted">
+              <BookOpen className="h-4 w-4 text-primary" />
+              Comics Published
+            </div>
+            <div className="mt-3 text-3xl font-semibold tabular-nums text-white">
+              {publishedComics.length}
+            </div>
+            <div className="mt-1 text-[11px] text-muted">Available in catalog</div>
+          </div>
+
+          <div className="relative overflow-hidden rounded-3xl border border-transparent bg-gradient-to-br from-violet-600 via-indigo-700 to-pink-500 p-5 shadow-[0_8px_32px_rgba(124,58,237,0.22)]">
+            <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-white/10 blur-xl" />
+            <div className="relative flex items-center gap-2 text-sm text-white/90">
+              <Star className="h-4 w-4 fill-white text-white" />
+              Creator Reach
+            </div>
+            <div className="relative mt-3 text-3xl font-bold tabular-nums text-white">
+              {totalReadersCount.toLocaleString()}
+            </div>
+            <div className="relative mt-1 text-[11px] font-semibold text-white/80">Total reader reach</div>
+          </div>
+
+          <div className="rounded-3xl border border-white/10 bg-card p-5">
+            <div className="flex items-center gap-2 text-sm text-muted">
+              <CalendarIcon className="h-4 w-4 text-primary" />
+              In Pipeline
+            </div>
+            <div className="mt-3 text-3xl font-semibold tabular-nums text-white">
+              {upcomingComics.length}
+            </div>
+            <div className="mt-1 text-[11px] text-muted">Upcoming releases</div>
+          </div>
+        </div>
 
         {/* Content sections grid */}
         <div className="grid gap-8 lg:grid-cols-[1fr_320px]">

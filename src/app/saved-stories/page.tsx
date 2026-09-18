@@ -179,15 +179,21 @@ export default function SavedStoriesPage() {
                     key={bookmark.id}
                     className="sf-comic-card sf-comic-surface group flex flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-card transition-all hover:border-primary/40"
                   >
-                    <div className="aspect-[16/9] overflow-hidden relative">
+                    <div
+                      className="aspect-[16/9] overflow-hidden relative cursor-pointer group/cover"
+                      onClick={() => router.push(`/read/${bookmark.chapterId}?from=/saved-stories`)}
+                    >
                       <img
                         src={bookmark.thumbUrl ?? "/placeholders/panel-1.svg"}
                         alt={bookmark.seriesName}
-                        className="sf-comic-image h-full w-full object-cover"
+                        className="sf-comic-image h-full w-full object-cover group-hover/cover:scale-105 transition-transform duration-300"
                         loading="lazy"
                       />
                       <button
-                        onClick={() => handleRemoveFromCollection(activeCollection.id, bookmark.id, bookmark.seriesName)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveFromCollection(activeCollection.id, bookmark.id, bookmark.seriesName);
+                        }}
                         className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-black/70 text-white/80 hover:bg-rose-600 hover:text-white transition-all shadow-md"
                         title="Remove from Playlist"
                       >
@@ -196,8 +202,11 @@ export default function SavedStoriesPage() {
                     </div>
 
                     <div className="space-y-3 p-4">
-                      <div>
-                        <h3 className="font-bold text-white text-base truncate">{bookmark.seriesName}</h3>
+                      <div
+                        className="cursor-pointer group/title"
+                        onClick={() => router.push(`/read/${bookmark.chapterId}?from=/saved-stories`)}
+                      >
+                        <h3 className="font-bold text-white text-base truncate group-hover/title:text-primary transition">{bookmark.seriesName}</h3>
                         <p className="text-xs text-muted">Chapter {bookmark.chapterId} · Saved in playlist</p>
                       </div>
 
@@ -206,7 +215,7 @@ export default function SavedStoriesPage() {
                           variant="primary"
                           size="sm"
                           className="flex-1"
-                          onClick={() => router.push(`/read/${bookmark.chapterId}`)}
+                          onClick={() => router.push(`/read/${bookmark.chapterId}?from=/saved-stories`)}
                         >
                           Read Now
                         </Button>
@@ -279,15 +288,21 @@ export default function SavedStoriesPage() {
                         key={bookmark.id}
                         className="sf-comic-card sf-comic-surface group flex flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-card transition-all hover:border-primary/40 hover:shadow-lg"
                       >
-                        <div className="aspect-[16/9] overflow-hidden relative">
+                        <div
+                          className="aspect-[16/9] overflow-hidden relative cursor-pointer group/cover"
+                          onClick={() => router.push(`/read/${bookmark.chapterId}?from=/saved-stories`)}
+                        >
                           <img
                             src={bookmark.thumbUrl ?? "/placeholders/panel-1.svg"}
                             alt={`${bookmark.seriesName} cover`}
-                            className="sf-comic-image h-full w-full object-cover"
+                            className="sf-comic-image h-full w-full object-cover group-hover/cover:scale-105 transition-transform duration-300"
                             loading="lazy"
                           />
                           <button
-                            onClick={() => handleRemoveGlobal(bookmark.seriesName)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRemoveGlobal(bookmark.seriesName);
+                            }}
                             className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-black/70 text-white/80 hover:bg-rose-600 hover:text-white transition-all shadow-md"
                             title="Remove from Saved Stories"
                           >
@@ -296,8 +311,11 @@ export default function SavedStoriesPage() {
                         </div>
 
                         <div className="space-y-3 p-4">
-                          <div>
-                            <h3 className="font-bold text-white text-base truncate">{bookmark.seriesName}</h3>
+                          <div
+                            className="cursor-pointer group/title"
+                            onClick={() => router.push(`/read/${bookmark.chapterId}?from=/saved-stories`)}
+                          >
+                            <h3 className="font-bold text-white text-base truncate group-hover/title:text-primary transition">{bookmark.seriesName}</h3>
                             <p className="text-xs text-muted">Chapter {bookmark.chapterId} · Saved in library</p>
                           </div>
 
@@ -306,7 +324,7 @@ export default function SavedStoriesPage() {
                               variant="primary"
                               size="sm"
                               className="flex-1"
-                              onClick={() => router.push(`/read/${bookmark.chapterId}`)}
+                              onClick={() => router.push(`/read/${bookmark.chapterId}?from=/saved-stories`)}
                             >
                               Read Now
                             </Button>
