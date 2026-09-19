@@ -69,9 +69,9 @@ export function FloatingGuideAssistant() {
   }, [chatMessages, agentTyping, chatOpen]);
 
   // If user is not logged in, or if the onboarding tour is currently running,
-  // or if the current page is NOT one of the 4 supported tour pages (Home, Comic Details, Chapter/Reader, Profile),
+  // or if inside the comic reader, or if the current page is NOT one of the supported tour pages,
   // hide the persistent assistant completely.
-  if (!isAuthenticated || isTourActive || !currentTour) {
+  if (!isAuthenticated || isTourActive || !currentTour || pathname?.startsWith("/read")) {
     return null;
   }
 

@@ -38,6 +38,7 @@ export function Navbar({
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const role = useAuthStore((s) => s.role);
   const displayName = useAuthStore((s) => s.displayName);
+  const email = useAuthStore((s) => s.email);
   const logout = useAuthStore((s) => s.logout);
   const menuSeries = seriesOptions?.length ? seriesOptions : seriesList;
   const genres = useMemo(() => {
@@ -288,7 +289,7 @@ export function Navbar({
               <div className="relative z-50" ref={profileRef}>
                 <button
                   id="tour-profile-menu"
-                  className="sf-clickable flex h-10 items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-2.5 hover:border-primary/35 hover:bg-white/8"
+                  className="sf-clickable flex h-10 items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-2.5 hover:border-primary/35 hover:bg-white/8 transition shadow-sm"
                   aria-haspopup="menu"
                   aria-expanded={profileOpen}
                   onClick={() => setProfileOpen((open) => !open)}
@@ -298,44 +299,78 @@ export function Navbar({
                   </span>
                   <span className="hidden text-xs capitalize text-muted md:block">{role ?? "reader"}</span>
                 </button>
+
                 {profileOpen ? (
-                  <div
-                    className="absolute right-0 top-full mt-2.5 w-64 overflow-hidden rounded-2xl border border-white/10 bg-surface/95 backdrop-blur-2xl shadow-2xl z-50 pointer-events-auto"
-                    role="menu"
-                  >
-                    <div className="border-b border-white/10 px-4 py-3">
-                      <div className="text-sm font-semibold text-white">{displayName || "FYP User"}</div>
-                      <div className="text-xs capitalize text-muted">{role ?? "reader"}</div>
-                    </div>
-                    {profileMenuItems.map((item) => {
-                      const Icon = item.icon;
-                      return (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          role="menuitem"
-                          className="sf-clickable flex items-center gap-3 px-4 py-3 text-sm text-muted hover:bg-white/5 hover:text-white transition-colors"
-                          onClick={() => setProfileOpen(false)}
-                        >
-                          <Icon className="h-4 w-4 text-primary" />
-                          {item.label}
-                        </Link>
-                      );
-                    })}
-                    <button
-                      className="sf-clickable flex w-full items-center gap-3 border-t border-white/10 px-4 py-3 text-left text-sm text-muted hover:bg-white/5 hover:text-white transition-colors"
-                      role="menuitem"
-                      onClick={() => {
-                        setProfileOpen(false);
-                        logout();
-                        toast({ tone: "default", title: "Logged out", message: "You have been logged out." });
-                        router.push("/");
-                      }}
+                  <>
+                    {/* Mobile Backdrop to dim the screen so the profile dropdown is 100% visible and readable */}
+                    <div
+                      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 sm:hidden animate-in fade-in duration-150"
+                      onClick={() => setProfileOpen(false)}
+                      aria-hidden="true"
+                    />
+
+                    {/* Profile Menu Dropdown */}
+                    <div
+                      className="absolute right-0 top-full mt-2.5 w-72 max-w-[calc(100vw-24px)] overflow-hidden rounded-2xl border border-white/20 bg-[#0c1020] text-white shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_25px_rgba(124,58,237,0.2)] z-50 pointer-events-auto animate-in fade-in zoom-in-95 duration-150 select-none"
+                      role="menu"
                     >
-                      <LogOut className="h-4 w-4 text-rose-400" />
-                      Logout
-                    </button>
-                  </div>
+                      {/* User Info Header */}
+                      <div className="border-b border-white/10 bg-white/[0.04] p-3.5 flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-primary via-indigo-600 to-pink-500 flex items-center justify-center text-white font-bold text-sm shadow-md shadow-primary/30 shrink-0">
+                          {initials}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-sm font-bold text-white truncate">{displayName || "FYP User"}</div>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary/20 text-primary border border-primary/30">
+                              {role ?? "reader"}
+                            </span>
+                            <span className="text-[11px] text-muted truncate">{email || "FYP Member"}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Navigation Links */}
+                      <div className="p-1.5 space-y-0.5">
+                        {profileMenuItems.map((item) => {
+                          const Icon = item.icon;
+                          return (
+                            <Link
+                              key={item.href}
+                              href={item.href}
+                              role="menuitem"
+                              className="sf-clickable flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-white/90 hover:text-white hover:bg-white/10 active:bg-white/15 transition-all"
+                              onClick={() => setProfileOpen(false)}
+                            >
+                              <div className="h-7 w-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0 text-primary">
+                                <Icon className="h-3.5 w-3.5" />
+                              </div>
+                              <span className="text-[13px]">{item.label}</span>
+                            </Link>
+                          );
+                        })}
+                      </div>
+
+                      {/* Logout Action */}
+                      <div className="border-t border-white/10 p-1.5 bg-black/30">
+                        <button
+                          className="sf-clickable flex w-full items-center gap-3 px-3 py-2.5 rounded-xl text-left text-xs font-semibold text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 active:bg-rose-500/15 transition-all cursor-pointer"
+                          role="menuitem"
+                          onClick={() => {
+                            setProfileOpen(false);
+                            logout();
+                            toast({ tone: "default", title: "Logged out", message: "You have been logged out." });
+                            router.push("/");
+                          }}
+                        >
+                          <div className="h-7 w-7 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center shrink-0 text-rose-400">
+                            <LogOut className="h-3.5 w-3.5" />
+                          </div>
+                          <span className="text-[13px]">Logout</span>
+                        </button>
+                      </div>
+                    </div>
+                  </>
                 ) : null}
               </div>
             </>

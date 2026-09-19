@@ -8,7 +8,10 @@ export const firstChapterBySeries: Record<string, string> = {
   s4: "c20",
   s5: "c30",
   s6: "c40",
-  s7: "c50"
+  s7: "c50",
+  s8: "c12",
+  s9: "c12",
+  s10: "c1"
 };
 
 export const platformStats = {
@@ -152,6 +155,51 @@ export const seriesList: Series[] = [
     isLocked: false,
     coverUrl: "/placeholders/cover-3.svg",
     ambientColorHex: "#00A8C8"
+  },
+  {
+    id: "s8",
+    title: "Dragon Forge: Aether Core",
+    writerName: "Rupa D.",
+    genre: "Fantasy",
+    chapterCount: 5,
+    readers: 64_500,
+    rating: 4.9,
+    description:
+      "Deep beneath the Imperial Foundry, forbidden Aether chambers rumble to life. A young runecrafter must harness volatile dragon essence to save the floating bastion.",
+    searchKeywords: ["dragon forge", "aether core", "runecrafter", "steampunk", "bastion", "foundry"],
+    isLocked: false,
+    coverUrl: "/placeholders/cover-2.svg",
+    ambientColorHex: "#F59E0B"
+  },
+  {
+    id: "s9",
+    title: "Runic Gears of Iron",
+    writerName: "Rupa D.",
+    genre: "Fantasy",
+    chapterCount: 8,
+    readers: 51_200,
+    rating: 4.8,
+    description:
+      "When the clockwork dragons of the northern peaks awaken, an exiled clocksmith and her mechanical gryphon embark on a quest to restore the shattered seals.",
+    searchKeywords: ["runic gears", "clockwork", "mechanical gryphon", "clocksmith", "dragons", "steampunk"],
+    isLocked: false,
+    coverUrl: "/placeholders/cover-1.svg",
+    ambientColorHex: "#D97706"
+  },
+  {
+    id: "s10",
+    title: "Chrome Syndicate: Sub-Level 9",
+    writerName: "Sanjay V.",
+    genre: "Sci-Fi",
+    chapterCount: 6,
+    readers: 38_400,
+    rating: 4.7,
+    description:
+      "Below the neon skyscrapers of Neo-Zenith lies Sub-Level 9 — an unmonitored sector ruled by cyber-mercenaries and autonomous rogue subroutines.",
+    searchKeywords: ["chrome syndicate", "sub-level 9", "cyberpunk", "mercenary", "neon", "hacker"],
+    isLocked: false,
+    coverUrl: "/placeholders/cover-3.svg",
+    ambientColorHex: "#7C3AED"
   }
 ];
 

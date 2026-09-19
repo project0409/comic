@@ -59,13 +59,18 @@ export function ChapterSelector({
         aria-expanded={isOpen}
         aria-label="Select Chapter"
         className={cn(
-          "flex items-center gap-2 px-3.5 py-1.5 rounded-2xl border transition-all cursor-pointer shadow-sm text-xs font-semibold",
+          "flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3.5 py-1 sm:py-1.5 rounded-xl sm:rounded-2xl border transition-all cursor-pointer shadow-sm text-xs font-semibold shrink-0",
           "bg-white/5 border-white/15 hover:border-primary/50 hover:bg-white/10 text-white",
           isOpen && "border-primary ring-2 ring-primary/20 bg-white/10"
         )}
       >
         <BookOpen className="h-3.5 w-3.5 text-primary shrink-0" />
-        <span className="truncate max-w-[200px] sm:max-w-[280px]">
+        {/* Compact label on mobile */}
+        <span className="truncate sm:hidden max-w-[65px] xs:max-w-[85px]">
+          Ch. {currentChapter?.number || 1}
+        </span>
+        {/* Full title on sm and desktop */}
+        <span className="truncate hidden sm:inline max-w-[200px] md:max-w-[260px]">
           {currentChapter?.displayTitle || `Chapter ${currentChapter?.number || 1}`}
         </span>
         <ChevronDown

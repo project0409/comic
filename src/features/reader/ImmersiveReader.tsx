@@ -339,14 +339,14 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
             exit={{ y: -14, opacity: 0 }}
             className="w-full shrink-0 z-40 border-b border-white/10 bg-[#060812]/95 backdrop-blur-2xl shadow-xl"
           >
-            <div className="mx-auto flex w-full max-w-[1700px] items-center justify-between gap-3 px-3 sm:px-6 py-2">
+            <div className="mx-auto flex flex-nowrap w-full max-w-[1700px] items-center justify-between gap-1.5 sm:gap-3 px-2 sm:px-6 py-2 overflow-x-hidden">
               {/* Desktop App Left: Exit + Divider + Chapter Selector + Comic Title */}
-              <div className="min-w-0 flex items-center gap-2.5 sm:gap-3">
+              <div className="min-w-0 flex flex-nowrap items-center gap-1.5 sm:gap-3 shrink-0">
                 <button
                   id="tour-reader-exit"
                   type="button"
                   onClick={() => router.replace(exitUrl)}
-                  className="group flex items-center gap-1.5 rounded-xl border border-white/15 bg-white/5 px-2.5 sm:px-3 py-1.5 text-xs text-white hover:border-primary/50 hover:bg-white/10 transition shadow-sm cursor-pointer shrink-0"
+                  className="group flex items-center justify-center h-8 w-8 sm:h-auto sm:w-auto p-1.5 sm:px-3 sm:py-1.5 rounded-xl border border-white/15 bg-white/5 text-xs text-white hover:border-primary/50 hover:bg-white/10 transition shadow-sm cursor-pointer shrink-0"
                   title={
                     fromParam === "/library"
                       ? "Exit Comic: Back to Library"
@@ -358,7 +358,7 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
                   }
                 >
                   <ArrowLeft className="h-4 w-4 text-primary transition group-hover:-translate-x-0.5" />
-                  <span className="font-semibold text-white hidden sm:inline">
+                  <span className="font-semibold text-white hidden sm:inline ml-1.5">
                     Exit Comic
                   </span>
                 </button>
@@ -387,9 +387,16 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
               </div>
 
               {/* Desktop App Right: Mode Toggles, Audio, Lore Master AI, Exit */}
-              <div id="tour-reader-controls" className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-                <Button variant="outline" size="sm" onClick={toggleReadingMode} className="h-8 px-2.5 text-xs font-semibold" title="Toggle reading mode">
-                  {readingMode === "flip" ? "3D Flip" : "Scroll"}
+              <div id="tour-reader-controls" className="flex items-center gap-1 sm:gap-2 shrink-0">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={toggleReadingMode}
+                  className="h-8 px-2 sm:px-2.5 text-xs font-semibold shrink-0"
+                  title="Toggle reading mode"
+                >
+                  <span className="hidden xs:inline">{readingMode === "flip" ? "3D Flip" : "Scroll"}</span>
+                  <span className="xs:hidden">{readingMode === "flip" ? "3D" : "Feed"}</span>
                 </Button>
 
                 <Button
@@ -397,7 +404,7 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
                   size="sm"
                   onClick={() => setGuidedViewActive(!guidedViewActive)}
                   title="Guided view (panel zoom)"
-                  className="h-8 px-2 text-xs"
+                  className="h-8 w-8 p-0 sm:w-auto sm:px-2 text-xs shrink-0"
                 >
                   {guidedViewActive ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </Button>
@@ -425,19 +432,32 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
                 </div>
 
                 {/* Mobile / Tablet Audio Button */}
-                <Button variant="outline" size="sm" onClick={toggleMuted} title="Ambient Audio" className="h-8 px-2 text-xs lg:hidden">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={toggleMuted}
+                  title="Ambient Audio"
+                  className="h-8 w-8 p-0 sm:w-auto sm:px-2 text-xs lg:hidden shrink-0"
+                >
                   {isMuted ? <VolumeX className="h-4 w-4 text-muted" /> : <Volume2 className="h-4 w-4 text-primary" />}
                 </Button>
 
-                <Button variant="outline" size="sm" onClick={() => setLoreMasterOpen(true)} title="Lore Master AI" className="h-8 px-2 text-xs">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setLoreMasterOpen(true)}
+                  title="Lore Master AI"
+                  className="h-8 w-8 p-0 sm:w-auto sm:px-2 text-xs shrink-0"
+                >
                   <WandSparkles className="h-4 w-4 text-highlight" />
                 </Button>
 
+                {/* Close button shown on sm: and up (since Left has Exit arrow on mobile) */}
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => router.replace(exitUrl)}
-                  className="h-8 px-2 text-muted hover:text-white border border-white/10"
+                  className="hidden sm:inline-flex h-8 px-2 text-muted hover:text-white border border-white/10 shrink-0"
                   title={
                     fromParam === "/library"
                       ? "Exit to Library"

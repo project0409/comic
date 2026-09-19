@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Smile } from "lucide-react";
+import { Button } from "@/components/Button";
 import { cn } from "@/components/cn";
 import { ChapterSelector } from "./ChapterSelector";
 import { PageFlip, type PanelClickCoords } from "./PageFlip";
@@ -392,8 +393,58 @@ export function ComicReader({
       </div>
 
       {/* FOOTER: DOCKED PROGRESS, STATUS & CONTROLS */}
-      <div className="w-full shrink-0 border-t border-white/10 bg-[#060812]/95 backdrop-blur-2xl shadow-xl px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 select-none z-30">
-        <div className="w-full max-w-[1700px] mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
+      <div className="w-full shrink-0 border-t border-white/10 bg-[#060812]/95 backdrop-blur-2xl shadow-xl px-2.5 sm:px-6 lg:px-8 py-2 select-none z-30">
+        {/* MOBILE FOOTER DOCK (SINGLE SLEEK 40px ROW - PREVENTS SQUEEZING / CLIPPING) */}
+        <div className="flex md:hidden items-center justify-between gap-2 w-full">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handlePrevPage}
+            disabled={!canPrev}
+            aria-label="Previous Page"
+            className="h-8 px-2.5 text-xs font-semibold shrink-0 gap-1 text-white/90 disabled:opacity-30 disabled:hover:bg-transparent"
+          >
+            <ChevronLeft className="h-3.5 w-3.5" />
+            <span>Prev</span>
+          </Button>
+
+          <div className="flex-1 flex items-center justify-center min-w-0 px-1">
+            <ProgressIndicator
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onSeekPage={triggerTurn}
+              className="w-full justify-center"
+            />
+          </div>
+
+          <div className="flex items-center gap-1.5 shrink-0">
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={handleNextPage}
+              disabled={!canNext}
+              aria-label="Next Page"
+              className="h-8 px-2.5 text-xs font-semibold gap-1 shadow-md shadow-primary/20 disabled:opacity-30 disabled:hover:bg-primary/50"
+            >
+              <span>Next</span>
+              <ChevronRight className="h-3.5 w-3.5" />
+            </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleOpenReactionFromToolbar}
+              title="React to panel"
+              aria-label="React with emoji"
+              className="h-8 w-8 p-0 text-white/90 shrink-0"
+            >
+              <Smile className="h-4 w-4 text-amber-400" />
+            </Button>
+          </div>
+        </div>
+
+        {/* DESKTOP FOOTER DOCK (COMPREHENSIVE EXPANSIVE BAR) */}
+        <div className="hidden md:flex items-center justify-between gap-3 w-full max-w-[1700px] mx-auto">
           {/* Left: Keyboard / Touch Tips */}
           <div className="text-[11px] text-muted hidden xl:flex items-center gap-2 shrink-0">
             <span className="font-medium text-white/70">Keys:</span>

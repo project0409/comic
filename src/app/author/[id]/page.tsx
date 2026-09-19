@@ -1,10 +1,10 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useParams, useRouter } from "@/compat/next-navigation";
 import Link from "@/compat/next-link";
 import { motion } from "framer-motion";
-import { ArrowLeft, Clock, Heart, Users, BookOpen, Calendar as CalendarIcon, Star } from "lucide-react";
+import { ArrowLeft, ArrowDown, Clock, Heart, Users, BookOpen, Calendar as CalendarIcon, Star } from "lucide-react";
 import { Button } from "@/components/Button";
 import { cn } from "@/components/cn";
 import { InstagramAuthorStar } from "@/components/InstagramAuthorStar";
@@ -48,6 +48,17 @@ export default function AuthorProfilePage() {
   const totalReadersCount = useMemo(() => {
     return publishedComics.reduce((acc, c) => acc + (c.readers || 0), 0) || 48200;
   }, [publishedComics]);
+
+  const [highlightComics, setHighlightComics] = useState(false);
+
+  const scrollToComics = () => {
+    const el = document.getElementById("comics-published-section");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      setHighlightComics(true);
+      setTimeout(() => setHighlightComics(false), 2400);
+    }
+  };
 
   if (!author) {
     return (
@@ -169,15 +180,39 @@ export default function AuthorProfilePage() {
             <div className="mt-1 text-[11px] text-muted">Active followers</div>
           </div>
 
-          <div className="rounded-3xl border border-white/10 bg-card p-5">
-            <div className="flex items-center gap-2 text-sm text-muted">
-              <BookOpen className="h-4 w-4 text-primary" />
-              Comics Published
+          <div
+            onClick={scrollToComics}
+            role="button"
+            tabIndex={0}
+            aria-label="View all published comics"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                scrollToComics();
+              }
+            }}
+            className={cn(
+              "rounded-3xl border p-5 transition-all duration-300 cursor-pointer group text-left select-none",
+              "bg-card hover:bg-white/[0.07] hover:border-primary/60 hover:shadow-lg hover:shadow-primary/10 hover:scale-[1.02] active:scale-[0.98]",
+              highlightComics ? "border-primary ring-2 ring-primary/40 bg-primary/10" : "border-white/10"
+            )}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm text-muted group-hover:text-primary transition-colors font-medium">
+                <BookOpen className="h-4 w-4 text-primary" />
+                Comics Published
+              </div>
+              <ArrowDown className="h-3.5 w-3.5 text-muted/60 group-hover:text-primary transition-transform group-hover:translate-y-0.5" />
             </div>
-            <div className="mt-3 text-3xl font-semibold tabular-nums text-white">
+            <div className="mt-3 text-3xl font-semibold tabular-nums text-white group-hover:text-primary transition-colors">
               {publishedComics.length}
             </div>
-            <div className="mt-1 text-[11px] text-muted">Available in catalog</div>
+            <div className="mt-1 text-[11px] text-muted flex items-center justify-between">
+              <span>Available in catalog</span>
+              <span className="text-[10px] text-primary font-medium group-hover:underline flex items-center gap-0.5">
+                View all <ArrowDown className="h-2.5 w-2.5 inline" />
+              </span>
+            </div>
           </div>
 
           <div className="relative overflow-hidden rounded-3xl border border-transparent bg-gradient-to-br from-violet-600 via-indigo-700 to-pink-500 p-5 shadow-[0_8px_32px_rgba(124,58,237,0.22)]">
@@ -207,12 +242,23 @@ export default function AuthorProfilePage() {
         {/* Content sections grid */}
         <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
           {/* Left Column: Published Comics */}
-          <section className="space-y-4">
-            <div className="flex items-center gap-2 border-b border-white/5 pb-2">
-              <BookOpen className="h-5 w-5 text-primary" />
-              <h2 className="font-display text-xl font-bold tracking-wide text-white">
-                Comics Uploaded ({publishedComics.length})
-              </h2>
+          <section
+            id="comics-published-section"
+            className={cn(
+              "space-y-4 rounded-3xl p-3 sm:p-5 transition-all duration-500 scroll-mt-6",
+              highlightComics
+                ? "ring-2 ring-primary/80 bg-primary/10 shadow-[0_0_35px_rgba(255,51,102,0.25)]"
+                : "border border-transparent"
+            )}
+          >
+            <div className="flex items-center justify-between border-b border-white/5 pb-2">
+              <div className="flex items-center gap-2">
+                <BookOpen className="h-5 w-5 text-primary" />
+                <h2 className="font-display text-xl font-bold tracking-wide text-white">
+                  Comics Published ({publishedComics.length})
+                </h2>
+              </div>
+              <span className="text-xs text-muted">All series published by {author.name}</span>
             </div>
 
             {publishedComics.length === 0 ? (

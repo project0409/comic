@@ -52,79 +52,79 @@ export default function ProfilePage() {
 
   return (
     <RequireAuth>
-      <div className="mx-auto max-w-5xl space-y-6 px-4 py-10">
-        <div id="tour-profile-info" className="rounded-3xl border border-white/10 bg-card p-6">
+      <div className="mx-auto max-w-5xl space-y-5 sm:space-y-6 px-3 sm:px-4 py-6 sm:py-10">
+        <div id="tour-profile-info" className="rounded-2xl sm:rounded-3xl border border-white/10 bg-card p-4 sm:p-6 shadow-xl">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-4">
-              <div className="grid h-16 w-16 place-items-center rounded-2xl bg-primary/20 text-primary">
-                <User className="h-8 w-8" />
+            <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
+              <div className="grid h-14 w-14 sm:h-16 sm:w-16 place-items-center rounded-2xl bg-gradient-to-tr from-primary/25 to-highlight/20 border border-primary/30 text-primary shrink-0 shadow-lg shadow-primary/10">
+                <User className="h-7 w-7 sm:h-8 sm:w-8" />
               </div>
-              <div>
-                <div className="font-display text-3xl tracking-widest">{displayName || "FYP User"}</div>
-                <div className="text-sm text-muted">{email || "Google account"} · {provider ?? "email"}</div>
+              <div className="min-w-0 flex-1">
+                <div className="font-display text-2xl sm:text-3xl tracking-wide sm:tracking-widest truncate text-white">{displayName || "FYP User"}</div>
+                <div className="text-xs sm:text-sm text-muted truncate mt-0.5">{email || "Google account"} · <span className="capitalize">{provider ?? "email"}</span></div>
               </div>
             </div>
-            <Badge tone="primary" className="w-fit capitalize">{role ?? "reader"}</Badge>
+            <Badge tone="primary" className="w-fit capitalize text-xs px-3 py-1">{role ?? "reader"}</Badge>
           </div>
         </div>
 
         <div
           id="tour-profile-stats"
           className={cn(
-            "grid gap-4 grid-cols-2",
+            "grid gap-3 sm:gap-4 grid-cols-2",
             roleName === "writer" ? "sm:grid-cols-3 lg:grid-cols-5" : "md:grid-cols-4"
           )}
         >
-          <div className="rounded-3xl border border-white/10 bg-card p-5">
-            <div className="flex items-center gap-2 text-sm text-muted">
+          <div className="rounded-2xl sm:rounded-3xl border border-white/10 bg-card p-4 sm:p-5">
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-muted">
               <BookOpen className="h-4 w-4 text-primary" />
               {roleName === "writer" ? "Comics Published" : "Comics Read"}
             </div>
-            <div className="mt-3 text-3xl font-semibold tabular-nums">
+            <div className="mt-2 sm:mt-3 text-2xl sm:text-3xl font-semibold tabular-nums text-white">
               {roleName === "writer" ? "3" : historyCount}
             </div>
           </div>
 
-          <div className="relative overflow-hidden rounded-3xl border border-transparent bg-gradient-to-br from-violet-600 via-indigo-700 to-pink-500 p-5 shadow-[0_8px_32px_rgba(124,58,237,0.22)] transition hover:scale-[1.02] hover:shadow-[0_12px_42px_rgba(124,58,237,0.3)] duration-300">
+          <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-transparent bg-gradient-to-br from-violet-600 via-indigo-700 to-pink-500 p-4 sm:p-5 shadow-[0_8px_32px_rgba(124,58,237,0.22)] transition hover:scale-[1.02] hover:shadow-[0_12px_42px_rgba(124,58,237,0.3)] duration-300">
             <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-white/10 blur-xl" />
             <div className="absolute -left-4 -bottom-4 h-16 w-16 rounded-full bg-white/5 blur-lg" />
             
-            <div className="relative flex items-center gap-2 text-sm text-white/90">
+            <div className="relative flex items-center gap-2 text-xs sm:text-sm text-white/90">
               <Star className="h-4 w-4 fill-white text-white" />
               {roleName === "writer" ? "Creator Points" : "Points"}
             </div>
-            <div className="relative mt-3 text-3xl font-bold tabular-nums text-white">12,560</div>
-            <div className="relative mt-1 text-[11px] font-semibold text-white/80">+250 earned today</div>
+            <div className="relative mt-2 sm:mt-3 text-2xl sm:text-3xl font-bold tabular-nums text-white">12,560</div>
+            <div className="relative mt-1 text-[10px] sm:text-[11px] font-semibold text-white/80">+250 earned today</div>
           </div>
 
           {/* Followers Stat Card for Writer Profile */}
           {roleName === "writer" && (
-            <div className="rounded-3xl border border-primary/30 bg-card p-5 shadow-lg shadow-primary/5">
-              <div className="flex items-center gap-2 text-sm text-primary font-semibold">
+            <div className="rounded-2xl sm:rounded-3xl border border-primary/30 bg-card p-4 sm:p-5 shadow-lg shadow-primary/5">
+              <div className="flex items-center gap-2 text-xs sm:text-sm text-primary font-semibold">
                 <Users className="h-4 w-4 text-primary" />
                 Followers
               </div>
-              <div className="mt-3 text-3xl font-bold tabular-nums text-white">
+              <div className="mt-2 sm:mt-3 text-2xl sm:text-3xl font-bold tabular-nums text-white">
                 {writerFollowerCount.toLocaleString()}
               </div>
-              <div className="mt-1 text-[11px] text-muted">+18 this week</div>
+              <div className="mt-1 text-[10px] sm:text-[11px] text-muted">+18 this week</div>
             </div>
           )}
 
-          <div className="rounded-3xl border border-white/10 bg-card p-5">
-            <div className="flex items-center gap-2 text-sm text-muted">
+          <div className="rounded-2xl sm:rounded-3xl border border-white/10 bg-card p-4 sm:p-5">
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-muted">
               <Users className="h-4 w-4 text-primary" />
               Following
             </div>
-            <div className="mt-3 text-3xl font-semibold tabular-nums">{followingCount}</div>
+            <div className="mt-2 sm:mt-3 text-2xl sm:text-3xl font-semibold tabular-nums text-white">{followingCount}</div>
           </div>
 
-          <div className="rounded-3xl border border-white/10 bg-card p-5">
-            <div className="flex items-center gap-2 text-sm text-muted">
+          <div className="rounded-2xl sm:rounded-3xl border border-white/10 bg-card p-4 sm:p-5">
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-muted">
               <Bookmark className="h-4 w-4 text-primary" />
               Saved Stories
             </div>
-            <div className="mt-3 text-3xl font-semibold tabular-nums">{savedCount}</div>
+            <div className="mt-2 sm:mt-3 text-2xl sm:text-3xl font-semibold tabular-nums text-white">{savedCount}</div>
           </div>
         </div>
 
