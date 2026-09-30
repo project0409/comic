@@ -68,9 +68,59 @@ type VaultState = {
 export const useVaultStore = create<VaultState>()(
   persist(
     (set) => ({
-      bookmarks: [],
-      reactions: [],
-      history: [],
+      bookmarks: [
+        {
+          id: "bm_s3_c1",
+          seriesName: "Night City Blade",
+          chapterId: "c_s3_ch1",
+          pageIndex: 1,
+          x: 200,
+          y: 350,
+          note: "Alley ambush standoff"
+        },
+        {
+          id: "bm_s3_c2",
+          seriesName: "Night City Blade",
+          chapterId: "c_s3_ch2",
+          pageIndex: 2,
+          x: 310,
+          y: 420,
+          note: "Syndicate Boss hologram"
+        },
+        {
+          id: "bm_s3_c3",
+          seriesName: "Night City Blade",
+          chapterId: "c_s3_ch3",
+          pageIndex: 3,
+          x: 180,
+          y: 290,
+          note: "Rooftop sniper vantage"
+        },
+        {
+          id: "bm_s3_c4",
+          seriesName: "Night City Blade",
+          chapterId: "c_s3_ch4",
+          pageIndex: 4,
+          x: 250,
+          y: 380,
+          note: "Neon vows cliffhanger"
+        }
+      ],
+      reactions: [
+        { id: "rx_s3_1", emoji: "🔥", seriesName: "Night City Blade", chapterId: "c_s3_ch1", pageIndex: 1, x: 120, y: 200, atIso: "2026-05-02T12:00:00Z" },
+        { id: "rx_s3_2", emoji: "👏", seriesName: "Night City Blade", chapterId: "c_s3_ch1", pageIndex: 2, x: 220, y: 310, atIso: "2026-05-02T14:30:00Z" },
+        { id: "rx_s3_3", emoji: "🤯", seriesName: "Night City Blade", chapterId: "c_s3_ch2", pageIndex: 2, x: 180, y: 400, atIso: "2026-05-09T17:15:00Z" },
+        { id: "rx_s3_4", emoji: "🔥", seriesName: "Night City Blade", chapterId: "c_s3_ch3", pageIndex: 3, x: 150, y: 220, atIso: "2026-05-16T11:45:00Z" },
+        { id: "rx_s3_5", emoji: "💀", seriesName: "Night City Blade", chapterId: "c_s3_ch3", pageIndex: 4, x: 280, y: 360, atIso: "2026-05-16T15:20:00Z" },
+        { id: "rx_s3_6", emoji: "🔥", seriesName: "Night City Blade", chapterId: "c_s3_ch4", pageIndex: 4, x: 300, y: 450, atIso: "2026-05-23T22:10:00Z" },
+        { id: "rx_s3_7", emoji: "😭", seriesName: "Night City Blade", chapterId: "c_s3_ch4", pageIndex: 4, x: 160, y: 280, atIso: "2026-05-23T23:05:00Z" }
+      ],
+      history: [
+        { seriesId: "s3", chapterId: "c_s3_ch1", readAtIso: "2026-05-02T10:00:00Z" },
+        { seriesId: "s3", chapterId: "c_s3_ch2", readAtIso: "2026-05-09T11:00:00Z" },
+        { seriesId: "s3", chapterId: "c_s3_ch3", readAtIso: "2026-05-16T12:00:00Z" },
+        { seriesId: "s3", chapterId: "c_s3_ch4", readAtIso: "2026-05-23T14:00:00Z" }
+      ],
       highlights: [
         {
           id: "hl_1",

@@ -164,6 +164,60 @@ export const useReviewStore = create<ReviewState>()(
           rating: 5,
           reviewText: "Love the neo-noir aesthetics and music sync in this. A total blast!",
           atIso: "2026-08-09T23:50:00Z"
+        },
+        // Chapter 1 reviews for s3
+        {
+          id: "r_s3_c1_1",
+          seriesId: "s3",
+          chapterId: "c_s3_ch1",
+          userEmail: "blade_master@example.com",
+          userName: "BladeMaster",
+          rating: 5,
+          reviewText: "Chapter 1 kicks off with explosive energy! The alley choreography is so clean.",
+          atIso: "2026-05-02T11:20:00Z"
+        },
+        {
+          id: "r_s3_c1_2",
+          seriesId: "s3",
+          chapterId: "c_s3_ch1",
+          userEmail: "street_samurai@example.com",
+          userName: "StreetSamurai",
+          rating: 4,
+          reviewText: "Gritty, moody, and intense. Great worldbuilding for Neo-Kyoto's dark underbelly.",
+          atIso: "2026-05-03T14:45:00Z"
+        },
+        // Chapter 2 reviews for s3
+        {
+          id: "r_s3_c2_1",
+          seriesId: "s3",
+          chapterId: "c_s3_ch2",
+          userEmail: "cyber_noir@example.com",
+          userName: "CyberNoir",
+          rating: 5,
+          reviewText: "The syndicate encounter kept me on the edge of my seat. Beautiful neon reflections!",
+          atIso: "2026-05-09T16:10:00Z"
+        },
+        // Chapter 3 reviews for s3
+        {
+          id: "r_s3_c3_1",
+          seriesId: "s3",
+          chapterId: "c_s3_ch3",
+          userEmail: "sniper_scope@example.com",
+          userName: "SniperScope",
+          rating: 5,
+          reviewText: "Hands down the best sniper duel sequence in any webcomic this year. 5/5 stars!",
+          atIso: "2026-05-16T10:30:00Z"
+        },
+        // Chapter 4 reviews for s3
+        {
+          id: "r_s3_c4_1",
+          seriesId: "s3",
+          chapterId: "c_s3_ch4",
+          userEmail: "ghost_runner@example.com",
+          userName: "GhostRunner",
+          rating: 4,
+          reviewText: "The emotional stakes and betrayal reveal hit hard. Can't wait to see what happens next!",
+          atIso: "2026-05-23T21:00:00Z"
         }
       ],
       addOrUpdateReview: (reviewData) =>

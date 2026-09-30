@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Bookmark, LogOut, Pencil, Search, Settings, User } from "lucide-react";
+import { Bell, Bookmark, BookOpen, LogOut, Pencil, Search, Settings, User } from "lucide-react";
 import Link from "@/compat/next-link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "@/compat/next-navigation";
@@ -104,6 +104,9 @@ export function Navbar({
     if (role === "writer" || role === "admin") {
       items.push({ href: "/dashboard/writer", label: "Writer Dashboard", icon: Pencil });
       items.push({ href: "/dashboard/analytics", label: "Analytics", icon: Settings });
+    }
+    if (role === "reader") {
+      items.push({ href: "/saved-stories", label: "Reader Hub", icon: BookOpen });
     }
     if (role === "admin") {
       items.push({ href: "/dashboard/admin", label: "Admin Gate", icon: Settings });
@@ -309,23 +312,23 @@ export function Navbar({
                       aria-hidden="true"
                     />
 
-                    {/* Profile Menu Dropdown */}
+                    {/* Profile Menu Dropdown (Theme Adaptive) */}
                     <div
-                      className="absolute right-0 top-full mt-2.5 w-72 max-w-[calc(100vw-24px)] overflow-hidden rounded-2xl border border-white/20 bg-[#0c1020] text-white shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_25px_rgba(124,58,237,0.2)] z-50 pointer-events-auto animate-in fade-in zoom-in-95 duration-150 select-none"
+                      className="sf-profile-dropdown absolute right-0 top-full mt-2.5 w-72 max-w-[calc(100vw-24px)] overflow-hidden rounded-2xl border z-50 pointer-events-auto animate-in fade-in zoom-in-95 duration-150 select-none"
                       role="menu"
                     >
                       {/* User Info Header */}
-                      <div className="border-b border-white/10 bg-white/[0.04] p-3.5 flex items-center gap-3">
+                      <div className="sf-profile-header border-b p-3.5 flex items-center gap-3">
                         <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-primary via-indigo-600 to-pink-500 flex items-center justify-center text-white font-bold text-sm shadow-md shadow-primary/30 shrink-0">
                           {initials}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <div className="text-sm font-bold text-white truncate">{displayName || "FYP User"}</div>
+                          <div className="sf-profile-username text-sm font-bold truncate">{displayName || "FYP User"}</div>
                           <div className="flex items-center gap-2 mt-0.5">
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary/20 text-primary border border-primary/30">
+                            <span className="sf-profile-role-badge inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border">
                               {role ?? "reader"}
                             </span>
-                            <span className="text-[11px] text-muted truncate">{email || "FYP Member"}</span>
+                            <span className="sf-profile-email text-[11px] truncate">{email || "FYP Member"}</span>
                           </div>
                         </div>
                       </div>
@@ -339,10 +342,10 @@ export function Navbar({
                               key={item.href}
                               href={item.href}
                               role="menuitem"
-                              className="sf-clickable flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-white/90 hover:text-white hover:bg-white/10 active:bg-white/15 transition-all"
+                              className="sf-profile-item sf-clickable flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all"
                               onClick={() => setProfileOpen(false)}
                             >
-                              <div className="h-7 w-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0 text-primary">
+                              <div className="sf-profile-icon-box h-7 w-7 rounded-lg border flex items-center justify-center shrink-0">
                                 <Icon className="h-3.5 w-3.5" />
                               </div>
                               <span className="text-[13px]">{item.label}</span>
@@ -352,9 +355,9 @@ export function Navbar({
                       </div>
 
                       {/* Logout Action */}
-                      <div className="border-t border-white/10 p-1.5 bg-black/30">
+                      <div className="sf-profile-footer border-t p-1.5">
                         <button
-                          className="sf-clickable flex w-full items-center gap-3 px-3 py-2.5 rounded-xl text-left text-xs font-semibold text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 active:bg-rose-500/15 transition-all cursor-pointer"
+                          className="sf-profile-logout-btn sf-clickable flex w-full items-center gap-3 px-3 py-2.5 rounded-xl text-left text-xs font-semibold transition-all cursor-pointer"
                           role="menuitem"
                           onClick={() => {
                             setProfileOpen(false);
@@ -363,7 +366,7 @@ export function Navbar({
                             router.push("/");
                           }}
                         >
-                          <div className="h-7 w-7 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center shrink-0 text-rose-400">
+                          <div className="sf-profile-logout-icon h-7 w-7 rounded-lg border flex items-center justify-center shrink-0">
                             <LogOut className="h-3.5 w-3.5" />
                           </div>
                           <span className="text-[13px]">Logout</span>

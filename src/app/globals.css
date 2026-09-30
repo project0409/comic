@@ -153,6 +153,135 @@ body {
   box-shadow: 0 18px 42px rgba(26, 54, 83, 0.16) !important;
 }
 
+/* Profile Menu Dropdown (Theme Adaptive) */
+.sf-profile-dropdown {
+  background-color: #0c1020;
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.95), 0 0 25px rgba(124, 58, 237, 0.2);
+}
+
+:root[data-theme="light"] .sf-profile-dropdown {
+  background-color: #ffffff !important;
+  border-color: rgba(203, 213, 225, 0.9) !important;
+  box-shadow: 0 20px 50px rgba(16, 32, 51, 0.16), 0 4px 16px rgba(16, 32, 51, 0.08) !important;
+}
+
+.sf-profile-header {
+  background-color: rgba(255, 255, 255, 0.04);
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+:root[data-theme="light"] .sf-profile-header {
+  background-color: #f8fafc !important;
+  border-bottom-color: rgba(226, 232, 240, 0.9) !important;
+}
+
+.sf-profile-username {
+  color: #ffffff;
+}
+
+:root[data-theme="light"] .sf-profile-username {
+  color: #0f172a !important;
+}
+
+.sf-profile-email {
+  color: #aab2c8;
+}
+
+:root[data-theme="light"] .sf-profile-email {
+  color: #64748b !important;
+}
+
+.sf-profile-role-badge {
+  background-color: rgba(255, 51, 102, 0.2);
+  color: #ff3366;
+  border-color: rgba(255, 51, 102, 0.3);
+}
+
+:root[data-theme="light"] .sf-profile-role-badge {
+  background-color: rgba(255, 79, 123, 0.12) !important;
+  color: #e11d48 !important;
+  border-color: rgba(255, 79, 123, 0.3) !important;
+}
+
+.sf-profile-item {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.sf-profile-item:hover {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sf-profile-item:active {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+:root[data-theme="light"] .sf-profile-item {
+  color: #334155 !important;
+}
+
+:root[data-theme="light"] .sf-profile-item:hover {
+  color: #0f172a !important;
+  background-color: #f1f5f9 !important;
+}
+
+:root[data-theme="light"] .sf-profile-item:active {
+  background-color: #e2e8f0 !important;
+}
+
+.sf-profile-icon-box {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #ff3366;
+}
+
+:root[data-theme="light"] .sf-profile-icon-box {
+  background-color: #f1f5f9 !important;
+  border-color: rgba(226, 232, 240, 0.9) !important;
+  color: #e11d48 !important;
+}
+
+.sf-profile-footer {
+  background-color: rgba(0, 0, 0, 0.3);
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+:root[data-theme="light"] .sf-profile-footer {
+  background-color: #f8fafc !important;
+  border-top-color: rgba(226, 232, 240, 0.9) !important;
+}
+
+.sf-profile-logout-btn {
+  color: #fb7185;
+}
+
+.sf-profile-logout-btn:hover {
+  color: #fda4af;
+  background-color: rgba(244, 63, 94, 0.1);
+}
+
+:root[data-theme="light"] .sf-profile-logout-btn {
+  color: #e11d48 !important;
+}
+
+:root[data-theme="light"] .sf-profile-logout-btn:hover {
+  color: #be123c !important;
+  background-color: #fff1f2 !important;
+}
+
+.sf-profile-logout-icon {
+  background-color: rgba(244, 63, 94, 0.1);
+  border-color: rgba(244, 63, 94, 0.2);
+  color: #fb7185;
+}
+
+:root[data-theme="light"] .sf-profile-logout-icon {
+  background-color: #ffe4e6 !important;
+  border-color: #fecdd3 !important;
+  color: #e11d48 !important;
+}
+
 .sf-comic-image {
   filter: saturate(1.08) contrast(1.04);
   transition:

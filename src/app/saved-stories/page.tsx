@@ -5,6 +5,7 @@ import { useRouter } from "@/compat/next-navigation";
 import { BookmarkCheck, BookOpen, Trash2, Folder, ChevronLeft, Pencil, Check, FolderHeart, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/Button";
 import { RequireAuth } from "@/components/RequireAuth";
+import { Navbar } from "@/features/discovery/Navbar";
 import { useVaultStore } from "@/store/vaultStore";
 import { useToastStore } from "@/store/toastStore";
 import { cn } from "@/components/cn";
@@ -81,6 +82,7 @@ export default function SavedStoriesPage() {
 
   return (
     <RequireAuth>
+      <Navbar />
       <div className="mx-auto max-w-5xl space-y-6 px-4 py-10">
         
         {/* Header Section */}

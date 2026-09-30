@@ -4,7 +4,7 @@ import { getComicChapter } from "./comicChapters";
 export const firstChapterBySeries: Record<string, string> = {
   s1: "c1",
   s2: "c12",
-  s3: "c2",
+  s3: "c_s3_ch1",
   s4: "c20",
   s5: "c30",
   s6: "c40",
@@ -86,7 +86,7 @@ export const seriesList: Series[] = [
     title: "Night City Blade",
     writerName: "S. Rava",
     genre: "Action",
-    chapterCount: 12,
+    chapterCount: 4,
     readers: 48_204,
     rating: 4.7,
     description:
@@ -214,6 +214,12 @@ const initialChaptersBySeries: Record<string, Chapter[]> = {
   s2: [
     { id: "c12", seriesId: "s2", number: 1, title: "Gilded Letters", releaseDateIso: "2026-05-12", status: "Free", isLocked: false },
     { id: "c13", seriesId: "s2", number: 2, title: "Ash Kisses", releaseDateIso: "2026-05-22", status: "Free", isLocked: false }
+  ],
+  s3: [
+    { id: "c_s3_ch1", seriesId: "s3", number: 1, title: "Alley Ambush", releaseDateIso: "2026-05-01", status: "Free", isLocked: false },
+    { id: "c_s3_ch2", seriesId: "s3", number: 2, title: "Neon Syndicate", releaseDateIso: "2026-05-08", status: "Free", isLocked: false },
+    { id: "c_s3_ch3", seriesId: "s3", number: 3, title: "Rooftop Sniper", releaseDateIso: "2026-05-15", status: "Free", isLocked: false },
+    { id: "c_s3_ch4", seriesId: "s3", number: 4, title: "Neon Vows", releaseDateIso: "2026-05-22", status: "Free", isLocked: false }
   ]
 };
 

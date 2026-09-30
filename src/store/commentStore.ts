@@ -61,15 +61,63 @@ export const useCommentStore = create<CommentState>()(
           status: "New"
         },
         {
-          id: "cm_demo_1",
+          id: "cm_s3_c1_1",
           targetType: "Chapter",
           seriesId: "s3",
           seriesName: "Night City Blade",
-          chapterId: "c2",
+          chapterId: "c_s3_ch1",
+          pageIndex: 1,
+          readerName: "Aki_Net",
+          body: "The opening rain sequence and alley duel set such a gritty tone. Loving S. Rava's choreography!",
+          atIso: "2026-05-02T10:15:00Z",
+          status: "New"
+        },
+        {
+          id: "cm_s3_c1_2",
+          targetType: "Chapter",
+          seriesId: "s3",
+          seriesName: "Night City Blade",
+          chapterId: "c_s3_ch1",
           pageIndex: 2,
-          readerName: "Demo Reader",
-          body: "The rooftop sniper scene is intense. I want more backstory for the blade-for-hire.",
-          atIso: "2026-08-03T10:10:00Z",
+          readerName: "BladeMaster",
+          body: "The blade deflection sound effects worked so well in the canvas reader. Great start!",
+          atIso: "2026-05-03T18:40:00Z",
+          status: "Reviewed"
+        },
+        {
+          id: "cm_s3_c2_1",
+          targetType: "Chapter",
+          seriesId: "s3",
+          seriesName: "Night City Blade",
+          chapterId: "c_s3_ch2",
+          pageIndex: 2,
+          readerName: "TriggerFinger",
+          body: "The neon syndicate boss intro gave me chills. Fantastic cyberpunk character design!",
+          atIso: "2026-05-09T14:15:00Z",
+          status: "New"
+        },
+        {
+          id: "cm_s3_c3_1",
+          targetType: "Chapter",
+          seriesId: "s3",
+          seriesName: "Night City Blade",
+          chapterId: "c_s3_ch3",
+          pageIndex: 3,
+          readerName: "SniperScope",
+          body: "Rooftop vantage points and dynamic lighting are incredible. The tension had me sweating!",
+          atIso: "2026-05-16T09:20:00Z",
+          status: "New"
+        },
+        {
+          id: "cm_s3_c4_1",
+          targetType: "Chapter",
+          seriesId: "s3",
+          seriesName: "Night City Blade",
+          chapterId: "c_s3_ch4",
+          pageIndex: 4,
+          readerName: "KatanaX",
+          body: "Neon vows cliffhanger was epic! Can't wait for Chapter 5.",
+          atIso: "2026-05-23T20:30:00Z",
           status: "New"
         }
       ],
