@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { useAuthStore } from "./authStore";
 
 export type VaultBookmark = {
   id: string;
@@ -132,23 +133,28 @@ export const useVaultStore = create<VaultState>()(
       ],
       collections: [],
       addBookmark: (b) => {
+        if (!useAuthStore.getState().isAuthenticated) return "";
         const id = `bm_${crypto.randomUUID()}`;
         set((s) => ({
           bookmarks: [{ id, ...b }, ...s.bookmarks]
         }));
         return id;
       },
-      updateBookmarkNote: (id, note) =>
+      updateBookmarkNote: (id, note) => {
+        if (!useAuthStore.getState().isAuthenticated) return;
         set((s) => ({
           bookmarks: s.bookmarks.map((b) => (b.id === id ? { ...b, note } : b))
-        })),
-      addReaction: (r) =>
+        }));
+      },
+      addReaction: (r) => {
+        if (!useAuthStore.getState().isAuthenticated) return;
         set((s) => ({
           reactions: [
             { id: `rx_${crypto.randomUUID()}`, atIso: new Date().toISOString(), ...r },
             ...s.reactions
           ]
-        })),
+        }));
+      },
       removeBookmarkBySeries: (seriesName) =>
         set((s) => ({
           bookmarks: s.bookmarks.filter((b) => b.seriesName !== seriesName),
@@ -168,6 +174,7 @@ export const useVaultStore = create<VaultState>()(
           }))
         })),
       createCollection: (name) => {
+        if (!useAuthStore.getState().isAuthenticated) return undefined;
         const cleanName = name.trim();
         if (!cleanName) return undefined;
         const id = `col_${crypto.randomUUID()}`;
@@ -184,7 +191,8 @@ export const useVaultStore = create<VaultState>()(
         }));
         return id;
       },
-      renameCollection: (collectionId, name) =>
+      renameCollection: (collectionId, name) => {
+        if (!useAuthStore.getState().isAuthenticated) return;
         set((s) => {
           const cleanName = name.trim();
           if (!cleanName) return s;
@@ -193,12 +201,16 @@ export const useVaultStore = create<VaultState>()(
               collection.id === collectionId ? { ...collection, name: cleanName } : collection
             )
           };
-        }),
-      deleteCollection: (collectionId) =>
+        });
+      },
+      deleteCollection: (collectionId) => {
+        if (!useAuthStore.getState().isAuthenticated) return;
         set((s) => ({
           collections: s.collections.filter((collection) => collection.id !== collectionId)
-        })),
-      addBookmarkToCollection: (collectionId, bookmarkId) =>
+        }));
+      },
+      addBookmarkToCollection: (collectionId, bookmarkId) => {
+        if (!useAuthStore.getState().isAuthenticated) return;
         set((s) => ({
           collections: s.collections.map((collection) =>
             collection.id === collectionId
@@ -210,7 +222,8 @@ export const useVaultStore = create<VaultState>()(
                 }
               : collection
           )
-        })),
+        }));
+      },
       removeBookmarkFromCollection: (collectionId, bookmarkId) =>
         set((s) => ({
           collections: s.collections.map((collection) =>

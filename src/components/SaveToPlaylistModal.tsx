@@ -5,6 +5,8 @@ import { X, Plus, FolderHeart, Folder, Check } from "lucide-react";
 import { motion } from "framer-motion";
 import { createPortal } from "react-dom";
 import { Button } from "./Button";
+import { useRouter } from "@/compat/next-navigation";
+import { useAuthStore } from "@/store/authStore";
 import { useVaultStore } from "@/store/vaultStore";
 import { useToastStore } from "@/store/toastStore";
 import type { Series } from "@/lib/types";
@@ -19,6 +21,8 @@ export function SaveToPlaylistModal({
   series: Series;
   onClose: () => void;
 }) {
+  const router = useRouter();
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const toast = useToastStore((s) => s.push);
   const bookmarks = useVaultStore((s) => s.bookmarks);
   const addBookmark = useVaultStore((s) => s.addBookmark);
@@ -34,6 +38,18 @@ export function SaveToPlaylistModal({
     setMounted(true);
     return () => setMounted(false);
   }, []);
+
+  useEffect(() => {
+    if (open && !isAuthenticated) {
+      toast({
+        tone: "danger",
+        title: "Login Required",
+        message: "Please log in to save stories to your library."
+      });
+      onClose();
+      router.push("/login");
+    }
+  }, [open, isAuthenticated, onClose, router, toast]);
 
   // Find or create bookmark for this series
   const getOrCreateBookmarkId = (): string => {
@@ -62,6 +78,7 @@ export function SaveToPlaylistModal({
   }, [bookmarks, collections, series.title]);
 
   const handleTogglePlaylist = (collectionId: string) => {
+    if (!isAuthenticated) return;
     const bookmarkId = getOrCreateBookmarkId();
     const isActive = activePlaylists.includes(collectionId);
     const collection = collections.find((c) => c.id === collectionId);
@@ -86,6 +103,7 @@ export function SaveToPlaylistModal({
   };
 
   const handleSaveToGenrePlaylist = () => {
+    if (!isAuthenticated) return;
     const genre = series.genre;
     let collection = collections.find((c) => c.name.toLowerCase() === genre.toLowerCase());
     let collectionId = collection?.id;
@@ -108,6 +126,7 @@ export function SaveToPlaylistModal({
 
   const handleCreatePlaylist = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAuthenticated) return;
     const name = newPlaylistName.trim();
     if (!name) return;
 
@@ -124,7 +143,7 @@ export function SaveToPlaylistModal({
     }
   };
 
-  if (!open || !mounted) return null;
+  if (!open || !mounted || !isAuthenticated) return null;
 
   return createPortal(
     <div className="fixed inset-0 z-55 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm select-none">

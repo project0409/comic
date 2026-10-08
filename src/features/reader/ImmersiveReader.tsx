@@ -3,7 +3,7 @@
 import Link from "@/compat/next-link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, Bookmark, ChevronLeft, ChevronRight, Eye, EyeOff, Layers, MessageSquare, Send, Shield, Volume2, VolumeX, WandSparkles, X } from "lucide-react";
+import { ArrowLeft, Bookmark, ChevronLeft, ChevronRight, Eye, EyeOff, Layers, MessageSquare, Send, Shield, Smile, Volume2, VolumeX, WandSparkles, X } from "lucide-react";
 import { Button } from "@/components/Button";
 import { cn } from "@/components/cn";
 import { getChapterPages } from "@/lib/api";
@@ -13,7 +13,7 @@ import { audioEngine } from "@/lib/audioEngine";
 import { useAudioStore } from "@/store/audioStore";
 import { useReaderStore } from "@/store/readerStore";
 import { useUiStore } from "@/store/uiStore";
-import { useVaultStore } from "@/store/vaultStore";
+import { useVaultStore, type VaultReaction } from "@/store/vaultStore";
 import { useAuthStore } from "@/store/authStore";
 import { useCommentStore } from "@/store/commentStore";
 import { useReviewStore } from "@/store/reviewStore";
@@ -26,6 +26,7 @@ import { ReactionPicker } from "./ReactionPicker";
 import { LoreMasterOverlay } from "@/features/loremaster/LoreMasterOverlay";
 import { useRouter, useSearchParams } from "@/compat/next-navigation";
 import { SaveToPlaylistModal } from "@/components/SaveToPlaylistModal";
+import { canGuestRead, getChapterInfo } from "@/lib/guestReaderLimit";
 
 export function ImmersiveReader({ chapterId }: { chapterId: string }) {
   const router = useRouter();
@@ -75,6 +76,7 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
   const volume = useAudioStore((s) => s.volume);
   const setVolume = useAudioStore((s) => s.setVolume);
 
+  const reactions = useVaultStore((s) => s.reactions);
   const addReaction = useVaultStore((s) => s.addReaction);
   const addBookmark = useVaultStore((s) => s.addBookmark);
   const bookmarks = useVaultStore((s) => s.bookmarks);
@@ -167,11 +169,26 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
   const [loading, setLoading] = useState(true);
   const [commentText, setCommentText] = useState("");
 
-  // Long-press reactions
+  // Floating reactions picker state
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pressPoint, setPressPoint] = useState({ x: 0, y: 0 });
-  const pressTimerRef = useRef<number | null>(null);
-  const canvasRectRef = useRef<DOMRect | null>(null);
+  const [pickerTarget, setPickerTarget] = useState<{
+    pageIndex: number;
+    relX: number;
+    relY: number;
+  }>({ pageIndex: 1, relX: 50, relY: 50 });
+
+  const handleOpenReaction = (
+    pageIndex: number,
+    clientX: number,
+    clientY: number,
+    relX = 50,
+    relY = 50
+  ) => {
+    setPickerTarget({ pageIndex, relX, relY });
+    setPressPoint({ x: clientX, y: clientY });
+    setPickerOpen(true);
+  };
 
   // Distraction-free gesture
   const swipeStartY = useRef<number | null>(null);
@@ -231,61 +248,44 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
     }
   }
 
-  function onPointerDown(e: React.PointerEvent) {
-    if ((e.pointerType === "mouse" && e.button !== 0) || loreMasterOpen) return;
-    if (pressTimerRef.current) window.clearTimeout(pressTimerRef.current);
-
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    canvasRectRef.current = rect;
-    const clientX = e.clientX;
-    const clientY = e.clientY;
-
-    pressTimerRef.current = window.setTimeout(() => {
-      setPressPoint({ x: clientX, y: clientY });
-      setPickerOpen(true);
-      // Haptic simulation
-      document.body.classList.remove("sf-vibrate");
-      void document.body.offsetWidth;
-      document.body.classList.add("sf-vibrate");
-    }, 500);
-
-    // Prevent native drag/select
-    (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
-  }
-
-  function onPointerUp() {
-    if (pressTimerRef.current) {
-      window.clearTimeout(pressTimerRef.current);
-      pressTimerRef.current = null;
-    }
-  }
-
   async function handlePickReaction(payload: { emoji: any; comment?: string; bookmark?: boolean }) {
     setPickerOpen(false);
-    if (!page) return;
-    const rect = canvasRectRef.current;
-    if (!rect) return;
+    if (!isAuthenticated) {
+      toast({
+        title: "Login Required",
+        message: "Please log in to react to panels and drop emojis.",
+        tone: "danger"
+      });
+      return;
+    }
 
-    const xCoord = Math.max(0, Math.min(rect.width, pressPoint.x - rect.left));
-    const yCoord = Math.max(0, Math.min(rect.height, pressPoint.y - rect.top));
+    const targetPage = pickerTarget.pageIndex;
+    const relX = pickerTarget.relX;
+    const relY = pickerTarget.relY;
 
     addReaction({
       emoji: payload.emoji,
       seriesName: series?.title ?? "FYP Series",
       chapterId,
-      pageIndex: page.index,
-      x: xCoord,
-      y: yCoord,
+      pageIndex: targetPage,
+      x: relX,
+      y: relY,
       comment: payload.comment
+    });
+
+    toast({
+      title: `Reaction added! ${payload.emoji}`,
+      message: `Pinned to Page ${targetPage}`,
+      tone: "success"
     });
 
     if (payload.bookmark) {
       addBookmark({
         seriesName: series?.title ?? "FYP Series",
         chapterId,
-        pageIndex: page.index,
-        x: xCoord,
-        y: yCoord,
+        pageIndex: targetPage,
+        x: relX,
+        y: relY,
         note: payload.comment,
         thumbUrl: series?.coverUrl ?? "/placeholders/panel-2.svg"
       });
@@ -296,9 +296,10 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         emoji: payload.emoji,
-        x_coord: xCoord,
-        y_coord: yCoord,
-        page_id: page.id,
+        x_coord: relX,
+        y_coord: relY,
+        chapter_id: chapterId,
+        page_index: targetPage,
         comment: payload.comment
       })
     }).catch(() => {});
@@ -483,6 +484,18 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
             initialChapterId={chapterId}
             seriesTitle={series?.title}
             onChapterChange={(newChId) => {
+              if (!isAuthenticated && !canGuestRead(newChId)) {
+                const { chapterNumber } = getChapterInfo(newChId);
+                toast({
+                  tone: "danger",
+                  title: chapterNumber > 2 ? "Chapter Preview Limit" : "Free Preview Limit Reached (2/2)",
+                  message: chapterNumber > 2
+                    ? `Guest preview is limited to the first 2 chapters. Please log in to read Chapter ${chapterNumber}.`
+                    : "You've read your 2 free preview comics! Please log in to continue reading."
+                });
+                router.push(`/login?redirectTo=/read/${newChId}${fromParam ? `?from=${encodeURIComponent(fromParam)}` : ""}`);
+                return;
+              }
               router.replace(`/read/${newChId}${fromParam ? `?from=${encodeURIComponent(fromParam)}` : ""}`);
             }}
             onAmbientColorChange={(hex) => setAmbient(hex)}
@@ -499,6 +512,19 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
 
               {!distractionFreeMode ? (
                 <div id="tour-reader-page-nav" className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5 h-8 text-xs font-semibold text-white/90 border-white/15 bg-white/5 hover:border-primary/50 hover:bg-primary/10 cursor-pointer"
+                    onClick={(e) => {
+                      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                      handleOpenReaction(currentPage, rect.left + rect.width / 2, rect.top, 50, 50);
+                    }}
+                    title={`React to Page ${currentPage}`}
+                  >
+                    <Smile className="h-3.5 w-3.5 text-amber-400" />
+                    <span>React</span>
+                  </Button>
                   <Button variant="ghost" size="sm" onClick={prev} disabled={currentPage <= 1}>
                     <ChevronLeft className="h-4 w-4" /> Prev
                   </Button>
@@ -507,7 +533,20 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
                       variant="primary"
                       size="sm"
                       className="gap-1 bg-gradient-to-r from-primary to-highlight text-white text-xs font-bold"
-                      onClick={() => router.push(`/read/${nextChapter.id}${fromParam ? `?from=${encodeURIComponent(fromParam)}` : ""}`)}
+                      onClick={() => {
+                        if (!isAuthenticated && !canGuestRead(nextChapter.id)) {
+                          toast({
+                            tone: "danger",
+                            title: nextChapter.number > 2 ? "Chapter Preview Limit" : "Free Preview Limit Reached (2/2)",
+                            message: nextChapter.number > 2
+                              ? `Guest preview is limited to the first 2 chapters. Please log in to read Chapter ${nextChapter.number}.`
+                              : "You've read your 2 free preview comics! Please log in to continue reading."
+                          });
+                          router.push(`/login?redirectTo=/read/${nextChapter.id}`);
+                          return;
+                        }
+                        router.push(`/read/${nextChapter.id}${fromParam ? `?from=${encodeURIComponent(fromParam)}` : ""}`);
+                      }}
                     >
                       Next Chapter <ChevronRight className="h-4 w-4" />
                     </Button>
@@ -526,16 +565,19 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
                 "relative overflow-hidden rounded-2xl border border-white/10 bg-black/30 shadow-[inset_0_0_42px_rgba(0,0,0,0.32)]",
                 "h-[70vh] md:h-[74vh]"
               )}
-              onPointerDown={onPointerDown}
-              onPointerUp={onPointerUp}
-              onPointerCancel={onPointerUp}
             >
               {loading ? <LoadingOverlay /> : null}
 
               {guidedViewActive ? (
                 <GuidedViewReader chapterId={chapterId} pages={pages} />
               ) : (
-                <ScrollReader pages={pages} />
+                <ScrollReader
+                  pages={pages}
+                  chapterId={chapterId}
+                  seriesTitle={series?.title}
+                  reactions={reactions}
+                  onOpenReaction={handleOpenReaction}
+                />
               )}
             </div>
 
@@ -561,6 +603,17 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
                     size="md"
                     className="gap-2 font-bold px-7 py-3 text-sm bg-gradient-to-r from-primary to-highlight text-white shadow-[0_0_24px_rgba(255,51,102,0.45)] hover:scale-105 transition-all cursor-pointer"
                     onClick={() => {
+                      if (!isAuthenticated && !canGuestRead(nextChapter.id)) {
+                        toast({
+                          tone: "danger",
+                          title: nextChapter.number > 2 ? "Chapter Preview Limit" : "Free Preview Limit Reached (2/2)",
+                          message: nextChapter.number > 2
+                            ? `Guest preview is limited to the first 2 chapters. Please log in to read Chapter ${nextChapter.number}.`
+                            : "You've read your 2 free preview comics! Please log in to continue reading."
+                        });
+                        router.push(`/login?redirectTo=/read/${nextChapter.id}`);
+                        return;
+                      }
                       router.push(`/read/${nextChapter.id}${fromParam ? `?from=${encodeURIComponent(fromParam)}` : ""}`);
                     }}
                   >
@@ -615,7 +668,18 @@ export function ImmersiveReader({ chapterId }: { chapterId: string }) {
                   ) : (
                     <button
                       type="button"
-                      onClick={() => setPlaylistOpen(true)}
+                      onClick={() => {
+                        if (!isAuthenticated) {
+                          toast({
+                            tone: "danger",
+                            title: "Login Required",
+                            message: "Please log in to save stories to your library."
+                          });
+                          router.push(`/login?redirectTo=/read/${chapterId}`);
+                          return;
+                        }
+                        setPlaylistOpen(true);
+                      }}
                       className="text-[10px] text-primary hover:underline font-semibold"
                     >
                       + Save to Library
@@ -959,7 +1023,19 @@ function FlipReader({ pages }: { pages: ChapterPage[] }) {
   );
 }
 
-function ScrollReader({ pages }: { pages: ChapterPage[] }) {
+function ScrollReader({
+  pages,
+  chapterId,
+  seriesTitle,
+  reactions,
+  onOpenReaction
+}: {
+  pages: ChapterPage[];
+  chapterId: string;
+  seriesTitle?: string;
+  reactions: VaultReaction[];
+  onOpenReaction: (pageIndex: number, clientX: number, clientY: number, relX: number, relY: number) => void;
+}) {
   const setCurrentPage = useReaderStore((s) => s.setCurrentPage);
   const setTotalPages = useReaderStore((s) => s.setTotalPages);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -991,26 +1067,84 @@ function ScrollReader({ pages }: { pages: ChapterPage[] }) {
   return (
     <div ref={containerRef} className="h-full w-full overflow-y-auto p-4 [perspective:1200px]">
       <div className="mx-auto max-w-[860px] space-y-8">
-        {pages.map((p) => (
-          <motion.div
-            key={p.id}
-            data-page={p.index}
-            initial={{ opacity: 0.85, rotateX: 6, y: 15 }}
-            whileInView={{ opacity: 1, rotateX: 0, y: 0 }}
-            viewport={{ once: false, amount: 0.3 }}
-            transition={{ duration: 0.4 }}
-            className="sf-comic-card rounded-2xl border border-white/10 bg-black/35 p-2 shadow-2xl transition-transform"
-            style={{ transformStyle: "preserve-3d" }}
-          >
-            <div className="mb-2 flex items-center justify-between px-2 text-xs text-muted">
-              <span className="font-semibold text-white/80">Page {p.index}</span>
-              {p.mood ? <span className="text-[10px] text-primary">{p.mood}</span> : null}
-            </div>
-            <div className="h-[70vh] overflow-hidden rounded-xl">
-              <CanvasPage src={p.imageUrl} />
-            </div>
-          </motion.div>
-        ))}
+        {pages.map((p) => {
+          const pageReactions = reactions.filter(
+            (r) =>
+              r.pageIndex === p.index &&
+              (r.chapterId === chapterId || (seriesTitle && r.seriesName === seriesTitle))
+          );
+          return (
+            <motion.div
+              key={p.id}
+              data-page={p.index}
+              initial={{ opacity: 0.85, rotateX: 6, y: 15 }}
+              whileInView={{ opacity: 1, rotateX: 0, y: 0 }}
+              viewport={{ once: false, amount: 0.3 }}
+              transition={{ duration: 0.4 }}
+              className="sf-comic-card rounded-2xl border border-white/10 bg-black/35 p-2 sm:p-3 shadow-2xl transition-transform"
+              style={{ transformStyle: "preserve-3d" }}
+            >
+              <div className="mb-2 flex items-center justify-between px-2 text-xs text-muted">
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-white/90">Page {p.index}</span>
+                  {p.mood ? <span className="text-[10px] text-primary">{p.mood}</span> : null}
+                </div>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                    onOpenReaction(p.index, rect.left + rect.width / 2, rect.top, 50, 50);
+                  }}
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl border border-white/15 bg-white/5 hover:border-primary/50 hover:bg-primary/15 text-white/90 hover:text-white transition text-[11px] font-semibold cursor-pointer shadow-sm select-none"
+                  title={`React to Page ${p.index}`}
+                >
+                  <Smile className="h-3.5 w-3.5 text-amber-400" />
+                  <span>React</span>
+                  {pageReactions.length > 0 && (
+                    <span className="ml-0.5 px-1.5 py-0.2 rounded-full bg-primary/25 border border-primary/30 text-primary text-[10px] font-bold">
+                      {pageReactions.length}
+                    </span>
+                  )}
+                </button>
+              </div>
+
+              <div className="group/scrollpage relative h-[70vh] overflow-hidden rounded-xl cursor-pointer">
+                {/* Subtle hover tooltip hint */}
+                <div className="absolute top-3 left-1/2 -translate-x-1/2 z-30 pointer-events-none opacity-0 group-hover/scrollpage:opacity-100 transition-opacity">
+                  <span className="text-[11px] font-medium px-2.5 py-1 rounded-full bg-black/85 border border-white/20 text-white/90 shadow-2xl flex items-center gap-1.5 backdrop-blur-md">
+                    <Smile className="h-3.5 w-3.5 text-primary" />
+                    <span>Click panel to react</span>
+                  </span>
+                </div>
+
+                <CanvasPage
+                  src={p.imageUrl}
+                  onPanelClick={(e, coords) => {
+                    onOpenReaction(p.index, coords.clientX, coords.clientY, coords.relX, coords.relY);
+                  }}
+                />
+
+                {/* Render Placed Emoji Reactions on the Panel */}
+                {pageReactions.map((r) => (
+                  <div
+                    key={r.id}
+                    style={{ left: `${r.x}%`, top: `${r.y}%` }}
+                    className="absolute z-20 -translate-x-1/2 -translate-y-1/2 pointer-events-auto"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                    }}
+                    title={`Reaction: ${r.emoji}`}
+                  >
+                    <div className="relative flex items-center justify-center h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-[#080b18]/90 border border-primary/40 shadow-[0_4px_16px_rgba(0,0,0,0.8),0_0_12px_rgba(255,51,102,0.3)] text-lg sm:text-xl transform hover:scale-125 transition-transform animate-in zoom-in duration-200 cursor-pointer select-none">
+                      <span>{r.emoji}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          );
+        })}
       </div>
     </div>
   );

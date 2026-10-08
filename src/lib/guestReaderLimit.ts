@@ -1,7 +1,9 @@
 import { chaptersBySeries } from "./mockData";
+import { getComicChapter } from "./comicChapters";
 
 const GUEST_READ_KEY = "fyp-guest-read-series";
 export const MAX_GUEST_COMICS = 2;
+export const MAX_GUEST_CHAPTER_NUMBER = 2;
 
 export function getGuestReadSeries(): string[] {
   if (typeof window === "undefined") return [];
@@ -13,44 +15,105 @@ export function getGuestReadSeries(): string[] {
   }
 }
 
-export function getSeriesIdForChapter(chapterId: string): string {
+export function getChapterInfo(chapterId: string): { seriesId: string; chapterNumber: number } {
+  // Check chaptersBySeries from mockData
   for (const [sId, chapters] of Object.entries(chaptersBySeries)) {
-    if (chapters.some((c) => c.id === chapterId)) {
-      return sId;
+    const ch = chapters.find((c) => c.id === chapterId);
+    if (ch) {
+      return { seriesId: sId, chapterNumber: ch.number };
     }
   }
-  return chapterId;
+
+  // Check in comicChapters
+  try {
+    const comicCh = getComicChapter(chapterId);
+    if (comicCh) {
+      return { seriesId: comicCh.seriesId || "s1", chapterNumber: comicCh.number };
+    }
+  } catch {}
+
+  const numMatch = chapterId.match(/ch(\d+)/i) || chapterId.match(/\d+/);
+  const num = numMatch ? parseInt(numMatch[1] || numMatch[0], 10) : 1;
+  return { seriesId: chapterId, chapterNumber: num };
 }
 
-export function recordGuestRead(chapterId: string): { allowed: boolean; count: number; max: number } {
+export function getSeriesIdForChapter(chapterId: string): string {
+  return getChapterInfo(chapterId).seriesId;
+}
+
+export type GuestReadResult = {
+  allowed: boolean;
+  reason?: "series_limit" | "chapter_limit";
+  count: number;
+  max: number;
+  chapterNumber?: number;
+};
+
+export function recordGuestRead(chapterId: string): GuestReadResult {
   if (typeof window === "undefined") return { allowed: true, count: 0, max: MAX_GUEST_COMICS };
-  const sId = getSeriesIdForChapter(chapterId);
+
+  const { seriesId, chapterNumber } = getChapterInfo(chapterId);
+
+  // 1. Chapters beyond Chapter 2 are never accessible without login
+  if (chapterNumber > MAX_GUEST_CHAPTER_NUMBER) {
+    return {
+      allowed: false,
+      reason: "chapter_limit",
+      count: getGuestReadSeries().length,
+      max: MAX_GUEST_COMICS,
+      chapterNumber
+    };
+  }
+
   const current = getGuestReadSeries();
 
-  // If this comic series was already read by this guest, permit reading
-  if (current.includes(sId)) {
-    return { allowed: true, count: current.length, max: MAX_GUEST_COMICS };
+  // 2. If this comic was already one of the 2 recorded guest reads, allow reading (for ch <= 2)
+  if (current.includes(seriesId)) {
+    return {
+      allowed: true,
+      count: current.length,
+      max: MAX_GUEST_COMICS,
+      chapterNumber
+    };
   }
 
-  // If already read 2 unique comics, block the 3rd one
+  // 3. If guest has already read 2 unique comics, block the 3rd comic
   if (current.length >= MAX_GUEST_COMICS) {
-    return { allowed: false, count: current.length, max: MAX_GUEST_COMICS };
+    return {
+      allowed: false,
+      reason: "series_limit",
+      count: current.length,
+      max: MAX_GUEST_COMICS,
+      chapterNumber
+    };
   }
 
-  // Record this comic as one of the 2 allowed guest reads
-  const updated = [...current, sId];
+  // 4. Record this comic as one of the 2 allowed guest reads
+  const updated = [...current, seriesId];
   try {
     localStorage.setItem(GUEST_READ_KEY, JSON.stringify(updated));
   } catch {}
 
-  return { allowed: true, count: updated.length, max: MAX_GUEST_COMICS };
+  return {
+    allowed: true,
+    count: updated.length,
+    max: MAX_GUEST_COMICS,
+    chapterNumber
+  };
 }
 
 export function canGuestRead(chapterId: string): boolean {
   if (typeof window === "undefined") return true;
-  const sId = getSeriesIdForChapter(chapterId);
+
+  const { seriesId, chapterNumber } = getChapterInfo(chapterId);
+
+  // Chapter 3 and beyond is blocked for guests
+  if (chapterNumber > MAX_GUEST_CHAPTER_NUMBER) {
+    return false;
+  }
+
   const current = getGuestReadSeries();
-  if (current.includes(sId)) return true;
+  if (current.includes(seriesId)) return true;
   return current.length < MAX_GUEST_COMICS;
 }
 

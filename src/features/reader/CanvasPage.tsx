@@ -221,14 +221,24 @@ function drawComicTemplate(
   ctx.restore();
 }
 
+export type PanelClickCoords = {
+  relX: number;
+  relY: number;
+  clientX: number;
+  clientY: number;
+  panelIndex: number;
+};
+
 export function CanvasPage({
   src,
   className,
-  onReady
+  onReady,
+  onPanelClick
 }: {
   src: string;
   className?: string;
   onReady?: () => void;
+  onPanelClick?: (e: React.MouseEvent<HTMLCanvasElement>, coords: PanelClickCoords) => void;
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const renderStateRef = useRef<RenderState | null>(null);
@@ -295,6 +305,20 @@ export function CanvasPage({
     const y = e.clientY - rect.top;
     const metrics = getPageMetrics(state.w, state.h);
     const panelIndex = PANEL_TEMPLATE.findIndex((points) => ctx.isPointInPath(polygonPath(points, metrics), x, y));
+
+    const relX = Math.round(Math.max(5, Math.min(95, (x / rect.width) * 100)));
+    const relY = Math.round(Math.max(5, Math.min(95, (y / rect.height) * 100)));
+
+    if (onPanelClick) {
+      onPanelClick(e, {
+        relX,
+        relY,
+        clientX: e.clientX,
+        clientY: e.clientY,
+        panelIndex: panelIndex >= 0 ? panelIndex : 0
+      });
+    }
+
     if (panelIndex < 0) return;
 
     const startedAt = performance.now();

@@ -5,13 +5,13 @@ export const firstChapterBySeries: Record<string, string> = {
   s1: "c1",
   s2: "c12",
   s3: "c_s3_ch1",
-  s4: "c20",
-  s5: "c30",
-  s6: "c40",
-  s7: "c50",
-  s8: "c12",
-  s9: "c12",
-  s10: "c1"
+  s4: "c_s4_ch1",
+  s5: "c_s5_ch1",
+  s6: "c_s6_ch1",
+  s7: "c_s7_ch1",
+  s8: "c_s8_ch1",
+  s9: "c_s9_ch1",
+  s10: "c_s10_ch1"
 };
 
 export const platformStats = {

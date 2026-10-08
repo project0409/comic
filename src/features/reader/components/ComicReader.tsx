@@ -11,6 +11,8 @@ import { ProgressIndicator } from "./ProgressIndicator";
 import { ReactionPicker, type Emoji } from "../ReactionPicker";
 import { useVaultStore } from "@/store/vaultStore";
 import { useToastStore } from "@/store/toastStore";
+import { useAuthStore } from "@/store/authStore";
+import { canGuestRead, getChapterInfo } from "@/lib/guestReaderLimit";
 import {
   COMIC_CHAPTERS,
   getComicChapter,
@@ -50,6 +52,7 @@ export function ComicReader({
   }, []);
 
   // Vault and reaction store integration
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const reactions = useVaultStore((s) => s.reactions);
   const addReaction = useVaultStore((s) => s.addReaction);
   const addBookmark = useVaultStore((s) => s.addBookmark);
@@ -106,13 +109,24 @@ export function ComicReader({
   const handleSelectChapter = useCallback(
     (newChapterId: string) => {
       if (newChapterId === currentChapterId) return;
+      if (!isAuthenticated && !canGuestRead(newChapterId)) {
+        const { chapterNumber } = getChapterInfo(newChapterId);
+        toast({
+          tone: "danger",
+          title: chapterNumber > 2 ? "Chapter Preview Limit" : "Free Preview Limit Reached (2/2)",
+          message: chapterNumber > 2
+            ? `Guest preview is limited to the first 2 chapters. Please log in to read Chapter ${chapterNumber}.`
+            : "You've read your 2 free preview comics! Please log in to continue reading."
+        });
+        return;
+      }
       setCurrentChapterId(newChapterId);
       setCurrentPage(1); // Reset to page 1
       if (onChapterChange) {
         onChapterChange(newChapterId);
       }
     },
-    [currentChapterId, onChapterChange]
+    [currentChapterId, onChapterChange, isAuthenticated, toast]
   );
 
   // Turn page with debounce lock to protect the 3D animation
@@ -195,6 +209,16 @@ export function ComicReader({
   // Save reaction (pure 1-click emoji reaction)
   const handlePickReaction = useCallback(
     ({ emoji }: { emoji: Emoji }) => {
+      if (!isAuthenticated) {
+        toast({
+          title: "Login Required",
+          message: "Please log in to react to panels and drop emojis.",
+          tone: "danger"
+        });
+        setPickerState((prev) => ({ ...prev, open: false }));
+        return;
+      }
+
       const seriesName = seriesTitle || chapter.title;
       addReaction({
         emoji,
@@ -213,7 +237,7 @@ export function ComicReader({
 
       setPickerState((prev) => ({ ...prev, open: false }));
     },
-    [seriesTitle, chapter.title, currentChapterId, pickerState, addReaction, toast]
+    [isAuthenticated, seriesTitle, chapter.title, currentChapterId, pickerState, addReaction, toast]
   );
 
   // Keyboard Controls: ArrowRight, ArrowLeft, Home, End, Escape
